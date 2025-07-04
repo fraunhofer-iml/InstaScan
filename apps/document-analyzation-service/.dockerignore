@@ -1,0 +1,16 @@
+Dockerfile
+README.md
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+coverage.xml
+.pytest_cache/
+.mypy_cache/
+.vscode/
+logs/
+tests/
+third-party-licenses/
+venv/
+.venv/
+.gitlab-ci.yml

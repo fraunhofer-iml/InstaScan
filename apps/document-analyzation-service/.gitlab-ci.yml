@@ -1,0 +1,176 @@
+variables:
+  DAS_MODULE_NAME: "document-analyzation-service"
+  DAS_PROJECT_DIR: $MODULE_DIR/$DAS_MODULE_NAME
+  DAS_IMAGE_NAME: core/$DAS_MODULE_NAME
+  DAS_SOURCE_FILES_DIR: "document_analyzation_service/"
+  DAS_REQUIREMENTS_DIR: $DAS_PROJECT_DIR/requirements_locked
+  DAS_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/$DAS_IMAGE_NAME
+  DAS_SONAR_PROJECT_NAME: $SONAR_PROJECT_PREFIX-Document-Analyzation-Service
+  DAS_SONAR_PROJECT_KEY: $DAS_SONAR_PROJECT_NAME
+
+doc-analyzation-service:code-style:
+  stage: format-check
+  image: python:3.10-slim
+  interruptible: true
+  before_script:
+    - pip install $(grep ruff $DAS_REQUIREMENTS_DIR/requirements-lock-uv-py310-all.txt)
+  script:
+    - cd $DAS_PROJECT_DIR
+    - ruff format --check --config pyproject.toml "$DAS_SOURCE_FILES_DIR"
+  allow_failure: true
+  only:
+    - merge_requests
+    - main
+
+doc-analyzation-service:lint:
+  stage: format-check
+  image: python:3.10-slim
+  interruptible: true
+  before_script:
+      - pip install $(grep ruff $DAS_REQUIREMENTS_DIR/requirements-lock-uv-py310-all.txt)
+  script:
+    - cd $DAS_PROJECT_DIR
+    - ruff check --config pyproject.toml "$DAS_SOURCE_FILES_DIR"
+  allow_failure: true
+  only:
+    - merge_requests
+    - main
+
+doc-analyzation-service:type-check:
+  stage: format-check
+  image: python:3.10-slim
+  interruptible: true
+  before_script:
+      - pip install -r $DAS_REQUIREMENTS_DIR/requirements-lock-uv-py310-all.txt
+  script:
+    - cd $DAS_PROJECT_DIR
+    - mypy --install-types --non-interactive --config-file pyproject.toml "$DAS_SOURCE_FILES_DIR"
+  allow_failure: true
+  only:
+    - merge_requests
+    - main
+
+doc-analyzation-service:unit-tests:
+  stage: test
+  image: python:3.10-slim
+  interruptible: true
+  before_script:
+      - pip install -r $DAS_REQUIREMENTS_DIR/requirements-lock-uv-py310-all.txt
+  variables:
+    TEST_FILES_DIR: "document_analyzation_service/tests"
+  script:
+    - echo ${DAS_PROJECT_DIR}
+    - cd $DAS_PROJECT_DIR
+    - pytest --cov="$DAS_SOURCE_FILES_DIR" --cov-branch --cov-report xml:coverage.xml --junitxml xunit-reports/xunit-result-pytest.xml "$TEST_FILES_DIR"
+    - coverage report
+    - coverage xml
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    when: always
+    reports:
+      junit: ${DAS_PROJECT_DIR}/xunit-reports/xunit-result-pytest.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: ${DAS_PROJECT_DIR}/coverage.xml
+    paths:
+      - ${DAS_PROJECT_DIR}/xunit-reports/xunit-result-pytest.xml
+      - ${DAS_PROJECT_DIR}/coverage.xml
+  allow_failure: true
+  only:
+    - merge_requests
+    - main
+
+doc-analyzation-service:sonarqube-check:
+  stage: quality-analysis
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [ "" ]
+  variables:
+    TEST_FILES_DIR: "document_analyzation_service/tests/"
+    # Define the location of the analysis task cache
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    # Tell git to fetch all the branches of the project, required by the analysis task
+    GIT_DEPTH: "0"
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - ${DAS_PROJECT_DIR}/.sonar/cache
+  needs:
+    - job: doc-analyzation-service:type-check
+      artifacts: true
+    - job: doc-analyzation-service:unit-tests
+      artifacts: true
+  script:
+    - >
+      sonar-scanner
+      -Dsonar.host.url="${SONAR_HOST_URL}"
+      -Dsonar.projectKey=${DAS_SONAR_PROJECT_KEY}
+      -Dsonar.projectBaseDir=${DAS_PROJECT_DIR}
+      -Dsonar.python.xunit.reportPath=xunit-reports/xunit-result-pytest.xml
+      -Dsonar.python.coverage.reportPaths=coverage.xml
+      -Dsonar.sources=${DAS_SOURCE_FILES_DIR}
+      -Dsonar.tests=${TEST_FILES_DIR}
+      -Dsonar.coverage.exclusions=**__init__**,${TEST_FILES_DIR}**
+      -Dsonar.exclusions=*.xml,${TEST_FILES_DIR}**
+      -Dsonar.qualitygate.wait=true
+  allow_failure: true
+  only:
+    - merge_requests
+    - main
+
+doc-analyzation-service:license-check:
+  stage: license
+  image: python:3.10-slim
+  interruptible: true
+  before_script:
+    - pip install -r $DAS_REQUIREMENTS_DIR/requirements-lock-uv-py310-all.txt
+    - pip install --upgrade pip-licenses
+    - cd ${DAS_PROJECT_DIR}
+    - mkdir -p $GENERATED_LICENSES_DIR
+  variables:
+    REFERENCE_LICENSES_FILE: third-party-licenses/third-party-licenses.csv
+    GENERATED_LICENSES_DIR: third-party-licenses/generated
+    GENERATED_LICENSES_FILE: third-party-licenses/generated/third-party-licenses.csv
+  script:
+    # For now, ignore the "pkg-resources" package as it seems to be listed in the output even though it is not a dependency.
+    # This issue might be related: https://bugs.launchpad.net/ubuntu/+source/python-pip/+bug/1635463
+    - 'pip-licenses --ignore-packages pkg-resources --with-urls --format=csv --output-file=$GENERATED_LICENSES_FILE'
+    - 'cmp --silent $REFERENCE_LICENSES_FILE $GENERATED_LICENSES_FILE || export LICENSES_CHANGED=true'
+    - 'if [ ! -z ${LICENSES_CHANGED} ]; then
+        echo Some licenses used by the third-party dependencies have changed.;
+        echo Please refer to the README and generate/update them accordingly.;
+        git diff --no-index --unified=0 $REFERENCE_LICENSES_FILE $GENERATED_LICENSES_FILE;
+      fi'
+  only:
+    - merge_requests
+    - main
+
+doc-analyzation-service:latest-build:
+  stage: archive
+  image: docker
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - cd $DAS_PROJECT_DIR
+    - docker build --cache-from $DAS_REGISTRY_IMAGE --tag $DAS_REGISTRY_IMAGE:latest .
+    - docker push $DAS_REGISTRY_IMAGE:latest
+  allow_failure: false
+  only:
+    - main
+
+doc-analyzation-service:container-build:
+  stage: archive
+  image: docker
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - cd $DAS_PROJECT_DIR
+    - docker build --cache-from $DAS_REGISTRY_IMAGE --tag $DAS_REGISTRY_IMAGE:$CI_COMMIT_TAG .
+    - docker push $DAS_REGISTRY_IMAGE:$CI_COMMIT_TAG
+  allow_failure: false
+  only:
+    - tags

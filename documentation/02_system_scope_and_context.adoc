@@ -1,0 +1,64 @@
+[[chapter-system-scope-and-context]]
+:docinfo: shared
+:toc: left
+:toclevels: 3
+:sectnums:
+:copyright: Apache License 2.0
+
+== System Scope and Context
+
+This section describes the environment and scope of {projectName} within the SKALA project. It identifies its users and the systems it interacts with, specifying the external interfaces (domain interfaces and technical interfaces to communication partners). InstaScan is presented as a black box here.
+
+=== Business Context
+
+{projectName}, as part of the SKALA project, operates within the logistics and supply chain management domain. Its primary business context involves digitizing and making transport documents machine-readable, specifically focusing on CMRs. The application of InstaScan facilitates the transition to electronic CMRs (eCMRs) within the Silicon Economy framework, enhancing efficiency and interoperability in logistics operations.
+
+The business context of {projectName} is defined by its role in automating document processing, thereby supporting logistics operations with enhanced data integrity and compliance.
+
+=== Technical Context
+
+In contrast to the business context, the technical view describes the various technical channels, protocols, or interfaces used to realize communication with the objects from the business context. Actual instances of building blocks communicate in the technical context.
+
+{projectName} consists of several modules, with the initial focus on the Document-analyzation-service being made available online. The architecture includes:
+
+- **Frontend**: User interface for interaction.
+- **Backend-for-Frontend (BFF)**: Communicates with the Frontend, Storage Service, and Document-analyzation-service (DAS).
+- **Storage Service**: Manages access to the Blockchain Network, Database, and Object Storage.
+- **Document-analyzation-service (DAS)**: Communicates with the BFF and Storage Service and uses external interfaces to Azure Cloud or local GPU systems (e.g., Ollama) to leverage VLMs.
+
+The following technical interfaces link {projectName} to its environment:
+
+[cols="4",options="header"]
+|===
+|Interface
+|Inputs
+|Outputs
+|Protocol
+
+|Frontend API
+|User interactions
+|User responses
+|HTTP/HTTPS
+
+|BFF API
+|Frontend requests, Device data
+|Processed data, storage access
+|HTTP/HTTPS
+
+|Storage Service API
+|Requests to store data
+|Return of stored data
+|AMQP
+
+|Document Analyzation Service API
+|Requests to analyze image data
+|Return of analysis results
+|AMQP
+
+|External VLM Interface
+|Document data & Prompts
+|Processed text / Structured Output
+|API - Azure Cloud or local GPU
+|===
+
+{projectName}'s technical context is characterized by its ability to process document images and convert them into machine-readable formats, facilitating seamless integration with digital logistics solutions like eCMRs.

@@ -1,0 +1,60 @@
+[[chapter-installation-and-tutorial]]
+:docinfo: shared
+:toc: left
+:toclevels: 3
+:sectnums:
+:copyright: Apache License 2.0
+
+== Installation and Tutorials
+
+This section provides a detailed guide for setting up and using the Document-analyzation-service (DAS) within the {projectName} project, focusing on its communication with VLMs using RabbitMQ and processing base64-encoded images.
+
+=== Installation and Setup
+
+1. **Clone the Repository**: Use Git to clone the {projectName} repository containing the DAS code.
+[source,shell]
+git clone <placeholder>
+
+2. **Configure Environment Variables**: Set up necessary environment variables for the DAS, including RabbitMQ connection details and paths to external VLM interfaces (Azure or local GPU). The configuration can be found in `document-analyzation-service/config`
+
+3. **Build Docker Image**: Navigate to the root directory and build the Docker image.
+[source,shell]
+docker compose build .
+
+4. **Start Services**: The supplied docker-compose.yml file contains an executable configuration for the other backend components, so that when the docker services are started, they connect automatically and the project can be used via the frontend.
+[source,shell]
+docker compose up -d
+
+=== Tutorials
+
+This section provides a tutorial that shows how to use the services of {projectName}, in particular how to use the DAS for document digitization and machine readability.
+
+==== Upload a picture of a CMR document via the frontend
+
+This section explains how to access {projectName} functions via the front end.
+
+1. *Open* your browser and navigate to:
+[source,shell]
+http://localhost:4200
+
+2. *Navigate to the documents page*
+Click on `Start` to go to the document page. There you will find the `Upload Document` button. Click on `Upload Document` and use the dialog that opens to upload an image file in jpeg format. Confirm the upload by clicking the `Upload` button. The frontend will then convert the image to base64 format and send it to the backend and it is then added to the list with a note on the current status of the analysis.
+
+3. *Navigate to the details page*
+Clicking on an entry in the table takes you to the details page of the documents, which displays both the saved image and the analysis result. If some fields have not been filled in correctly, changes can be made in the display, which can then be confirmed using the `Approve` button.
+
+==== Processing Base64-encoded Images
+
+1. **Send Image to DAS**: Use RabbitMQ to send base64-encoded CMR document images to the DAS. As described in the demo (document-analyzation-service/document_analyzation_service/demo).
+
+2. **Process Document**: The DAS running in the Docker container will decode the base64 image and process it using VLMs, converting it into a machine-readable format.
+
+3. **Verify Output**: The output will be sent via RabbitMQ (AMQP) to the defined topic. Check the processed output in the designated storage location, ensuring the document is correctly digitized.
+
+==== Communicating with VLMs
+
+1. **Configure VLM Access**: Ensure the DAS is set up to communicate with VLMs, either via Azure Cloud or a local GPU system (e.g., Ollama).
+
+2. **Process and Analyze**: The DAS will utilize VLMs to analyze the document images, ensuring accurate digitization and compliance.
+
+This section provides a comprehensive guide to installing, configuring, and utilizing the Document-analyzation-service within the {projectName} project, focusing on its communication with VLMs and processing of base64-encoded images using RabbitMQ.

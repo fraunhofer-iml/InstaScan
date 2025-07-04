@@ -1,0 +1,48 @@
+<!--
+  ~ Copyright Fraunhofer Institute for Material Flow and Logistics
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License").
+  ~ For details on the licensing terms, see the LICENSE file.
+  ~ SPDX-License-Identifier: Apache-2.0
+  -->
+
+<div>
+     <img src="assets/failed-icon.svg" alt="Close upload document" id="close" (keyup)="dialogRef.close()" (click)="dialogRef.close()" />
+     <h1 class="title">Upload Document</h1>
+ </div>
+ <div class="container">
+  <div class="upload-container">
+    <label
+      for="dropzone-file"
+      class="dropzone"
+      (drop)="onDrop($event)"
+      (dragover)="onDragOver($event)"
+    >
+      <div class="dropzone-content" *ngIf="!document.value">
+        <div class="icon-cloud-upload"></div>
+        <p class="text"><strong>Click to upload</strong> or drag and drop</p>
+        <p class="text small">PNG, JPG, PDF</p>
+      </div>
+
+      <div class="dropzone-content" *ngIf="document.value">
+        <div class="icon-check"></div>
+        <span class="text bold">{{ document.value.name }}</span>
+      </div>
+
+      <input
+        id="dropzone-file"
+        type="file"
+        class="hidden"
+        (change)="onFileSelected($event)"
+      />
+    </label>
+  </div>
+
+  <button
+    mat-flat-button
+    [disabled]="!document.valid"
+    (click)="submitDocument()"
+  >
+    Upload
+  </button>
+</div>

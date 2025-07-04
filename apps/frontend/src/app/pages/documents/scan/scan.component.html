@@ -1,0 +1,39 @@
+<!--
+  ~ Copyright Fraunhofer Institute for Material Flow and Logistics
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License").
+  ~ For details on the licensing terms, see the LICENSE file.
+  ~ SPDX-License-Identifier: Apache-2.0
+  -->
+
+<div class="container-scanning">
+    <ng-container *ngIf="isCameraConnected | async; else noCamera">
+        <div class="container-camera">
+            <img
+                id="video"
+                [src]="liveImage | async"
+                alt="camera"
+                *ngIf="liveImage; else loading"
+            />
+            <div class="capture-image">
+                <button
+                        mat-flat-button
+                        (click)="captureImage()"
+                        [disabled]="!isCameraConnected"
+                >
+                    <img
+                            src="../../../assets/camera.svg"
+                            alt="camera icon"
+                            class="icon-camera"
+                    />
+                </button>
+            </div>
+        </div>
+    </ng-container>
+    <ng-template #loading>
+        <p class="loading-text">Loading camera feed...</p>
+    </ng-template>
+    <ng-template #noCamera>
+        <p class="error-message">Camera not detected</p>
+    </ng-template>
+</div>

@@ -1,0 +1,51 @@
+<!--
+  ~ Copyright Fraunhofer Institute for Material Flow and Logistics
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License").
+  ~ For details on the licensing terms, see the LICENSE file.
+  ~ SPDX-License-Identifier: Apache-2.0
+  -->
+
+<mat-form-field
+    *ngIf="isPrimitive(data())"
+    appearance="outline"
+    class="json-input"
+>
+    <mat-label>{{ formatLabel(label || '') }}</mat-label>
+    <input matInput [(ngModel)]="data" [readonly]="!editable" (input)="onInputChange(true)" />
+</mat-form-field>
+
+<div class="json-object" *ngIf="isObject(data())">
+    <div *ngIf="label" class="json-title">{{ formatLabel(label) }}</div>
+    <div class="json-fields">
+        <ng-container *ngFor="let key of getObjectKeys(data())">
+          <app-json-component
+          [(data)]="data()[key]"
+          [label]="key"
+          [depth]="depth + 1"
+          [editable]="editable"
+          (modified)="onInputChange(true)"
+      ></app-json-component>
+        </ng-container>
+    </div>
+</div>
+
+<div class="json-array" *ngIf="isArray(data())">
+    <div *ngIf="label" class="json-title">{{ formatLabel(label) }}</div>
+    <div class="json-array-items">
+        <ng-container *ngFor="let item of data(); let index = index">
+            <mat-expansion-panel
+             [expanded]="true">
+                <mat-expansion-panel-header>
+                    <mat-panel-title>Element {{index +1}}</mat-panel-title>
+                </mat-expansion-panel-header>
+                <app-json-component
+                    [(data)]="data()[index]"
+                    [depth]="depth + 1"
+                    [editable]="editable"
+                    (modified)="onInputChange(true)"
+                ></app-json-component>
+            </mat-expansion-panel>
+        </ng-container>
+    </div>
+</div>

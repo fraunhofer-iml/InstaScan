@@ -1,0 +1,19 @@
+<!--
+  ~ Copyright Fraunhofer Institute for Material Flow and Logistics
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License").
+  ~ For details on the licensing terms, see the LICENSE file.
+  ~ SPDX-License-Identifier: Apache-2.0
+  -->
+
+<mat-toolbar>
+    <div [routerLink]="['/', RoutingEnum.dashboard]" routerLinkActive="active">
+        <img src="assets/logo.svg" class="toolbar-icon" alt="Logo" />
+    </div>
+    <span class="title">InstaScan</span>
+</mat-toolbar>
+<mat-sidenav-container>
+    <mat-sidenav-content>
+        <ng-content></ng-content>
+    </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,0 +1,97 @@
+/*!
+ * Copyright Fraunhofer Institute for Material Flow and Logistics
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * For details on the licensing terms, see the LICENSE file.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.dashboard {
+    padding: 3.5em 1em 1em 1em ;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.button {
+    display: flex;
+    justify-content: flex-end;
+    margin: 1em 0;
+}
+
+.table-container {
+    overflow-x: auto;
+    width: 98%;
+    margin: 0 auto;
+    padding: 1em;
+}
+
+table {
+    min-width: 98%;
+    margin: 0 auto;
+    background-color: white;
+}
+
+.uuid-link {
+    color: var(--main-color);
+}
+
+.uuid-link:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.pagination {
+    background-color: white;
+}
+
+mat-chip {
+    width: 12px;
+    height: 12px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.icons {
+    width: 20px;
+    height: 20px;
+    background-color: black;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+}
+
+.status-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.documentType {
+    text-align: center;
+}
+
+.in_progress {
+    mask-image: var(--icon-progess);
+    -webkit-mask-image: var(--icon-progess);
+}
+
+.failed {
+    mask-image: var(--icon-failed);
+    -webkit-mask-image: var(--icon-failed);
+}
+
+.finished {
+    mask-image: var(--icon-finished);
+    -webkit-mask-image: var(--icon-finished);
+}
+
+.approved {
+    mask-image: var(--icon-approved);
+    -webkit-mask-image: var(--icon-approved);
+}
+
+.upload {
+    mask-image: var(--icon-upload);
+    -webkit-mask-image: var(--icon-upload);
+}

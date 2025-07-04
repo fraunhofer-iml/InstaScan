@@ -1,0 +1,94 @@
+variables:
+  FRONTEND_MODULE_NAME: "frontend"
+  FRONTEND_PROJECT_DIR: $MODULE_DIR/$FRONTEND_MODULE_NAME
+  FRONTEND_IMAGE_NAME: core/$FRONTEND_MODULE_NAME
+  FRONTEND_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE/$FRONTEND_IMAGE_NAME
+  FRONTEND_SONAR_PROJECT_NAME: $SONAR_PROJECT_PREFIX-Frontend
+  FRONTEND_SONAR_PROJECT_KEY: $FRONTEND_SONAR_PROJECT_NAME
+  FRONTEND_SONAR_BASE_DIR: ./$FRONTEND_PROJECT_DIR
+
+frontend:tests:
+  stage: test
+  extends: .install-npm-packages
+  interruptible: true
+  script:
+    - npx nx run frontend:test
+#  coverage: '/Lines \W+: (\d+\.\d+)%.*/'
+  artifacts:
+    paths:
+      - "${FRONTEND_PROJECT_DIR}/coverage"
+    expire_in: 1 week
+  allow_failure: false
+  only:
+    - merge_requests
+    - main
+
+frontend:sonarqube-check:
+  needs:
+    - frontend:tests
+  stage: quality-analysis
+  image:
+    name: sonarsource/sonar-scanner-cli:5.0
+    entrypoint: ['']
+  variables:
+    SONAR_USER_HOME: '/apps/frontend/.sonar' # Defines the location of the analysis task cache
+    GIT_DEPTH: '0' # Tells git to fetch all the branches of the project, required by the analysis task
+  cache:
+    key: '${CI_JOB_NAME}'
+    paths:
+      - /apps/frontend/.sonar/cache
+  script:
+    - echo ${FRONTEND_SONAR_PROJECT_NAME}
+    - echo ${FRONTEND_PROJECT_DIR}
+    - >
+      sonar-scanner
+      -Dsonar.projectBaseDir=./apps/frontend/
+      -Dsonar.pullrequest.key=${CI_MERGE_REQUEST_IID}
+      -Dsonar.pullrequest.branch=${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}
+      -Dsonar.pullrequest.base=${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}
+  allow_failure: true
+  only:
+    - merge_requests
+    - main
+
+frontend:build:
+  stage: build
+  extends: .install-npm-packages
+  interruptible: true
+  script:
+    - npx nx run frontend:build --verbose
+  artifacts:
+    paths:
+      - dist/apps/frontend
+  allow_failure: false
+  only:
+    - merge_requests
+    - main
+
+frontend:latest-build:
+  stage: archive
+  image: docker
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build --cache-from $FRONTEND_REGISTRY_IMAGE --build-arg APP=frontend -t $FRONTEND_REGISTRY_IMAGE:latest -f docker/angular.dockerfile .
+    - docker push $FRONTEND_REGISTRY_IMAGE:latest
+  allow_failure: false
+  only:
+    - main
+
+frontend:container-build:
+  stage: archive
+  image: docker
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build --cache-from $FRONTEND_REGISTRY_IMAGE --build-arg APP=frontend -t $FRONTEND_REGISTRY_IMAGE:$CI_COMMIT_TAG -f docker/angular.dockerfile .
+    - docker push $FRONTEND_REGISTRY_IMAGE:$CI_COMMIT_TAG
+  allow_failure: false
+  only:
+    - tags

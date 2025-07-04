@@ -1,0 +1,82 @@
+[[chapter-building-block-view]]
+:docinfo: shared
+:toc: left
+:toclevels: 3
+:sectnums:
+:copyright: Apache License 2.0
+
+= Building Block View
+
+The building block view is a static and hierarchical decomposition of the system into building blocks and their relationships.
+It is a collection descriptions for all important components.
+Building blocks may be modules, components, subsystems, classes, interfaces, packages, libraries, frameworks, layers, partitions, tiers, functions, macros, operations, data structures, etc.).
+
+
+== Overview
+
+The project essentially consists of a front-end and several back-end components.
+The frontend is a web interface for the user and was developed using Angular.
+The backend consists of an backend for frontend, which is responsible for routing requests from the frontend to the corresponding service, and a number of services, which provide the business logic.
+The storage-service is a nestjs application and the document-analyzation-service is a python application.
+Additionally, the backend utilizes a database and an object storage system for data storage.
+
+
+== Building Blocks - Level 1
+
+In level 1, the components of {projectName} are shown.
+
+[cols="1,1,3",options="header"]
+|===
+| Name
+| Status
+| Responsibility / Description
+
+| Frontend
+| Custom development
+| The frontend is the user interface of the project. All actions such as batch creation are carried out from here and all saved data can be viewed. It allows to upload new documents to be saved and analyzed.
+
+| Backend for frontend
+| Custom development
+| The service that receives the interface calls from the frontend and forwards them to the other services.
+
+| Storage service
+| Custom development
+| The storage service is responsible for storing the image data sent by the BFF in the document storage. At the same time, an entry containing the uuid of the document should be created in the database for each upload.
+
+| Document analyzation service
+| Custom development
+| The document analysis service has the task of processing the image files sent by the BFF, checking which document it is and sending the image to an AI service via a prompt and the appropriate data schema. The result is then sent back to the storage service.
+
+| Message-broker
+| Message-broker software
+| The service that connects all services from the API service onwards.
+
+| Postgres database
+| Relational database management system
+| All information is stored non-temporarily here.
+
+| S3 File Storage
+| Object storage system
+| Saves the scanned documents.
+|===
+
+
+== Building Blocks - Level 2
+
+In Level 2, the internal components of the above are shown.
+
+=== Frontend
+
+TBD
+
+=== Backend for frontend (BFF)
+
+TBD
+
+=== Storage service
+
+TBD
+
+=== Document analyzation service
+
+TBD

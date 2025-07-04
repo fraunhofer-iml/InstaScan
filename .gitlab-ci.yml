@@ -1,0 +1,122 @@
+variables:
+  CRI_URL: $CI_REGISTRY
+  CRI_PATH: ${CRI_URL}/skala/ap4/AUAVP
+  SONAR_PROJECT_PREFIX: "AUAVP"
+  MODULE_DIR: "apps"
+
+stages:
+  - ci-build
+  - test
+  - format-check
+  - quality-analysis
+  - license
+  - build
+  - archive
+  - deploy
+
+.install-npm-packages:
+  image: node:lts-alpine
+  interruptible: true
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm
+  before_script:
+    - npm install --cache .npm
+
+include:
+  - 'apps/bff/.gitlab-ci.yml'
+  - 'apps/frontend/.gitlab-ci.yml'
+  - 'apps/storage-service/.gitlab-ci.yml'
+  - 'apps/document-analyzation-service/.gitlab-ci.yml'
+
+npm-licenses-check:
+  stage: license
+  extends: .install-npm-packages
+  variables:
+    LICENSES_LIST: 'npm-licenses-list.csv'
+    LICENSES_OVERRIDES: 'third-party-licenses/npm-licenses-overrides.txt'
+    EXCLUDED_PACKAGES: ''
+  before_script:
+    - npm ci --include dev --cache .npm --prefer-offline
+    - >
+      if [ -e ${LICENSES_OVERRIDES} ]; then
+        EXCLUDED_PACKAGES=$(cat ${LICENSES_OVERRIDES});
+      fi
+  script:
+    - >
+      npx license-checker
+      --unknown
+      --csv
+      --excludePackages "${EXCLUDED_PACKAGES}"
+      --onlyAllow "${NPM_LICENSE_CHECKER_WHITELIST}"
+      --out "${LICENSES_LIST}"
+    - >
+      if [ ${EXCLUDED_PACKAGES} ]; then
+        echo -e "\n\nManually overridden packages excluded from the licenses check:\n${EXCLUDED_PACKAGES}" >> ${LICENSES_LIST};
+      fi
+    - cat "${LICENSES_LIST}"
+  artifacts:
+    name: 'npm-licenses-list'
+    expose_as: 'NPM Licenses List'
+    expire_in: 1 hour
+    paths:
+      - $LICENSES_LIST
+  only:
+    - merge_requests
+
+all:deploy:
+  stage: deploy
+  image: alpine:latest
+  variables:
+    GIT_STRATEGY: none
+  before_script:
+    - echo "Deploying images with tag $CI_COMMIT_TAG"
+    - apk add --no-cache git curl bash coreutils
+    - curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+    - mv kustomize /usr/local/bin/
+    - git clone https://pipeline-token:${LOCAL_GL_TOKEN}@gitlab.cc-asp.fraunhofer.de/skala/ap4/pipeline.git
+    - git config --global user.email "gitlab@oe260.iml.fhg.de"
+    - git config --global user.name "GitLab CI/CD"
+  script:
+    - cd pipeline/kustomize/core/overlays/prod
+    - kustomize edit set image ${CRI_PATH}/bff:$CI_COMMIT_TAG
+    - kustomize edit set image ${CRI_PATH}/document-analyzation-service:$CI_COMMIT_TAG
+    - kustomize edit set image ${CRI_PATH}/storage-service:$CI_COMMIT_TAG
+    - kustomize edit set image ${CRI_PATH}/frontend:$CI_COMMIT_TAG
+    - git commit -am '[skip ci] manifest-image update'
+    - git push origin main
+  only:
+    - /^.*rel.*$/
+  except:
+    - branches
+    - merge_requests
+
+all-dev:deploy:
+  stage: deploy
+  image: alpine:latest
+  variables:
+    GIT_STRATEGY: none
+  before_script:
+    - echo "Deploying images with tag $CI_COMMIT_TAG"
+    - apk add --no-cache git curl bash coreutils
+    - curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+    - mv kustomize /usr/local/bin/
+    - git clone https://pipeline-token:${LOCAL_GL_TOKEN}@gitlab.cc-asp.fraunhofer.de/skala/ap4/pipeline.git
+    - git config --global user.email "gitlab@oe260.iml.fhg.de"
+    - git config --global user.name "GitLab CI/CD"
+  script:
+    - cd pipeline/kustomize/core/overlays/dev
+    - kustomize edit set image ${CRI_PATH}/bff:$CI_COMMIT_TAG
+    - kustomize edit set image ${CRI_PATH}/document-analyzation-service:$CI_COMMIT_TAG
+    - kustomize edit set image ${CRI_PATH}/storage-service:$CI_COMMIT_TAG
+    - kustomize edit set image ${CRI_PATH}/frontend:$CI_COMMIT_TAG
+    - git commit -am '[skip ci] manifest-image update'
+    - git push origin main
+  only:
+    - /^.*rc.*$/
+  except:
+    - branches
+    - merge_requests

@@ -1,0 +1,38 @@
+[[chapter-introduction-and-goals]]
+:docinfo: shared
+:toc: left
+:toclevels: 3
+:sectnums:
+:copyright: Apache License 2.0
+
+= Introduction and Goals
+
+== Introduction
+
+The SKALA project aims to harness the synergetic interaction between AI and blockchain technology for federated and decentralized platform ecosystems. This initiative focuses on empowering companies to achieve secure and trustworthy process automation and autonomization in production, logistics, and supply chain management, spanning from the shop floor to the value network level.
+
+== Project Context
+
+SKALA builds upon the foundation laid by projects like Silicon Economy Logistics Ecosystem and Blockchain Europe, extending the concept of a digital continuum. By integrating AI and blockchain, SKALA seeks to create scalable reference applications for horizontal, vertical, and temporal networking of diverse processes, organizations, and systems.
+
+== Goals
+
+=== Main Goals
+
+* Enable the convergence of AI and blockchain technology for federated and decentralized platform ecosystems.
+* Facilitate secure and trustworthy process automation and autonomization across production, logistics, and supply chain management.
+* Develop synergetic AI and blockchain components, including software modules, AI models, smart contracts, and adapters for third-party system integration.
+
+=== Quality Goals
+
+* Efficiency: Enhance process efficiency and effectiveness through automation and autonomization.
+* Security: Ensure data integrity and security via blockchain technology.
+* Interoperability: Support seamless integration across various systems and networks.
+
+== Requirements Overview
+
+SKALA supports the development and implementation of AI and blockchain solutions for automated process management. The requirements include:
+
+* Development of federated reference platforms with components applicable across different value chain levels.
+* Technical implementation and open-source release of software components for specific use cases.
+* Establishment and scaling of solutions through technical test networks in collaboration with industry partners.

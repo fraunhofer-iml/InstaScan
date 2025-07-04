@@ -1,0 +1,75 @@
+/*!
+ * Copyright Fraunhofer Institute for Material Flow and Logistics
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * For details on the licensing terms, see the LICENSE file.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+@use '@angular/material' as mat;
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@include mat.core();
+
+$my-theme: mat.define-theme((
+        color: (
+          primary: mat.$cyan-palette
+        )
+));
+
+:root {
+  --primary-background-color: white;
+  --button-background-color: #729fcf;
+  --box-shadow-color: #8690a3;
+  --main-color: #3A7D78;
+  --sub-color: #e6f0ef;
+  --light-grey-color: #ccc;
+  --darker-grey-color: #a1a1a1;
+  --dark-grey-color: #777;
+  --hover-grey-color: #f3f3f3;
+  --green-color: #32ff7f;
+  --red-color: #ff4317;
+
+  --icon-cloud-upload: url('assets/cloud-upload.svg');
+  --icon-check: url('assets/check-icon.svg');
+  --icon-progess: url('assets/progress-icon.svg');
+  --icon-failed: url('assets/failed-icon.svg');
+  --icon-finished: url('assets/finished-icon.svg');
+  --icon-approved: url('assets/approved-icon.svg');
+  --icon-upload: url('assets/upload-icon.svg');
+
+  @include mat.all-component-themes($my-theme);
+}
+
+body {
+  margin: 0;
+  font-family: roboto, 'Helvetica Neue', sans-serif;
+  height: 100%;
+}
+
+h1 {
+  font-weight: 300;
+  font-size: x-large;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 80vh;
+  padding: 1rem;
+}
+
+.card {
+  background-color: white;
+  border-radius: 1em;
+  padding: 1em;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

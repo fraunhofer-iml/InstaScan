@@ -1,0 +1,52 @@
+[[chapter-runtime-view]]
+:docinfo: shared
+:toc: left
+:toclevels: 3
+:sectnums:
+:copyright: Apache License 2.0
+
+= Runtime View
+
+*Contents*
+
+- 1 General Component Communication
+- 2 Transaction related schemes and definitions
+- 3 Use Cases and process flows
+
+== General Component Communication
+
+All inter-component communication is carried out using JSON messages.
+This communication occurs either through direct REST interactions from the frontend to the BFF (backend for frontend), or for inter-service communication, an AMQP messaging queue via a broker instance, as provided by https://www.rabbitmq.com/[RabbitMQ].
+
+== Transaction related schemes and definitions
+
+This Chapter outlines all available APIs in the following Order:
+
+1. The Backend which accepts AMQP messages related to the process.
+2. The Api exposed through the BFF which the {projectName} Frontend uses to query for data and upload new documents.
+
+=== AMQP specific messaging interfaces and API
+
+The BFF service uses various AMQP endpoints provided by the storage service and the document-analyzation service. Storage service and document analysis service also communicate with each other via AMQP.
+
+==== Storage Service API
+|===
+| *Image Controller* | Path | Description
+|CREATE | `/images/create` | Create a new image. Is used by the BFF.
+|UPDATE | `images/update` | Updates an existing image. Is used by the BFF.
+|GET | `images/read` | Returns all existing images. Is used by the BFF.
+|GET_BY_ID | `images/read-by-id` | Returns a specific image. Is used by the BFF.
+|PUBLISH_ANALYSIS | `analysis/publish` | Saves a complete analysis result in the database. Is used by the document analyzation service.
+|READ_ANALYSIS | `analysis/get` | Returns an analysis result of a specific image. Is used by the BFF.
+|===
+
+==== Document Analyzation Service API
+|===
+| *Image Controller* | Path | Description
+|CREATE | `/images/create` | Accepts a new image, prepares it and sends it to an AI service for analysis. Is used by the BFF.
+|===
+
+=== REST specific messaging interfaces and API
+
+The BFF serves as a bridge for the frontend and enables RESTful endpoints.
+It has a Swagger api that specifies how the individual endpoints are defined. As soon as the BFF service is started, this swagger api is available under http://localhost:3000/api.

@@ -1,0 +1,97 @@
+/*!
+ * Copyright Fraunhofer Institute for Material Flow and Logistics
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * For details on the licensing terms, see the LICENSE file.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.wrapper {
+    height: 100%;
+    display: flex;
+    padding: 5em 1em 1em 1em;
+    gap: 1em;
+    transition: all 0.3s ease-in-out;
+    align-items: flex-start;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.ImageJsoncontainer {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: fit-content(80vh);
+    gap: 1em;
+}
+
+.image-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--main-color);
+    text-align: center;
+}
+
+.image-viewer {
+    width: 100%;
+    height: auto;
+}
+
+.image {
+    width: 100%;
+    height: auto;
+    cursor: pointer;
+}
+
+.json {
+    height: auto;
+    width: 100%;
+    overflow-y: hidden;
+}
+
+.image-hidden {
+    display: flex;
+    justify-content: center;
+    gap: 1em;
+}
+
+.image-hidden .image-viewer {
+    width: 10vw;
+    min-width: 5vw;
+    flex-shrink: 0;
+}
+
+.image-hidden .json {
+    width: 60vw;
+    height: 90vh;
+    overflow-y: auto;
+}
+
+.json-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--main-color);
+    text-align: center;
+    display: inline-block;
+}
+
+.approve-button {
+    width: 100%;
+}
+
+.json-content {
+    overflow-y: scroll;
+}
+
+.custom-header {
+    position: relative;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+.header-button {
+    position: absolute;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+}

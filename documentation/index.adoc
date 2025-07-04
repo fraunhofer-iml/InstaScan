@@ -1,0 +1,66 @@
+= {projectName} Documentation
+:doctype: book
+:toc: left
+:toclevels: 3
+:sectnumlevels: 5
+:leveloffset: 1
+:icons: font
+:copyright: Apache License 2.0
+:projectName: InstaScan
+
+[[section-preface]]
+== Preface
+
+=== Motivation
+
+{projectName} is a bridging technology developed within the SKALA project, utilizing multimodal large language models (VLMs) to digitize and make transport documents machine-readable, specifically focusing on freight documents like CMRs. This advancement facilitates the seamless transition to electronic CMRs (eCMRs) within the Silicon Economy framework, enhancing efficiency and interoperability in logistics operations.
+
+{projectName} serves as a critical component in the digital transformation of document handling, enabling the automated processing and verification of CMRs and, in the future, other documents such as pallet notes. By converting paper documents into machine-readable formats, InstaScan supports the integration of digital solutions like eCMRs, streamlining logistics processes and reducing manual intervention.
+
+Unlike other services, {projectName} uniquely focuses on document digitization and machine readability, providing a specialized solution for transport document management. It enhances operational efficiency by ensuring compliance and authenticity in document handling, paving the way for broader adoption of digital logistics solutions.
+
+{projectName} functions as an easy-to-use tool within the SKALA project, simplifying document management processes tailored for the logistics industry. This documentation provides comprehensive descriptions of all InstaScan components, detailing their context, interactions, constraints, and implementation specifics. The document is crafted for publication under the Apache-2.0 license.
+
+=== Documentation Approach
+
+The documentation of the individual projects is in English and is based on a reduced version of link:https://docs.arc42.org/home/[arc42 template]
+
+The link:https://agilemanifesto.org/[Agile Manifesto] says: “Working software over comprehensive documentation”.
+It does not say “no documentation”.
+Even in lean, agile and iterative development approaches, an appropriate amount of documentation will help numerous stakeholders doing a better job. arc42 is completely process-agnostic, and especially well-suited for lean and agile development approaches.
+It is supposed to be used “on demand” - you provide only the type or amount of information required for your specific documentation purpose.
+Documentation shall be part of your Definition-of-Done.
+Therefore, arc42 is automatically included in Scrum processes.
+
+https://docs.gitlab.com/ee/user/asciidoc.html[GitLab Asciidoc] gives an overview about using asciidoc in a GitLab project.
+
+=== Main Authors
+
+[cols="1e,2e",options="header"]
+|===
+|Name
+|E-Mail
+
+|Tim Chilla
+|tim.chilla@iml.fraunhofer.de
+
+|Lukas Grieger
+|lukas.grieger@iml.fraunhofer.de
+|===
+
+For a complete list of authors and the document history see the GitLab history being provided automatically.
+
+// Enable section numbering from here on
+:sectnums:
+
+<<<
+include::01_introduction_and_goals.adoc[]
+
+<<<
+include::03-building-block-view.adoc[]
+
+<<<
+include::04-runtime-view.adoc[]
+
+<<<
+include::05_installation_and_tutorial.adoc[]
