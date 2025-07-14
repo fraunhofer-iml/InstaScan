@@ -9,6 +9,6 @@
 import { AnalysisResultAmqpDto } from '../analysis-result-amqp.dto';
 
 export const AnalysisResultAmqpDtoMocks : AnalysisResultAmqpDto[] = [
-  new AnalysisResultAmqpDto('testUuid', JSON.stringify({ status: 'success' })),
-  new AnalysisResultAmqpDto('testUuid', JSON.stringify({ status: 'error' })),
+  new AnalysisResultAmqpDto('testUuid', JSON.parse("{\"status\":\"success\",\"message\":\"message\",\"error_details\":\"error_details\"}")),
+  new AnalysisResultAmqpDto('testUuid', JSON.parse("{\"status\":\"error\",\"message\":\"message\",\"error_details\":\"error_details\"}")),
 ];

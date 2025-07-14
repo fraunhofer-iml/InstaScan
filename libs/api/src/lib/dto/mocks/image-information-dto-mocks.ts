@@ -9,12 +9,14 @@
 import { ImageInformationDto } from '../image.information.dto';
 import { AnalysisStatus, DocumentTypeId } from '@ap4/utils';
 
-export const ImageInformationDtoMocks: ImageInformationDto[] = [new ImageInformationDto(
-  'testUuid',
-  'testUrl',
-  new Date('2025-04-03T06:24:59.535Z'),
-  new Date('2025-04-03T06:24:59.535Z'),
-  AnalysisStatus.IN_PROGRESS,
-  DocumentTypeId.CMR,
-  'testAnalysisResult'
-)];
+export const ImageInformationDtoMocks: ImageInformationDto[] = [
+  new ImageInformationDto(
+      'testUuid',
+      'testUrl',
+      new Date('2025-04-03T06:24:59.535Z'),
+      new Date('2025-04-03T06:24:59.535Z'),
+      AnalysisStatus.IN_PROGRESS,
+      DocumentTypeId.CMR,
+      JSON.parse("{\"status\":\"success\",\"message\":\"message\",\"error_details\":\"error_details\"}")
+  ),
+];

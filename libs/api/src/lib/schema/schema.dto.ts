@@ -6,8 +6,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export enum ApproveButtonEnum {
-    approve = 'Approve',
-    saveAndApprove = 'Save changes and approve',
-    done = 'File was successfully approved'
-}
+import { EcmrSchemaDto } from "./ecmr.schema.dto";
+import { ErrorSchemaDto } from "./error.schema.dto";
+
+export type Schema = EcmrSchemaDto | ErrorSchemaDto;

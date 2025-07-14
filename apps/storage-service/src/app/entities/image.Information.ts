@@ -8,6 +8,8 @@
 
 import { Entity, Column, PrimaryColumn } from 'typeorm';
 import { ImageInformationDto } from '@ap4/api';
+import { ImageInformationAmqpDto } from '@ap4/amqp';
+import { AnalysisStatus, DocumentTypeId } from '@ap4/utils';
 
 @Entity()
 export class ImageInformation {
@@ -51,7 +53,18 @@ export class ImageInformation {
       this.lastModified,
       this.analysisStatus,
       this.documentType,
-      this.image_analysis_result,
+      JSON.parse(this.image_analysis_result),
+    );
+  }
+  public toImageInformationAmqpDto(): ImageInformationAmqpDto{
+    return new ImageInformationAmqpDto(
+      this.uuid, 
+      this.url, 
+      this.creationDate, 
+      this.lastModified, 
+      AnalysisStatus[this.analysisStatus],
+      DocumentTypeId[this.documentType],
+      JSON.parse(this.image_analysis_result)
     );
   }
 }

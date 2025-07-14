@@ -65,7 +65,7 @@ export class ImagesController {
   @ApiOperation({ description: 'Get all stored image information' })
   @ApiResponse({ type: String, description: 'Every image information that is currently saved' })
   @ApiResponse({ status: 200, description: 'A list of the stored image information' })
-  getAllImageInformation(): Observable<ImageInformationAmqpDto[]> {
+  getAllImageInformation(): Observable<ImageInformationDto[]> {
     return this.imagesService.getAllImageInformation();
   }
 
@@ -77,7 +77,7 @@ export class ImagesController {
   })
   @ApiResponse({ status: 201, description: 'Image uploaded', type: ImageInformationAmqpDto })
   @ApiResponse({ status: 400, description: 'Wrong image format' })
-  uploadImage(@Body() createImageDto: ImageDto): Observable<ImageInformationAmqpDto> {
+  uploadImage(@Body() createImageDto: ImageDto): Observable<ImageInformationDto> {
     return this.imagesService.uploadImage(createImageDto).pipe(
       map(image => {
         if (!image) {

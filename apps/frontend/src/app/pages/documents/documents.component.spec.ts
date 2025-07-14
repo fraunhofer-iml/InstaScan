@@ -10,7 +10,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DocumentsComponent } from './documents.component';
 import { of } from 'rxjs';
 import { ImageService } from '../../shared/services/image/imageService';
-import { ImageInformationDto } from '@ap4/api';
+import { ErrorSchemaDto, ImageInformationDto } from '@ap4/api';
 import { AnalysisStatus, DocumentTypeId } from '@ap4/utils';
 import { ActivatedRoute } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -30,7 +30,7 @@ describe('DocumentsComponent', () => {
             lastModified: new Date(),
             analysisStatus: AnalysisStatus.IN_PROGRESS,
             documentType: DocumentTypeId.CMR,
-            image_analysis_result: '',
+            image_analysis_result: new ErrorSchemaDto('status', 'message', 'error_details'),
         },
     ];
 

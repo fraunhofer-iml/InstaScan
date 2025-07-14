@@ -32,7 +32,7 @@ export class ImagesController {
 
   @MessagePattern(ImageMessagePattern.READ_ANALYSIS)
   public getImageInformation(@Payload() uuid: string): Promise<ImageInformationDto> {
-    return this.imagesService.getImageInformation(uuid);
+    return this.imagesService.getImageInformationDto(uuid);
   }
 
   @MessagePattern(ImageMessagePattern.GET)

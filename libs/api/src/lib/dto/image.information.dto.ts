@@ -8,6 +8,7 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { AnalysisStatus, DocumentTypeId } from '@ap4/utils';
+import { Schema } from '../schema/schema.dto';
 
 export class ImageInformationDto {
   @ApiProperty()
@@ -29,9 +30,9 @@ export class ImageInformationDto {
   })
   documentType: string;
   @ApiProperty()
-  image_analysis_result: string;
+  image_analysis_result: Schema;
 
-  constructor(uuid: string, url: string, creationDate: Date, lastModified: Date, analysisStatus: string, documentType: string, image_analysis_result: string) {
+  constructor(uuid: string, url: string, creationDate: Date, lastModified: Date, analysisStatus: string, documentType: string, image_analysis_result: Schema) {
     this.uuid = uuid;
     this.url = url;
     this.creationDate = creationDate;

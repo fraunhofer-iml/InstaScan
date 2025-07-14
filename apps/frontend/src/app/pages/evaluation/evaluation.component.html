@@ -5,8 +5,7 @@
   ~ For details on the licensing terms, see the LICENSE file.
   ~ SPDX-License-Identifier: Apache-2.0
   -->
-
-<div class="wrapper">
+  <div class="wrapper">
     <div
         class="ImageJsoncontainer"
         [ngClass]="{ 'image-visible': showImage, 'image-hidden': !showImage }"
@@ -33,30 +32,28 @@
             </mat-card>
         </div>
         <mat-card class="json">
-            <mat-card-header>
-                <div class="custom-header">
-                    @if(getImage.analysisStatus !== analysisStatus.FAILED){
-                    <mat-card-title class="json-title">Document type: {{ getImage.documentType }}</mat-card-title>
-                    <button
-                        mat-flat-button
-                        class="header-button"
-                        (click)="saveImageInformation(getImage.uuid)"
-                    >
-                        {{
-                            modified && getImage
-                                ? approveEnum.saveAndApprove
-                                : approveEnum.approve
-                        }}
-                    </button>
-                    }
-                </div>
-            </mat-card-header>
-            <mat-card-content class="json-content">
-                <app-json-component
-                    [(data)]="getImage.image_analysis_result"
-                    (modified)="onModified($event)"
-                ></app-json-component>
-            </mat-card-content>
+            @if(getImage){
+                <mat-card-header>
+                    <div class="custom-header">
+                        @if(getImage && getImage.analysisStatus !== analysisStatus.FAILED){
+                        <mat-card-title class="json-title">Document type: {{ getImage.documentType }}</mat-card-title>
+                        <button
+                            mat-flat-button
+                            class="header-button"
+                            (click)="saveImageInformation(getImage.uuid)"
+                        >
+                            {{approveEnum.APPROVE_BUTTON_TEXT}}
+                        </button>
+                        }
+                    </div>
+                </mat-card-header>
+                <mat-card-content class="json-content">
+                    <app-json-component
+                        [(data)]="getImage.image_analysis_result"
+                        (modified)="onModified($event)"
+                    ></app-json-component>
+                </mat-card-content>
+            }
         </mat-card>
     </div>
 </div>

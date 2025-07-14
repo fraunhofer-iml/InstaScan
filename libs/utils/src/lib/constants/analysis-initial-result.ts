@@ -6,6 +6,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './analysis-status.enum';
-export * from './document-type-id.enum';
-export * from './analysis-initial-result'
+export const ANALYSIS_INITIAL_RESULT = `{"status":"in_progress","content":null}`;

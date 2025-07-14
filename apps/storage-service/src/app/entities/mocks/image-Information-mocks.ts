@@ -15,5 +15,5 @@ export const ImageInformationMocks: ImageInformation[] = [new ImageInformation(
   new Date('2025-04-03T06:24:59.535Z'),
   'IN_PROGRESS',
   'CMR',
-  'testAnalysisResult'
+  "{\"status\":\"success\",\"message\":\"message\",\"error_details\":\"error_details\"}"
 )];

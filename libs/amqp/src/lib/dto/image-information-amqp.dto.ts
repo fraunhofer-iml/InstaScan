@@ -6,17 +6,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AnalysisStatus, DocumentTypeId } from '@ap4/utils';
+import { Schema } from '@ap4/api';
 export class ImageInformationAmqpDto {
 
   uuid: string;
   url: string;
   creationDate: Date;
   lastModified: Date;
-  analysisStatus: string;
-  documentType: string;
-  image_analysis_result: string;
+  analysisStatus: AnalysisStatus;
+  documentType: DocumentTypeId;
+  image_analysis_result: Schema;
 
-  constructor(uuid: string, url: string, creationDate: Date, lastModified: Date, analysisStatus: string, documentType: string, image_analysis_result: string) {
+  constructor(uuid: string, url: string, creationDate: Date, lastModified: Date, analysisStatus: AnalysisStatus, documentType: DocumentTypeId, image_analysis_result: Schema) {
     this.uuid = uuid;
     this.url = url;
     this.creationDate = creationDate;

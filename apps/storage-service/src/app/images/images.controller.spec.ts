@@ -18,6 +18,7 @@ import { ImageDto, ImageInformationDto, ImageInformationDtoMocks } from '@ap4/ap
 import { ImageInformation } from '../entities/image.Information';
 import { Repository } from 'typeorm';
 import { ImageInformationMocks } from '../entities/mocks/image-Information-mocks';
+import { AnalysisStatus } from '@ap4/utils';
 
 describe('ImagesController', () => {
   let controller: ImagesController;
@@ -105,7 +106,7 @@ describe('ImagesController', () => {
       return Promise.resolve(ImageInformationMocks[0]);
     });
 
-    const expectedReturnValue = ImageInformationMocks[0];
+    const expectedReturnValue = ImageInformationMocks[0].toImageInformationDto();
 
     const returnValue = await controller.getImageInformation('testUuid');
     expect(returnValue).toEqual(expectedReturnValue);
@@ -149,7 +150,10 @@ describe('ImagesController', () => {
 
     const expectedReturnValue = ImageInformationDtoMocks[0];
 
+    expectedReturnValue.analysisStatus = AnalysisStatus.FINISHED;
+
     const returnValue = await controller.saveAnalysisResult(AnalysisResultAmqpDtoMocks[0]);
+    returnValue.analysisStatus = AnalysisStatus.FINISHED;
     expect(returnValue).toEqual(expectedReturnValue);
   });
 
@@ -164,7 +168,8 @@ describe('ImagesController', () => {
       return Promise.resolve(ImageInformationMocks[0]);
     });
 
-    const expectedReturnValue = ImageInformationMocks[0];
+    const expectedReturnValue = ImageInformationMocks[0].toImageInformationDto();
+    expectedReturnValue.image_analysis_result =  JSON.parse("{\"status\":\"error\",\"message\":\"message\",\"error_details\":\"error_details\"}")
 
     const returnValue = await controller.saveAnalysisResult(AnalysisResultAmqpDtoMocks[1]);
     expect(returnValue).toEqual(expectedReturnValue);
@@ -181,9 +186,12 @@ describe('ImagesController', () => {
       return Promise.resolve(ImageInformationMocks[0]);
     });
 
-    const expectedReturnValue = ImageInformationMocks[0];
+    const expectedReturnValue = ImageInformationMocks[0].toImageInformationAmqpDto();
+    expectedReturnValue.analysisStatus = AnalysisStatus.IN_PROGRESS
+    expectedReturnValue.image_analysis_result = JSON.parse("{\"status\":\"error\",\"message\":\"message\",\"error_details\":\"error_details\"}")
 
     const returnValue = await controller.updateImageInformation(ImageInformationAmqpDtoMocks[0]);
     expect(returnValue).toEqual(expectedReturnValue);
   });
 });
+

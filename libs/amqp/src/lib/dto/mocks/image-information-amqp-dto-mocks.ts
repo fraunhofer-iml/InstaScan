@@ -8,6 +8,7 @@
 
 import { AnalysisStatus, DocumentTypeId } from '@ap4/utils';
 import { ImageInformationAmqpDto } from '../image-information-amqp.dto';
+import { ErrorSchemaDto } from '@ap4/api';
 
 export const ImageInformationAmqpDtoMocks: ImageInformationAmqpDto[] = [new ImageInformationAmqpDto(
   'testUuid',
@@ -16,5 +17,5 @@ export const ImageInformationAmqpDtoMocks: ImageInformationAmqpDto[] = [new Imag
   new Date(),
   AnalysisStatus.IN_PROGRESS,
   DocumentTypeId.CMR,
-  'testResult',
+  new ErrorSchemaDto('error', 'message', 'error_details')
 )];

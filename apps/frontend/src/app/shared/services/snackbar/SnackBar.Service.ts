@@ -28,7 +28,7 @@ export class SnackbarService {
     return this.messageSubject.asObservable();
   }
 
-  sendMessage(message: string): void {
+  public sendMessage(message: string): void {
     this.messageSubject.next(message);
     this.showSnackbar(message);
   }

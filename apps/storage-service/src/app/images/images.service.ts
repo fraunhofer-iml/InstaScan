@@ -15,7 +15,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ImageDto, ImageInformationDto } from '@ap4/api';
-import { AnalysisStatus, DocumentTypeId } from '@ap4/utils';
+import { ANALYSIS_INITIAL_RESULT, AnalysisStatus, DocumentTypeId } from '@ap4/utils';
 import { ImageInformation } from '../entities/image.Information';
 import type { Readable as ReadableStream } from 'node:stream';
 import process from 'node:process';
@@ -29,18 +29,18 @@ export class ImagesService implements OnModuleInit {
     private readonly s3Service: MinioService,
     @InjectRepository(ImageInformation)
     readonly imageInformationRepository: Repository<ImageInformation>
-  ) {}
+  ) { }
 
   async onModuleInit(): Promise<void> {
-    if(process.env.CLEAR_DB_ON_START.toLowerCase() === 'true'){
+    if (process.env.CLEAR_DB_ON_START.toLowerCase() === 'true') {
       this.logger.log('clear database');
       await this.imageInformationRepository.clear();
     }
   }
 
   public async getImage(uuid: string): Promise<ImageDto> {
-    const foundImageInformation: ImageInformationDto = await this.getImageInformation(uuid);
-    if(!foundImageInformation){
+    const foundImageInformation: ImageInformationDto = await this.getImageInformationDto(uuid);
+    if (!foundImageInformation) {
       return null;
     }
     const s3FileName = `${foundImageInformation.uuid}.jpeg`;
@@ -55,8 +55,18 @@ export class ImagesService implements OnModuleInit {
     return new ImageDto(pictureBuffer.toString('base64'));
   }
 
-  public async getImageInformation(uuid: string): Promise<ImageInformationDto> {
-    const foundImage: ImageInformation = await this.imageInformationRepository.findOne({where: {uuid: uuid}});
+  private async getImageInformation(uuid: string): Promise<ImageInformation> {
+    return this.imageInformationRepository.findOne({
+      where: { uuid: uuid },
+    });
+  }
+
+  public async getImageInformationDto(
+    uuid: string
+  ): Promise<ImageInformationDto> {
+    const foundImage: ImageInformation = await this.getImageInformation(
+      uuid
+    );
     return foundImage ? foundImage.toImageInformationDto() : null;
   }
 
@@ -69,7 +79,7 @@ export class ImagesService implements OnModuleInit {
     if (!await this.s3Service.client.bucketExists(process.env.S3_BUCKET)) {
       await this.s3Service.client.makeBucket(process.env.S3_BUCKET);
     }
-    try{
+    try {
       const s3FileName = `${body.uuid}.jpeg`;
       const fileBuffer: Buffer = Buffer.from(body.image_base64, 'base64');
       await this.s3Service.client.putObject(process.env.S3_BUCKET, s3FileName, fileBuffer);
@@ -81,38 +91,49 @@ export class ImagesService implements OnModuleInit {
         new Date(),
         AnalysisStatus.IN_PROGRESS,
         DocumentTypeId.CMR,
-        ''
+        ANALYSIS_INITIAL_RESULT
       );
       return this.imageInformationRepository.save(newImageInformation).then((result: ImageInformation) => result.toImageInformationDto());
     }
-    catch(e){
+    catch (e) {
       this.logger.error('Could not upload image', e);
       return null;
     }
   }
 
-  public async updateImageInformation(imageInformationDto: ImageInformationDto): Promise<ImageInformationAmqpDto> {
-    const foundImage = await this.getImageInformation(imageInformationDto.uuid);
+  public async updateImageInformation(
+    imageInformationDto: ImageInformationDto
+  ): Promise<ImageInformationAmqpDto> {
+    const foundImage = await this.getImageInformation(
+      imageInformationDto.uuid
+    );
     if (!foundImage) {
       return null;
     }
-    foundImage.image_analysis_result = imageInformationDto.image_analysis_result;
-    return this.imageInformationRepository.save(foundImage);
+    foundImage.image_analysis_result = JSON.stringify(
+      imageInformationDto.image_analysis_result
+    );
+    foundImage.analysisStatus = imageInformationDto.analysisStatus;
+    const updateImage: ImageInformation =
+      await this.imageInformationRepository.save(foundImage);
+    return updateImage.toImageInformationAmqpDto();
   }
 
-  public async saveAnalysisResult(analysisResultAmqpDto: AnalysisResultAmqpDto): Promise<ImageInformationAmqpDto> {
-    const foundImageInformation: ImageInformationDto = await this.getImageInformation(analysisResultAmqpDto.uuid);
+  public async saveAnalysisResult(
+    analysisResultAmqpDto: AnalysisResultAmqpDto
+  ): Promise<ImageInformationAmqpDto> {
+    const foundImageInformation: ImageInformation = await this.getImageInformation(analysisResultAmqpDto.uuid);
 
-    const analysisResult: any = analysisResultAmqpDto.image_analysis_result;
-    if(analysisResult.status && analysisResult.status=='error'){
+    if ('error_details' in analysisResultAmqpDto.image_analysis_result) {
       foundImageInformation.analysisStatus = AnalysisStatus.FAILED;
-    }
-    else{
+    } else {
       foundImageInformation.analysisStatus = AnalysisStatus.FINISHED;
     }
-    foundImageInformation.image_analysis_result = analysisResult;
-
-    return this.imageInformationRepository.save(foundImageInformation);
+    foundImageInformation.image_analysis_result =
+      JSON.stringify(analysisResultAmqpDto.image_analysis_result);
+    const updateImage: ImageInformation =
+      await this.imageInformationRepository.save(foundImageInformation);
+    return updateImage.toImageInformationAmqpDto();
   }
 
 }

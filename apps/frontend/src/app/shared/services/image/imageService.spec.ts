@@ -9,7 +9,7 @@
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { ImageService } from './imageService';
-import { ImageDto, ImageInformationDto } from '@ap4/api';
+import { ErrorSchemaDto, ImageDto, ImageInformationDto } from '@ap4/api';
 import { environment } from '../../../../environments/environment';
 import { AnalysisStatus, DocumentTypeId } from '@ap4/utils';
 
@@ -43,7 +43,7 @@ describe('ImageService', (): void => {
       lastModified: new Date('2025-04-03T06:24:59.535Z'),
       analysisStatus: AnalysisStatus.IN_PROGRESS,
       documentType: DocumentTypeId.CMR,
-      image_analysis_result: 'eyzwijh'
+      image_analysis_result: new ErrorSchemaDto('status', 'message', 'error_details'),
     };
     const uuid = '123';
 
@@ -64,7 +64,7 @@ describe('ImageService', (): void => {
         lastModified: new Date('2025-04-03T06:24:59.535Z'),
         analysisStatus: AnalysisStatus.IN_PROGRESS,
         documentType: DocumentTypeId.CMR,
-        image_analysis_result: 'eyzwijh'
+        image_analysis_result: new ErrorSchemaDto('status', 'message', 'error_details'),
       },
       {  uuid: '2',
         url: 'testUrl',
@@ -72,7 +72,7 @@ describe('ImageService', (): void => {
         lastModified: new Date('2025-04-03T06:24:59.535Z'),
         analysisStatus: AnalysisStatus.IN_PROGRESS,
         documentType: DocumentTypeId.CMR,
-        image_analysis_result: 'hsoflej'
+        image_analysis_result: new ErrorSchemaDto('status', 'message', 'error_details'),
       }
     ];
 
@@ -113,12 +113,13 @@ describe('ImageService', (): void => {
   });
   it('should update an analysed image by UUID', () => {
     const mockElement:ImageInformationDto = {
-      uuid: '1', image_analysis_result: 'eyzwijh',
+      uuid: '1', 
       url: '',
       creationDate: new Date(),
       lastModified: new Date(),
       analysisStatus: AnalysisStatus.IN_PROGRESS,
-      documentType: DocumentTypeId.CMR
+      documentType: DocumentTypeId.CMR,
+      image_analysis_result: new ErrorSchemaDto('status', 'message', 'error_details'),
     };
     const uuid = '123';
     service.updateImageInformation(uuid,mockElement).subscribe((element) => {
