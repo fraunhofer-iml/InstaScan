@@ -9,6 +9,6 @@
 import { AnalysisResultAmqpDto } from '../analysis-result-amqp.dto';
 
 export const AnalysisResultAmqpDtoMocks : AnalysisResultAmqpDto[] = [
-  new AnalysisResultAmqpDto('testUuid', JSON.parse("{\"status\":\"success\",\"message\":\"message\",\"error_details\":\"error_details\"}")),
-  new AnalysisResultAmqpDto('testUuid', JSON.parse("{\"status\":\"error\",\"message\":\"message\",\"error_details\":\"error_details\"}")),
+  new AnalysisResultAmqpDto('testUuid', JSON.parse("{\"sender_information\":{\"senderNameCompany\":\"testSender\"},\"consignee_information\":{\"consigneeNameCompany\":\"testReceiver\"}}")),
+  new AnalysisResultAmqpDto('testUuid', JSON.parse("{\"status\": \"error\",\"message\": \"An error occurred while processing the image.\",\"error_details\": \"Connection error.\"}")),
 ];

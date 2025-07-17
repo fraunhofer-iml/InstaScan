@@ -11,6 +11,7 @@ export enum ImageMessagePattern {
   UPDATE = 'images/update',
   GET = 'images/read',
   GET_BY_ID = 'images/read-by-id',
+  REMOVE = 'images/remove',
   PUBLISH_ANALYSIS = 'analysis/publish',
   READ_ANALYSIS = 'analysis/get'
 }

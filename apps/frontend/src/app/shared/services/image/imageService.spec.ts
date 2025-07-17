@@ -39,6 +39,8 @@ describe('ImageService', (): void => {
     const mockImage: ImageInformationDto =
     {  uuid: '1',
       url: 'testUrl',
+      sender: 'testSender',
+      receiver: 'testReceiver',
       creationDate: new Date('2025-04-03T06:24:59.535Z'),
       lastModified: new Date('2025-04-03T06:24:59.535Z'),
       analysisStatus: AnalysisStatus.IN_PROGRESS,
@@ -60,6 +62,8 @@ describe('ImageService', (): void => {
     const mockImages: ImageInformationDto[] = [
       {  uuid: '1',
         url: 'testUrl',
+        sender: 'testSender',
+        receiver: 'testReceiver',
         creationDate: new Date('2025-04-03T06:24:59.535Z'),
         lastModified: new Date('2025-04-03T06:24:59.535Z'),
         analysisStatus: AnalysisStatus.IN_PROGRESS,
@@ -68,6 +72,8 @@ describe('ImageService', (): void => {
       },
       {  uuid: '2',
         url: 'testUrl',
+        sender: 'testSender',
+        receiver: 'testReceiver',
         creationDate: new Date('2025-04-03T06:24:59.535Z'),
         lastModified: new Date('2025-04-03T06:24:59.535Z'),
         analysisStatus: AnalysisStatus.IN_PROGRESS,
@@ -115,6 +121,8 @@ describe('ImageService', (): void => {
     const mockElement:ImageInformationDto = {
       uuid: '1', 
       url: '',
+      sender: 'testSender',
+      receiver: 'testReceiver',
       creationDate: new Date(),
       lastModified: new Date(),
       analysisStatus: AnalysisStatus.IN_PROGRESS,

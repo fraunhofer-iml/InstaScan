@@ -26,6 +26,8 @@ describe('EvaluationComponent', () => {
   const mockImage = {
     uuid: '1234-uuid',
     url: 'mock-url',
+    sender: 'testSender',
+    receiver: 'testReceiver',
     creationDate: new Date(),
     lastModified: new Date(),
     analysisStatus: AnalysisStatus.APPROVED,
@@ -154,6 +156,8 @@ describe('EvaluationComponent', () => {
     const imageMock: ImageInformationDto = {
       uuid: '1234-uuid',
       url: 'mock-url',
+      sender: 'testSender',
+      receiver: 'testReceiver',
       creationDate: new Date(),
       lastModified: new Date(),
       analysisStatus: AnalysisStatus.APPROVED,

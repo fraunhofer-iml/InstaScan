@@ -12,13 +12,12 @@ import { ImagesService } from './images.service';
 import { MinioModule, MinioService } from 'nestjs-minio-client';
 import process from 'node:process';
 import { Readable } from 'stream';
-import { AnalysisResultAmqpDtoMocks, ImageInformationAmqpDtoMocks, UploadImageAmqpDtoMocks } from '@ap4/amqp';
+import { AnalysisResultAmqpDtoMocks, UploadImageAmqpDtoMocks } from '@ap4/amqp';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ImageDto, ImageInformationDto, ImageInformationDtoMocks } from '@ap4/api';
+import { ImageDto, ImageInformationDto } from '@ap4/api';
 import { ImageInformation } from '../entities/image.Information';
 import { Repository } from 'typeorm';
 import { ImageInformationMocks } from '../entities/mocks/image-Information-mocks';
-import { AnalysisStatus } from '@ap4/utils';
 
 describe('ImagesController', () => {
   let controller: ImagesController;
@@ -49,6 +48,7 @@ describe('ImagesController', () => {
             find: jest.fn(),
             findOne: jest.fn(),
             save: jest.fn(),
+            remove: jest.fn()
           },
         },
         {
@@ -57,6 +57,7 @@ describe('ImagesController', () => {
             client : {
               getObject: jest.fn().mockImplementation(() => readable),
               listObjects: jest.fn(),
+              removeObjects: jest.fn(),
               bucketExists: jest.fn().mockImplementation(() =>  false),
               makeBucket: jest.fn(),
               putObject: jest.fn().mockImplementation(() => {
@@ -118,7 +119,10 @@ describe('ImagesController', () => {
       return Promise.resolve(ImageInformationMocks);
     });
 
-    const expectedReturnValue: ImageInformationDto[] = ImageInformationDtoMocks;
+    const expectedReturnValue: ImageInformationDto[] = [
+        ImageInformationMocks[0].toImageInformationDto(),
+        ImageInformationMocks[1].toImageInformationDto(),
+    ];
 
     const returnValue = await controller.getAllImageInformation();
     expect(returnValue).toEqual(expectedReturnValue);
@@ -130,7 +134,7 @@ describe('ImagesController', () => {
       return Promise.resolve(ImageInformationMocks[0]);
     });
 
-    const expectedReturnValue = ImageInformationDtoMocks[0];
+    const expectedReturnValue = ImageInformationMocks[0].toImageInformationDto();
 
     const returnValue = await controller.uploadImage(UploadImageAmqpDtoMocks[0]);
     expect(returnValue).toEqual(expectedReturnValue);
@@ -148,28 +152,27 @@ describe('ImagesController', () => {
       return Promise.resolve(ImageInformationMocks[0]);
     });
 
-    const expectedReturnValue = ImageInformationDtoMocks[0];
-
-    expectedReturnValue.analysisStatus = AnalysisStatus.FINISHED;
+    const expectedReturnValue = ImageInformationMocks[0].toImageInformationAmqpDto();
+    expectedReturnValue.sender = "testSender";
+    expectedReturnValue.receiver = "testReceiver";
 
     const returnValue = await controller.saveAnalysisResult(AnalysisResultAmqpDtoMocks[0]);
-    returnValue.analysisStatus = AnalysisStatus.FINISHED;
+
     expect(returnValue).toEqual(expectedReturnValue);
   });
 
   it('saveAnalysisResult: should save a analysation failure', async () => {
     const getImageSpy = jest.spyOn(imageInformationRepository, 'findOne');
     getImageSpy.mockImplementationOnce(() => {
-      return Promise.resolve(ImageInformationMocks[0]);
+      return Promise.resolve(ImageInformationMocks[1]);
     });
 
     const saveImageSpy = jest.spyOn(imageInformationRepository, 'save');
     saveImageSpy.mockImplementationOnce(() => {
-      return Promise.resolve(ImageInformationMocks[0]);
+      return Promise.resolve(ImageInformationMocks[1]);
     });
 
-    const expectedReturnValue = ImageInformationMocks[0].toImageInformationDto();
-    expectedReturnValue.image_analysis_result =  JSON.parse("{\"status\":\"error\",\"message\":\"message\",\"error_details\":\"error_details\"}")
+    const expectedReturnValue = ImageInformationMocks[1].toImageInformationAmqpDto();
 
     const returnValue = await controller.saveAnalysisResult(AnalysisResultAmqpDtoMocks[1]);
     expect(returnValue).toEqual(expectedReturnValue);
@@ -187,11 +190,28 @@ describe('ImagesController', () => {
     });
 
     const expectedReturnValue = ImageInformationMocks[0].toImageInformationAmqpDto();
-    expectedReturnValue.analysisStatus = AnalysisStatus.IN_PROGRESS
-    expectedReturnValue.image_analysis_result = JSON.parse("{\"status\":\"error\",\"message\":\"message\",\"error_details\":\"error_details\"}")
 
-    const returnValue = await controller.updateImageInformation(ImageInformationAmqpDtoMocks[0]);
+    const returnValue = await controller.updateImageInformation(ImageInformationMocks[0].toImageInformationAmqpDto());
     expect(returnValue).toEqual(expectedReturnValue);
   });
-});
 
+  it('removeImageInformation: should remove a dataset of image information', async () => {
+    const getImageSpy = jest.spyOn(imageInformationRepository, 'findOne');
+    getImageSpy.mockImplementationOnce(() => {
+      return Promise.resolve(ImageInformationMocks[0]);
+    });
+
+    const returnValue = await controller.removeImageInformation(ImageInformationMocks[0].uuid);
+    expect(returnValue).toEqual(true);
+  });
+
+  it('removeImageInformation: should not remove a dataset if it is missing', async () => {
+    const getImageSpy = jest.spyOn(imageInformationRepository, 'findOne');
+    getImageSpy.mockImplementationOnce(() => {
+      return Promise.resolve(null);
+    });
+
+    const returnValue = await controller.removeImageInformation(ImageInformationMocks[0].uuid);
+    expect(returnValue).toEqual(false);
+  });
+});

@@ -16,6 +16,10 @@ export class ImageInformationDto {
   @ApiProperty()
   url: string;
   @ApiProperty()
+  sender: string;
+  @ApiProperty()
+  receiver: string;
+  @ApiProperty()
   creationDate: Date;
   @ApiProperty()
   lastModified: Date;
@@ -32,9 +36,11 @@ export class ImageInformationDto {
   @ApiProperty()
   image_analysis_result: Schema;
 
-  constructor(uuid: string, url: string, creationDate: Date, lastModified: Date, analysisStatus: string, documentType: string, image_analysis_result: Schema) {
+  constructor(uuid: string, url: string, sender: string, receiver: string, creationDate: Date, lastModified: Date, analysisStatus: string, documentType: string, image_analysis_result: Schema) {
     this.uuid = uuid;
     this.url = url;
+    this.sender = sender;
+    this.receiver = receiver;
     this.creationDate = creationDate;
     this.lastModified = lastModified;
     this.analysisStatus = analysisStatus;

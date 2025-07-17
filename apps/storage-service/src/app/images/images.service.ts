@@ -6,7 +6,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { MinioService } from 'nestjs-minio-client';
 import {
   AnalysisResultAmqpDto,
@@ -14,14 +14,14 @@ import {
 } from '@ap4/amqp';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ImageDto, ImageInformationDto } from '@ap4/api';
+import {ImageDto, ImageInformationDto} from '@ap4/api';
 import { ANALYSIS_INITIAL_RESULT, AnalysisStatus, DocumentTypeId } from '@ap4/utils';
 import { ImageInformation } from '../entities/image.Information';
 import type { Readable as ReadableStream } from 'node:stream';
 import process from 'node:process';
 
 @Injectable()
-export class ImagesService implements OnModuleInit {
+export class ImagesService {
 
   private readonly logger = new Logger(ImagesService.name);
 
@@ -29,14 +29,7 @@ export class ImagesService implements OnModuleInit {
     private readonly s3Service: MinioService,
     @InjectRepository(ImageInformation)
     readonly imageInformationRepository: Repository<ImageInformation>
-  ) { }
-
-  async onModuleInit(): Promise<void> {
-    if (process.env.CLEAR_DB_ON_START.toLowerCase() === 'true') {
-      this.logger.log('clear database');
-      await this.imageInformationRepository.clear();
-    }
-  }
+  ) {}
 
   public async getImage(uuid: string): Promise<ImageDto> {
     const foundImageInformation: ImageInformationDto = await this.getImageInformationDto(uuid);
@@ -128,6 +121,8 @@ export class ImagesService implements OnModuleInit {
       foundImageInformation.analysisStatus = AnalysisStatus.FAILED;
     } else {
       foundImageInformation.analysisStatus = AnalysisStatus.FINISHED;
+      foundImageInformation.sender = analysisResultAmqpDto.image_analysis_result.sender_information.senderNameCompany;
+      foundImageInformation.receiver = analysisResultAmqpDto.image_analysis_result.consignee_information.consigneeNameCompany;
     }
     foundImageInformation.image_analysis_result =
       JSON.stringify(analysisResultAmqpDto.image_analysis_result);
@@ -136,4 +131,15 @@ export class ImagesService implements OnModuleInit {
     return updateImage.toImageInformationAmqpDto();
   }
 
+  public async removeImage(uuid: string): Promise<boolean> {
+
+    const foundImageInformation: ImageInformation = await this.getImageInformation(uuid);
+    if (!foundImageInformation) return false;
+
+    await this.s3Service.client.removeObjects(process.env.S3_BUCKET, [`${uuid}.jpeg`]);
+    await this.imageInformationRepository.remove([foundImageInformation]);
+
+    this.logger.log('Removed image with uuid ', uuid);
+    return true;
+  }
 }

@@ -55,4 +55,9 @@ export class ImagesController {
   public updateImageInformation(@Body() imageInformationDto: ImageInformationDto): Promise<ImageInformationDto> {
     return this.imagesService.updateImageInformation(imageInformationDto);
   }
+
+  @MessagePattern(ImageMessagePattern.REMOVE)
+  public removeImageInformation(@Payload() uuid: string): Promise<boolean> {
+    return this.imagesService.removeImage(uuid);
+  }
 }

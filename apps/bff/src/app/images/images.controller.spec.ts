@@ -14,7 +14,7 @@ import {
   ImageInformationAmqpDtoMocks
 } from '@ap4/amqp';
 import { firstValueFrom, of } from 'rxjs';
-import { ImageDtoMocks } from '@ap4/api';
+import {ImageDtoMocks, ImageInformationDtoMocks} from '@ap4/api';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('ImagesController', () => {
@@ -33,6 +33,7 @@ describe('ImagesController', () => {
             getImage: jest.fn(),
             getImageInformation: jest.fn(),
             getAllImageInformation: jest.fn(),
+            removeImageInformation: jest.fn()
           },
         },
         {
@@ -132,5 +133,26 @@ describe('ImagesController', () => {
       return of(null);
     });
     await expect(firstValueFrom(controller.uploadImage(ImageDtoMocks[0]))).rejects.toThrow(BadRequestException);
+  });
+
+  it('removeImage: should remove an image', (done) => {
+    const removeImageSpy = jest.spyOn(imagesService, 'removeImageInformation');
+    removeImageSpy.mockImplementation(() => {
+      return of(true);
+    });
+    controller.removeImageInformation(ImageInformationDtoMocks[0].uuid).subscribe((response) => {
+      expect(removeImageSpy).toHaveBeenCalledWith(ImageInformationDtoMocks[0].uuid);
+      expect(removeImageSpy).toHaveBeenCalledTimes(1);
+      expect(response).toEqual(true);
+      done();
+    });
+  });
+
+  it('removeImage: should not remove an image due to missing image', async () => {
+    const removeImageSpy = jest.spyOn(imagesService, 'removeImageInformation');
+    removeImageSpy.mockImplementation(() => {
+      return of(null);
+    });
+    await expect(firstValueFrom(controller.removeImageInformation(ImageInformationDtoMocks[0].uuid))).rejects.toThrow(NotFoundException);
   });
 });

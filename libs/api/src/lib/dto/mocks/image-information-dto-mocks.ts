@@ -13,10 +13,11 @@ export const ImageInformationDtoMocks: ImageInformationDto[] = [
   new ImageInformationDto(
       'testUuid',
       'testUrl',
+      'testSender',
+      'testReceiver',
       new Date('2025-04-03T06:24:59.535Z'),
       new Date('2025-04-03T06:24:59.535Z'),
       AnalysisStatus.IN_PROGRESS,
       DocumentTypeId.CMR,
-      JSON.parse("{\"status\":\"success\",\"message\":\"message\",\"error_details\":\"error_details\"}")
-  ),
+      JSON.parse("{\"sender_information\":{\"senderNameCompany\":\"testSender\"},\"consignee_information\":{\"consigneeNameCompany\":\"testReceiver\"}}"))
 ];

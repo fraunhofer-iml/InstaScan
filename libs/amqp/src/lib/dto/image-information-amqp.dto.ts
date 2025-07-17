@@ -12,15 +12,19 @@ export class ImageInformationAmqpDto {
 
   uuid: string;
   url: string;
+  sender: string;
+  receiver: string;
   creationDate: Date;
   lastModified: Date;
   analysisStatus: AnalysisStatus;
   documentType: DocumentTypeId;
   image_analysis_result: Schema;
 
-  constructor(uuid: string, url: string, creationDate: Date, lastModified: Date, analysisStatus: AnalysisStatus, documentType: DocumentTypeId, image_analysis_result: Schema) {
+  constructor(uuid: string, url: string, sender: string, receiver: string, creationDate: Date, lastModified: Date, analysisStatus: AnalysisStatus, documentType: DocumentTypeId, image_analysis_result: Schema) {
     this.uuid = uuid;
     this.url = url;
+    this.sender = sender;
+    this.receiver = receiver;
     this.creationDate = creationDate;
     this.lastModified = lastModified;
     this.analysisStatus = analysisStatus;

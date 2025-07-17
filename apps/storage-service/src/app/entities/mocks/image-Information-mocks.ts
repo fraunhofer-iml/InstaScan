@@ -13,7 +13,16 @@ export const ImageInformationMocks: ImageInformation[] = [new ImageInformation(
   'testUrl',
   new Date('2025-04-03T06:24:59.535Z'),
   new Date('2025-04-03T06:24:59.535Z'),
-  'IN_PROGRESS',
+  'FINISHED',
   'CMR',
-  "{\"status\":\"success\",\"message\":\"message\",\"error_details\":\"error_details\"}"
+    "{\"sender_information\":{\"senderNameCompany\":\"testSender\"},\"consignee_information\":{\"consigneeNameCompany\":\"testReceiver\"}}"
+),
+new ImageInformation(
+    'testUuid',
+    'testUrl',
+    new Date('2025-04-03T06:24:59.535Z'),
+    new Date('2025-04-03T06:24:59.535Z'),
+    'FAILED',
+    'CMR',
+    "{\"status\": \"error\",\"message\": \"An error occurred while processing the image.\",\"error_details\": \"Connection error.\"}"
 )];

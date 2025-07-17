@@ -16,28 +16,36 @@ export class ImageInformation {
 
   @PrimaryColumn()
   uuid: string;
-
   @Column()
   url: string;
-
+  @Column()
+  sender: string;
+  @Column()
+  receiver: string;
   @Column()
   creationDate: Date
-
   @Column()
   lastModified: Date
-
   @Column()
   analysisStatus: string
-
   @Column()
   documentType: string
-
   @Column()
   image_analysis_result: string;
 
-  constructor(uuid: string, url: string, creationDate: Date, lastModified: Date, analysisStatus: string, documentType: string, image_analysis_result: string) {
+  constructor(
+      uuid: string,
+      url: string,
+      creationDate: Date,
+      lastModified: Date,
+      analysisStatus: string,
+      documentType: string,
+      image_analysis_result: string
+  ) {
     this.uuid = uuid;
     this.url = url;
+    this.sender = '';
+    this.receiver = '';
     this.creationDate = creationDate;
     this.lastModified = lastModified;
     this.analysisStatus = analysisStatus;
@@ -49,6 +57,8 @@ export class ImageInformation {
     return new ImageInformationDto(
       this.uuid,
       this.url,
+      this.sender,
+      this.receiver,
       this.creationDate,
       this.lastModified,
       this.analysisStatus,
@@ -59,7 +69,9 @@ export class ImageInformation {
   public toImageInformationAmqpDto(): ImageInformationAmqpDto{
     return new ImageInformationAmqpDto(
       this.uuid, 
-      this.url, 
+      this.url,
+      this.sender,
+      this.receiver,
       this.creationDate, 
       this.lastModified, 
       AnalysisStatus[this.analysisStatus],

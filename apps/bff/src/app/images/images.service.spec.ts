@@ -15,7 +15,7 @@ import {
 } from '@ap4/amqp';
 import { ClientProxy } from '@nestjs/microservices';
 import { of } from 'rxjs';
-import { ImageDtoMocks } from '@ap4/api';
+import { ImageDtoMocks, ImageInformationDtoMocks} from '@ap4/api';
 
 describe('ImagesService', () => {
   let service: ImagesService;
@@ -90,6 +90,18 @@ describe('ImagesService', () => {
 
     service.uploadImage(ImageDtoMocks[0]).subscribe((response) => {
       expect(response).toEqual(ImageInformationAmqpDtoMocks[0].uuid);
+      done();
+    });
+  });
+
+  it('removeImage: should remove an Image', (done) => {
+    const sendImageRequestSpy = jest.spyOn(storageServiceClientProxy, 'send');
+    sendImageRequestSpy.mockImplementation(() => {
+      return of(true);
+    });
+
+    service.removeImageInformation(ImageInformationDtoMocks[0].uuid).subscribe((response) => {
+      expect(response).toEqual(true);
       done();
     });
   });

@@ -46,4 +46,8 @@ export class ImagesService {
     return this.storageServiceAMQPClient.send(ImageMessagePattern.UPDATE, imageInformationDto);
   }
 
+  public removeImageInformation(uuid: string): Observable<boolean> {
+    return this.storageServiceAMQPClient.send(ImageMessagePattern.REMOVE, uuid);
+  }
+
 }

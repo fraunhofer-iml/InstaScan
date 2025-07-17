@@ -26,6 +26,8 @@ describe('DocumentsComponent', () => {
         {
             uuid: '1',
             url: 'http://url/api/v1/1',
+            sender: 'testSender',
+            receiver: 'testReceiver',
             creationDate: new Date(),
             lastModified: new Date(),
             analysisStatus: AnalysisStatus.IN_PROGRESS,

@@ -13,6 +13,8 @@ import { ErrorSchemaDto } from '@ap4/api';
 export const ImageInformationAmqpDtoMocks: ImageInformationAmqpDto[] = [new ImageInformationAmqpDto(
   'testUuid',
   'testUrl',
+  'testSender',
+  'testReceiver',
   new Date(),
   new Date(),
   AnalysisStatus.IN_PROGRESS,
