@@ -7,10 +7,13 @@
  */
 
 export const DISPLAYED_COLUMNS: string[] = [
-    'uuid',
-    'documentName',
-    'documentType',
-    'status',
-    'creationDate',
-    'lastModified',
+  'uuid',
+  'documentName',
+  'documentType',
+  'sender',
+  'receiver',
+  'status',
+  'creationDate',
+  'lastModified',
+  'delete'
 ];

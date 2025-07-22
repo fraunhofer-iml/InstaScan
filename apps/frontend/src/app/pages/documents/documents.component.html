@@ -61,8 +61,26 @@
                 <th mat-header-cell *matHeaderCellDef class="bold" mat-sort-header>
                     Document type
                 </th>
-                <td mat-cell *matCellDef="let element" class="documentType">
+                <td mat-cell *matCellDef="let element">
                     {{ element.documentType }}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="sender">
+                <th mat-header-cell *matHeaderCellDef class="bold" mat-sort-header>
+                    Sender
+                </th>
+                <td mat-cell *matCellDef="let element">
+                    {{ element.sender || '-' }}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="receiver">
+                <th mat-header-cell *matHeaderCellDef class="bold" mat-sort-header>
+                    Receiver
+                </th>
+                <td mat-cell *matCellDef="let element">
+                    {{ element.receiver || '-' }}
                 </td>
             </ng-container>
 
@@ -74,10 +92,18 @@
                     {{ element.creationDate | date : 'yyyy-MM-dd, HH:mm' }}
                 </td>
             </ng-container>
+
             <ng-container matColumnDef="lastModified">
                 <th mat-header-cell *matHeaderCellDef class="bold" mat-sort-header>Modified</th>
                 <td mat-cell *matCellDef="let element">
                     {{ element.lastModified | date : 'yyyy-MM-dd, HH:mm' }}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="delete">
+                <th mat-header-cell *matHeaderCellDef class="bold" mat-sort-header></th>
+                <td mat-cell *matCellDef="let element">
+                    <mat-icon fontSet="material-symbols-outlined" class="delete-icon" (click)="deleteImage(element.uuid)" (keyup)="deleteImage(element.uuid)">delete</mat-icon>
                 </td>
             </ng-container>
 

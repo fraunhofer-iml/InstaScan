@@ -34,6 +34,7 @@
     "@nestjs/typeorm": "^11.0.0",
     "axios": "^1.6.0",
     "class-validator": "^0.14.1",
+    "material-symbols": "^0.33.0",
     "nestjs-minio-client": "^2.2.0",
     "pg": "^8.14.1",
     "reflect-metadata": "^0.1.13",

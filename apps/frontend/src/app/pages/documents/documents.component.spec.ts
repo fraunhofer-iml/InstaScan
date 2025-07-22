@@ -40,26 +40,29 @@ describe('DocumentsComponent', () => {
         open: jest.fn(),
     } as never;
 
-    beforeEach(async () => {
-        await TestBed.configureTestingModule({
-            declarations: [],
-            imports: [DocumentsComponent, BrowserAnimationsModule],
-            providers: [
-                ImageService,
-                { provide: MatDialog, useValue: matDialogMock },
-                {
-                    provide: ActivatedRoute,
-                    useValue: {
-                        params: of('1'),
-                    },
-                },
-            ],
-        }).compileComponents();
+  const mockImageService = {
+    deleteImage: jest.fn(),
+    getImages: jest.fn(),
+  };
 
-        fixture = TestBed.createComponent(DocumentsComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
-    });
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [DocumentsComponent, BrowserAnimationsModule],
+      providers: [
+        { provide: ImageService, useValue: mockImageService },
+        { provide: MatDialog, useValue: matDialogMock },
+        {
+          provide: ActivatedRoute,
+          useValue: { params: of('1') },
+        },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(DocumentsComponent);
+    component = fixture.componentInstance;
+    component.initializeDataSource = jest.fn();
+    fixture.detectChanges();
+  });
 
     it('should create the component', () => {
         expect(component).toBeTruthy();
@@ -91,4 +94,14 @@ describe('DocumentsComponent', () => {
         component['paginator'].page.next(event);
         expect(setItemSpy).toHaveBeenCalledWith('itemsPerPage', '50');
     });
+
+  it('should call deleteImage and then initializeDataSource', () => {
+    const uuid = '1234-uuid';
+    mockImageService.deleteImage.mockReturnValue(of(null));
+
+    component.deleteImage(uuid);
+    expect(component.initializeDataSource).toHaveBeenCalled();
+  });
 });
+
+

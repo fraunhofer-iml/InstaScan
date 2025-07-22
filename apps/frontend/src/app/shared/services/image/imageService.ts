@@ -39,4 +39,8 @@ export class ImageService {
   public updateImageInformation(uuid: string, imageInformationDto: ImageInformationDto): Observable<ImageInformationDto> {
     return this.httpClient.put<ImageInformationDto>(`${environment.IMAGE.URL}/${uuid}`, imageInformationDto);
   }
+
+  public deleteImage(uuid: string): Observable<ImageInformationDto[]> {
+    return this.httpClient.delete<ImageInformationDto[]>(`${environment.IMAGE.URL}/${uuid}`);
+    }
 }

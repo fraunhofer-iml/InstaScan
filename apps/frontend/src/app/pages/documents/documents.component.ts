@@ -27,19 +27,21 @@ import { ScanComponent } from './scan/scan.component';
 import { MatDialog } from '@angular/material/dialog';
 import { UploadComponent } from './upload/upload.component';
 import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'app-dashboard',
     standalone: true,
     imports: [
-        CommonModule,
-        MatButtonModule,
-        MatTableModule,
-        HttpClientModule,
-        RouterModule,
-        MatPaginator,
-        ScanComponent,
-        MatSortModule,
+      CommonModule,
+      MatButtonModule,
+      MatTableModule,
+      HttpClientModule,
+      RouterModule,
+      MatPaginator,
+      ScanComponent,
+      MatSortModule,
+      MatIcon,
     ],
     providers: [ImageService],
     templateUrl: './documents.component.html',
@@ -54,60 +56,66 @@ export class DocumentsComponent implements AfterViewInit {
     displayedColumns: string[] = DISPLAYED_COLUMNS;
 
     constructor(
-        private readonly imageService: ImageService,
-        private readonly dialog: MatDialog,
-        private readonly cdr: ChangeDetectorRef
+      private readonly imageService: ImageService,
+      private readonly dialog: MatDialog,
+      private readonly cdr: ChangeDetectorRef
     ) {
-        this.initializeDataSource();
+      this.initializeDataSource();
     }
 
     ngAfterViewInit(): void {
-        this.initializeDataSource();
+      this.initializeDataSource();
     }
 
     transformStatus(value: string): string {
-        if (!value) return value;
-        return value.replace(/_/g, ' ').toLowerCase();
+      if (!value) return value;
+      return value.replace(/_/g, ' ').toLowerCase();
     }
 
     openUploadDocument() {
-        const dialogRef = this.dialog.open(UploadComponent, {
-            panelClass: 'mat-dialog-container',
-            width: '600px',
-            height: '400px',
-        });
+      const dialogRef = this.dialog.open(UploadComponent, {
+        panelClass: 'mat-dialog-container',
+        width: '600px',
+        height: '400px',
+      });
 
-        dialogRef.afterClosed().subscribe(() => {
-            this.initializeDataSource();
-        });
+      dialogRef.afterClosed().subscribe(() => {
+        this.initializeDataSource();
+      });
     }
 
     initializeDataSource(): void {
-        this.imageService
-            .getImages()
-            .pipe(
-                map((images) => {
-                    images.reverse();
-                    const dataSource =
-                        new MatTableDataSource<ImageInformationDto>(images);
-                    this.setupPaginator(dataSource);
-                    dataSource.sort = this.sort;
-                    return dataSource;
-                })
-            )
-            .subscribe((dataSource) => {
-                this.dataSource$.next(dataSource);
-                this.cdr.markForCheck();
-            });
+      this.imageService
+        .getImages()
+        .pipe(
+          map((images) => {
+            images.reverse();
+            const dataSource =
+              new MatTableDataSource<ImageInformationDto>(images);
+            this.setupPaginator(dataSource);
+            dataSource.sort = this.sort;
+            return dataSource;
+          })
+        )
+        .subscribe((dataSource) => {
+          this.dataSource$.next(dataSource);
+          this.cdr.markForCheck();
+        });
     }
 
-    private setupPaginator(
-        dataSource: MatTableDataSource<ImageInformationDto>
-    ): void {
-        this.paginator.pageSize = Number(localStorage.getItem('itemsPerPage'));
-        dataSource.paginator = this.paginator;
-        this.paginator.page.subscribe((event: PageEvent) => {
-            localStorage.setItem('itemsPerPage', String(event.pageSize));
-        });
+  deleteImage(uuid: string) {
+    this.imageService.deleteImage(uuid).subscribe(() => {
+      this.initializeDataSource();
+    });
+  }
+
+  private setupPaginator(
+    dataSource: MatTableDataSource<ImageInformationDto>
+  ): void {
+      this.paginator.pageSize = Number(localStorage.getItem('itemsPerPage'));
+      dataSource.paginator = this.paginator;
+      this.paginator.page.subscribe((event: PageEvent) => {
+        localStorage.setItem('itemsPerPage', String(event.pageSize));
+      });
     }
 }
