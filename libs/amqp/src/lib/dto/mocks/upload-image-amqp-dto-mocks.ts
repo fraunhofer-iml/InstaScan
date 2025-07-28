@@ -6,8 +6,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { UploadImageAmqpDto } from '../upload-image-amqp.dto';
+import {UploadImageAmqpDto} from '../upload-image-amqp.dto';
+import {DocumentUploadType} from "@ap4/utils";
 
 export const UploadImageAmqpDtoMocks: UploadImageAmqpDto[] = [
-  new UploadImageAmqpDto('testUuid', 'testImageString')
+  new UploadImageAmqpDto('testUuid', 'testImageString', DocumentUploadType.JPEG)
 ];

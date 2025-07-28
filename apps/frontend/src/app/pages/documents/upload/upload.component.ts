@@ -14,12 +14,15 @@ import { FormControl, Validators } from '@angular/forms';
 import { ImageService } from '../../../shared/services/image/imageService';
 import { HttpClientModule } from '@angular/common/http';
 import { MatDialogRef } from '@angular/material/dialog';
+import { DocumentUploadType } from '@ap4/utils';
+import { PdfConverter } from "./pdfConverter";
+import { from, switchMap } from "rxjs";
 
 @Component({
   selector: 'app-upload-document',
   standalone: true,
   imports: [CommonModule, MatButtonModule, MatIconModule, HttpClientModule],
-  providers: [ImageService],
+  providers: [ImageService, PdfConverter],
   templateUrl: './upload.component.html',
   styleUrl: './upload.component.css',
 })
@@ -29,6 +32,7 @@ export class UploadComponent {
   constructor(
       public dialogRef: MatDialogRef<UploadComponent>,
       private readonly imageService: ImageService,
+      private readonly pdfConverter: PdfConverter,
   ) {}
 
   onDragOver(event: DragEvent): void {
@@ -53,10 +57,24 @@ export class UploadComponent {
   submitDocument(): void {
     const reader = new FileReader();
     reader.onload = () => {
+      const mimeType: string = (reader.result as string).split(',')[0];
+      const extension: string = mimeType.split('/')[1].split(';')[0].toUpperCase();
+      const uploadType: DocumentUploadType = DocumentUploadType[extension as keyof typeof DocumentUploadType];
       const image_base64 = (reader.result as string).split(',')[1];
-      this.imageService.uploadImage({ image_base64 }).subscribe(() => {
+      if(uploadType == DocumentUploadType.PDF){
+        from(this.pdfConverter.convertToPdf(image_base64)).pipe(
+            switchMap(result => {
+              return this.imageService.uploadImage({ image_base64: result, documentUploadType: uploadType });
+            })
+        ).subscribe(() => {
           this.dialogRef.close();
-      });
+        });
+      }
+      else{
+        this.imageService.uploadImage({ image_base64: image_base64, documentUploadType: uploadType }).subscribe(() => {
+          this.dialogRef.close();
+        });
+      }
       this.document.setValue(null);
     };
     reader.readAsDataURL(this.document.value);

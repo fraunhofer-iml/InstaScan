@@ -6,17 +6,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AnalysisStatus, DocumentTypeId } from '@ap4/utils';
+import { AnalysisStatus, DocumentTypeId, DocumentUploadType } from '@ap4/utils';
 import { ImageInformationAmqpDto } from '../image-information-amqp.dto';
 import { ErrorSchemaDto } from '@ap4/api';
 
 export const ImageInformationAmqpDtoMocks: ImageInformationAmqpDto[] = [new ImageInformationAmqpDto(
   'testUuid',
-  'testUrl',
   'testSender',
   'testReceiver',
   new Date(),
   new Date(),
+  DocumentUploadType.JPEG,
   AnalysisStatus.IN_PROGRESS,
   DocumentTypeId.CMR,
   new ErrorSchemaDto('error', 'message', 'error_details')

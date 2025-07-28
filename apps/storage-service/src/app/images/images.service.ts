@@ -14,8 +14,13 @@ import {
 } from '@ap4/amqp';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {ImageDto, ImageInformationDto} from '@ap4/api';
-import { ANALYSIS_INITIAL_RESULT, AnalysisStatus, DocumentTypeId } from '@ap4/utils';
+import { ImageDto, ImageInformationDto } from '@ap4/api';
+import {
+  ANALYSIS_INITIAL_RESULT,
+  AnalysisStatus,
+  DOCUMENT_UPLOAD_TYPE_TO_UPLOAD_VALUES,
+  DocumentTypeId, DocumentUploadType
+} from '@ap4/utils';
 import { ImageInformation } from '../entities/image.Information';
 import type { Readable as ReadableStream } from 'node:stream';
 import process from 'node:process';
@@ -32,11 +37,11 @@ export class ImagesService {
   ) {}
 
   public async getImage(uuid: string): Promise<ImageDto> {
-    const foundImageInformation: ImageInformationDto = await this.getImageInformationDto(uuid);
+    const foundImageInformation: ImageInformation = await this.getImageInformation(uuid);
     if (!foundImageInformation) {
       return null;
     }
-    const s3FileName = `${foundImageInformation.uuid}.jpeg`;
+    const s3FileName = `${foundImageInformation.uuid}${DOCUMENT_UPLOAD_TYPE_TO_UPLOAD_VALUES[foundImageInformation.uploadType].extension}`;
     const objectResult: ReadableStream = await this.s3Service.client.getObject(process.env.S3_BUCKET, s3FileName);
     const pictureBuffer: Buffer = await new Promise((resolve, reject) => {
       const chunks: Buffer[] = [];
@@ -45,7 +50,7 @@ export class ImagesService {
       objectResult.on('end', () => resolve(Buffer.concat(chunks)));
       objectResult.on('error', () => reject(new Error('Could not read content')));
     });
-    return new ImageDto(pictureBuffer.toString('base64'));
+    return new ImageDto(pictureBuffer.toString('base64'), DocumentUploadType[foundImageInformation.uploadType.toUpperCase()]);
   }
 
   private async getImageInformation(uuid: string): Promise<ImageInformation> {
@@ -73,15 +78,15 @@ export class ImagesService {
       await this.s3Service.client.makeBucket(process.env.S3_BUCKET);
     }
     try {
-      const s3FileName = `${body.uuid}.jpeg`;
+      const s3FileName = `${body.uuid}${DOCUMENT_UPLOAD_TYPE_TO_UPLOAD_VALUES[body.uploadType].extension}`;
       const fileBuffer: Buffer = Buffer.from(body.image_base64, 'base64');
       await this.s3Service.client.putObject(process.env.S3_BUCKET, s3FileName, fileBuffer);
 
       const newImageInformation: ImageInformation = new ImageInformation(
         body.uuid,
-        `${process.env.MINIO_STORAGE_URL}${s3FileName}`,
         new Date(),
         new Date(),
+        body.uploadType,
         AnalysisStatus.IN_PROGRESS,
         DocumentTypeId.CMR,
         ANALYSIS_INITIAL_RESULT

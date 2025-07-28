@@ -8,6 +8,7 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
+import { DocumentUploadType } from '@ap4/utils';
 
 export class ImageDto {
 
@@ -15,7 +16,14 @@ export class ImageDto {
   @IsNotEmpty()
   image_base64: string;
 
-  constructor(imageBase64: string) {
-    this.image_base64 = imageBase64;
+  @ApiProperty({
+    type: String,
+    enum: DocumentUploadType
+  })
+  documentUploadType: DocumentUploadType;
+
+  constructor(image_base64: string, documentUploadType: DocumentUploadType) {
+    this.image_base64 = image_base64;
+    this.documentUploadType = documentUploadType ? documentUploadType : DocumentUploadType.JPEG;
   }
 }

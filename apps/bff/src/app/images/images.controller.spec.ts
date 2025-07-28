@@ -81,13 +81,13 @@ describe('ImagesController', () => {
   it('getImageInformation: should get an imageInformation', (done) => {
     const getImageSpy = jest.spyOn(imagesService, 'getImageInformation');
     getImageSpy.mockImplementation(() => {
-      return of(ImageInformationAmqpDtoMocks[0]);
+      return of(ImageInformationDtoMocks[0]);
     });
 
     controller.getImageInformation(ImageInformationAmqpDtoMocks[0].uuid).subscribe((response) => {
       expect(getImageSpy).toHaveBeenCalledWith(ImageInformationAmqpDtoMocks[0].uuid);
       expect(getImageSpy).toHaveBeenCalledTimes(1);
-      expect(response).toEqual(ImageInformationAmqpDtoMocks[0]);
+      expect(response).toEqual(ImageInformationDtoMocks[0]);
       done();
     });
   });
@@ -103,12 +103,12 @@ describe('ImagesController', () => {
   it('getAllImageInformation: should get the image id list', (done) => {
     const getImagesSpy = jest.spyOn(imagesService, 'getAllImageInformation');
     getImagesSpy.mockImplementation(() => {
-      return of(ImageInformationAmqpDtoMocks);
+      return of(ImageInformationDtoMocks);
     });
 
     controller.getAllImageInformation().subscribe((response) => {
       expect(getImagesSpy).toHaveBeenCalledTimes(1);
-      expect(response).toEqual(ImageInformationAmqpDtoMocks);
+      expect(response).toEqual(ImageInformationDtoMocks);
       done();
     });
   });
@@ -116,13 +116,13 @@ describe('ImagesController', () => {
   it('uploadImage: should create an image', (done) => {
     const createImageSpy = jest.spyOn(imagesService, 'uploadImage');
     createImageSpy.mockImplementation(() => {
-      return of(ImageInformationAmqpDtoMocks[0]);
+      return of(ImageInformationDtoMocks[0]);
     });
 
     controller.uploadImage(ImageDtoMocks[0]).subscribe((response) => {
       expect(createImageSpy).toHaveBeenCalledWith(ImageDtoMocks[0]);
       expect(createImageSpy).toHaveBeenCalledTimes(1);
-      expect(response).toEqual(ImageInformationAmqpDtoMocks[0]);
+      expect(response).toEqual(ImageInformationDtoMocks[0]);
       done();
     });
   });

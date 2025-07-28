@@ -8,4 +8,6 @@
 
 export * from './analysis-status.enum';
 export * from './document-type-id.enum';
+export * from './analysis-initial-result';
 export * from './analysis-initial-result'
+export * from './document-upload-type';

@@ -11,12 +11,28 @@ import { DocumentsComponent } from './documents.component';
 import { of } from 'rxjs';
 import { ImageService } from '../../shared/services/image/imageService';
 import { ErrorSchemaDto, ImageInformationDto } from '@ap4/api';
-import { AnalysisStatus, DocumentTypeId } from '@ap4/utils';
+import { AnalysisStatus, DocumentTypeId, DocumentUploadType } from '@ap4/utils';
 import { ActivatedRoute } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { PageEvent } from '@angular/material/paginator';
+
+jest.mock('pdfjs-dist', () => ({
+    GlobalWorkerOptions: {
+        workerSrc: 'pdf.worker.js',
+    },
+    getDocument: jest.fn().mockReturnValue(() => {
+        return Promise.resolve({
+            getPage: {
+                getViewport: {
+                    height: 5,
+                    width: 5
+                }
+            }
+        })
+    })
+}));
 
 describe('DocumentsComponent', () => {
     let component: DocumentsComponent;
@@ -25,11 +41,11 @@ describe('DocumentsComponent', () => {
     const mockImages: ImageInformationDto[] = [
         {
             uuid: '1',
-            url: 'http://url/api/v1/1',
             sender: 'testSender',
             receiver: 'testReceiver',
             creationDate: new Date(),
             lastModified: new Date(),
+            documentUploadType: DocumentUploadType.JPEG,
             analysisStatus: AnalysisStatus.IN_PROGRESS,
             documentType: DocumentTypeId.CMR,
             image_analysis_result: new ErrorSchemaDto('status', 'message', 'error_details'),

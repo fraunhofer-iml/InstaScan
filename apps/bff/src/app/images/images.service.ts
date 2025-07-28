@@ -37,8 +37,8 @@ export class ImagesService {
 
   public uploadImage(createImageDto: ImageDto): Observable<ImageInformationDto> {
     const newUuid: string = uuidGenerator();
-    this.analysisServiceAMQPClient.emit(ImageMessagePattern.CREATE, new UploadImageAmqpDto(newUuid, createImageDto.image_base64));
-    return this.storageServiceAMQPClient.send(ImageMessagePattern.CREATE, new UploadImageAmqpDto(newUuid, createImageDto.image_base64));
+    this.analysisServiceAMQPClient.emit(ImageMessagePattern.CREATE, new UploadImageAmqpDto(newUuid, createImageDto.image_base64, createImageDto.documentUploadType));
+    return this.storageServiceAMQPClient.send(ImageMessagePattern.CREATE, new UploadImageAmqpDto(newUuid, createImageDto.image_base64, createImageDto.documentUploadType));
   }
 
   public updateImageInformation(uuid: string, imageInformationDto: ImageInformationDto): Observable<ImageInformationDto> {

@@ -16,7 +16,7 @@
                 class="image-viewer"
             >
                 <mat-card-title class="image-title">Image</mat-card-title>
-                @if(getImage && getImage.url){
+                @if(getImage && getImage.documentType){
                 <img
                     [src]="encodedImageFile"
                     alt="Scanned document"

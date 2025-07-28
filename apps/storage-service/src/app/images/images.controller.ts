@@ -6,16 +6,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Body, Controller, Logger } from '@nestjs/common';
-import { ImagesService } from './images.service';
-import {
-  ImageMessagePattern,
-  AnalysisResultAmqpDto,
-  ImageInformationAmqpDto,
-  UploadImageAmqpDto
-} from '@ap4/amqp';
-import { MessagePattern, Payload } from '@nestjs/microservices';
-import { ImageDto, ImageInformationDto } from '@ap4/api';
+import {Body, Controller, Logger} from '@nestjs/common';
+import {ImagesService} from './images.service';
+import {AnalysisResultAmqpDto, ImageInformationAmqpDto, ImageMessagePattern, UploadImageAmqpDto} from '@ap4/amqp';
+import {MessagePattern, Payload} from '@nestjs/microservices';
+import {ImageDto, ImageInformationDto} from '@ap4/api';
+import {DocumentUploadType} from "@ap4/utils";
 
 @Controller()
 export class ImagesController {
@@ -42,6 +38,9 @@ export class ImagesController {
 
   @MessagePattern(ImageMessagePattern.CREATE)
   public uploadImage(@Body() body: UploadImageAmqpDto): Promise<ImageInformationDto> {
+    if(!body.uploadType){
+      body.uploadType = DocumentUploadType.JPEG;
+    }
     return this.imagesService.uploadImage(body);
   }
 
@@ -52,7 +51,7 @@ export class ImagesController {
   }
 
   @MessagePattern(ImageMessagePattern.UPDATE)
-  public updateImageInformation(@Body() imageInformationDto: ImageInformationDto): Promise<ImageInformationDto> {
+  public updateImageInformation(@Body() imageInformationDto: ImageInformationDto): Promise<ImageInformationAmqpDto> {
     return this.imagesService.updateImageInformation(imageInformationDto);
   }
 

@@ -11,7 +11,7 @@ import { TestBed } from '@angular/core/testing';
 import { ImageService } from './imageService';
 import { ErrorSchemaDto, ImageDto, ImageInformationDto } from '@ap4/api';
 import { environment } from '../../../../environments/environment';
-import { AnalysisStatus, DocumentTypeId } from '@ap4/utils';
+import { AnalysisStatus, DocumentTypeId, DocumentUploadType } from '@ap4/utils';
 
 describe('ImageService', (): void => {
   let service: ImageService;
@@ -38,7 +38,7 @@ describe('ImageService', (): void => {
   it('should fetch an image by UUID', () => {
     const mockImage: ImageInformationDto =
     {  uuid: '1',
-      url: 'testUrl',
+      documentUploadType: 'testUrl',
       sender: 'testSender',
       receiver: 'testReceiver',
       creationDate: new Date('2025-04-03T06:24:59.535Z'),
@@ -61,7 +61,7 @@ describe('ImageService', (): void => {
   it('should fetch all images', () => {
     const mockImages: ImageInformationDto[] = [
       {  uuid: '1',
-        url: 'testUrl',
+        documentUploadType: 'testUrl',
         sender: 'testSender',
         receiver: 'testReceiver',
         creationDate: new Date('2025-04-03T06:24:59.535Z'),
@@ -71,7 +71,7 @@ describe('ImageService', (): void => {
         image_analysis_result: new ErrorSchemaDto('status', 'message', 'error_details'),
       },
       {  uuid: '2',
-        url: 'testUrl',
+        documentUploadType: 'testUrl',
         sender: 'testSender',
         receiver: 'testReceiver',
         creationDate: new Date('2025-04-03T06:24:59.535Z'),
@@ -93,7 +93,7 @@ describe('ImageService', (): void => {
   });
 
   it('should upload an image and return a response string', () => {
-    const newImage: ImageDto = { image_base64: 'eyzwijh'};
+    const newImage: ImageDto = { image_base64: 'eyzwijh', documentUploadType: DocumentUploadType.JPEG};
     const responseMessage = 'Image uploaded';
 
     service.uploadImage(newImage).subscribe((response) => {
@@ -120,7 +120,7 @@ describe('ImageService', (): void => {
   it('should update an analysed image by UUID', () => {
     const mockElement:ImageInformationDto = {
       uuid: '1', 
-      url: '',
+      documentUploadType: '',
       sender: 'testSender',
       receiver: 'testReceiver',
       creationDate: new Date(),

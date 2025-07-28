@@ -10,18 +10,18 @@ import { ImageInformation } from '../image.Information';
 
 export const ImageInformationMocks: ImageInformation[] = [new ImageInformation(
   'testUuid',
-  'testUrl',
   new Date('2025-04-03T06:24:59.535Z'),
   new Date('2025-04-03T06:24:59.535Z'),
+    'JPEG',
   'FINISHED',
   'CMR',
     "{\"sender_information\":{\"senderNameCompany\":\"testSender\"},\"consignee_information\":{\"consigneeNameCompany\":\"testReceiver\"}}"
 ),
 new ImageInformation(
     'testUuid',
-    'testUrl',
     new Date('2025-04-03T06:24:59.535Z'),
     new Date('2025-04-03T06:24:59.535Z'),
+    'JPEG',
     'FAILED',
     'CMR',
     "{\"status\": \"error\",\"message\": \"An error occurred while processing the image.\",\"error_details\": \"Connection error.\"}"

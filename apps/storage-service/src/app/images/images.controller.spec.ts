@@ -18,6 +18,7 @@ import { ImageDto, ImageInformationDto } from '@ap4/api';
 import { ImageInformation } from '../entities/image.Information';
 import { Repository } from 'typeorm';
 import { ImageInformationMocks } from '../entities/mocks/image-Information-mocks';
+import { DocumentUploadType } from '@ap4/utils';
 
 describe('ImagesController', () => {
   let controller: ImagesController;
@@ -85,7 +86,7 @@ describe('ImagesController', () => {
 
     const returnValue: ImageDto = await controller.getImage(testUuid);
     const base64_mock_value = 'dGVzdFV1aWQ=';
-    const expected: ImageDto = new ImageDto(base64_mock_value);
+    const expected: ImageDto = new ImageDto(base64_mock_value, DocumentUploadType.JPEG);
 
     expect(expected).toEqual(returnValue);
   });
@@ -191,7 +192,7 @@ describe('ImagesController', () => {
 
     const expectedReturnValue = ImageInformationMocks[0].toImageInformationAmqpDto();
 
-    const returnValue = await controller.updateImageInformation(ImageInformationMocks[0].toImageInformationAmqpDto());
+    const returnValue = await controller.updateImageInformation(ImageInformationMocks[0].toImageInformationDto());
     expect(returnValue).toEqual(expectedReturnValue);
   });
 

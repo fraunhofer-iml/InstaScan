@@ -11,6 +11,22 @@ import { UploadComponent } from './upload.component';
 import { ImageService } from "../../../shared/services/image/imageService";
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
+jest.mock('pdfjs-dist', () => ({
+  GlobalWorkerOptions: {
+    workerSrc: 'pdf.worker.js',
+  },
+  getDocument: jest.fn().mockReturnValue(() => {
+    return Promise.resolve({
+      getPage: {
+        getViewport: {
+          height: 5,
+          width: 5
+        }
+      }
+    })
+  })
+}));
+
 describe('UploadComponent', () => {
   let component: UploadComponent;
   let fixture: ComponentFixture<UploadComponent>;

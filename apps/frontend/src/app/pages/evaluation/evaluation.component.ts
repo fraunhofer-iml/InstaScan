@@ -13,7 +13,7 @@ import { MatCardModule } from '@angular/material/card';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map, Observable } from 'rxjs';
 import { ImageDto, ImageInformationDto } from '@ap4/api';
-import { AnalysisStatus } from '@ap4/utils'
+import { AnalysisStatus, DOCUMENT_UPLOAD_TYPE_TO_UPLOAD_VALUES } from '@ap4/utils'
 import { ImageService } from '../../shared/services/image/imageService';
 import { HttpClientModule } from '@angular/common/http';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -67,7 +67,7 @@ export class EvaluationComponent {
   initializeImage() {
     this.imageId$.subscribe((id: string) => {
       this.imageService.getImageFileByUuid(id).subscribe((image: ImageDto) => {
-        this.encodedImageFile = image?.image_base64 ? `data:image/jpeg;base64,${image.image_base64}` : null;
+        this.encodedImageFile = image?.image_base64 ? `${DOCUMENT_UPLOAD_TYPE_TO_UPLOAD_VALUES[image.documentUploadType].mimeType}${image.image_base64}` : null;
       })
     })
   }

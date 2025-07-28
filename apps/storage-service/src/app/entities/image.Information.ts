@@ -9,7 +9,7 @@
 import { Entity, Column, PrimaryColumn } from 'typeorm';
 import { ImageInformationDto } from '@ap4/api';
 import { ImageInformationAmqpDto } from '@ap4/amqp';
-import { AnalysisStatus, DocumentTypeId } from '@ap4/utils';
+import { AnalysisStatus, DocumentTypeId, DocumentUploadType } from '@ap4/utils';
 
 @Entity()
 export class ImageInformation {
@@ -17,37 +17,29 @@ export class ImageInformation {
   @PrimaryColumn()
   uuid: string;
   @Column()
-  url: string;
-  @Column()
   sender: string;
   @Column()
   receiver: string;
   @Column()
-  creationDate: Date
+  creationDate: Date;
   @Column()
-  lastModified: Date
+  lastModified: Date;
   @Column()
-  analysisStatus: string
+  uploadType: string;
   @Column()
-  documentType: string
+  analysisStatus: string;
+  @Column()
+  documentType: string;
   @Column()
   image_analysis_result: string;
 
-  constructor(
-      uuid: string,
-      url: string,
-      creationDate: Date,
-      lastModified: Date,
-      analysisStatus: string,
-      documentType: string,
-      image_analysis_result: string
-  ) {
+  constructor(uuid: string, creationDate: Date, lastModified: Date, uploadType: string, analysisStatus: string, documentType: string, image_analysis_result: string) {
     this.uuid = uuid;
-    this.url = url;
     this.sender = '';
     this.receiver = '';
     this.creationDate = creationDate;
     this.lastModified = lastModified;
+    this.uploadType = uploadType;
     this.analysisStatus = analysisStatus;
     this.documentType = documentType;
     this.image_analysis_result = image_analysis_result;
@@ -56,11 +48,11 @@ export class ImageInformation {
   public toImageInformationDto(): ImageInformationDto {
     return new ImageInformationDto(
       this.uuid,
-      this.url,
       this.sender,
       this.receiver,
       this.creationDate,
       this.lastModified,
+      this.uploadType,
       this.analysisStatus,
       this.documentType,
       JSON.parse(this.image_analysis_result),
@@ -68,12 +60,12 @@ export class ImageInformation {
   }
   public toImageInformationAmqpDto(): ImageInformationAmqpDto{
     return new ImageInformationAmqpDto(
-      this.uuid, 
-      this.url,
+      this.uuid,
       this.sender,
       this.receiver,
       this.creationDate, 
-      this.lastModified, 
+      this.lastModified,
+      DocumentUploadType[this.uploadType.toUpperCase()],
       AnalysisStatus[this.analysisStatus],
       DocumentTypeId[this.documentType],
       JSON.parse(this.image_analysis_result)

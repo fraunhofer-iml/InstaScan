@@ -15,17 +15,33 @@ import { SnackbarService } from '../../shared/services/snackbar/SnackBar.Service
 import { RoutingEnum } from '../../shared/enums/routing.enum';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { AnalysisStatus } from '@ap4/utils';
+import { AnalysisStatus, DocumentUploadType } from '@ap4/utils';
 import { ErrorSchemaDto, ImageDto, ImageInformationDto } from '@ap4/api';
 import { ApproveMessage } from './enum/approved.enum';
+
+jest.mock('pdfjs-dist', () => ({
+  GlobalWorkerOptions: {
+    workerSrc: 'pdf.worker.js',
+  },
+  getDocument: jest.fn().mockReturnValue(() => {
+    return Promise.resolve({
+      getPage: {
+        getViewport: {
+          height: 5,
+          width: 5
+        }
+      }
+    })
+  })
+}));
 
 describe('EvaluationComponent', () => {
   let component: EvaluationComponent;
   let fixture: ComponentFixture<EvaluationComponent>;
   const mockRouter = { navigate: jest.fn() };
-  const mockImage = {
+  const mockImage: ImageInformationDto = {
     uuid: '1234-uuid',
-    url: 'mock-url',
+    documentUploadType: DocumentUploadType.JPEG,
     sender: 'testSender',
     receiver: 'testReceiver',
     creationDate: new Date(),
@@ -155,7 +171,7 @@ describe('EvaluationComponent', () => {
     const id$ = of('1234-uuid');
     const imageMock: ImageInformationDto = {
       uuid: '1234-uuid',
-      url: 'mock-url',
+      documentUploadType: 'mock-url',
       sender: 'testSender',
       receiver: 'testReceiver',
       creationDate: new Date(),
