@@ -391,22 +391,6 @@ class ECMRDocument(BaseModel):
                     "logisticsLocationOpeningHours": None,
                 },
                 "documents_handed_to_carrier": {"documentsRemarks": None},
-                "item_list": [
-                    {
-                        "marksAndNos": {
-                            "logisticsShippingMarksMarking": None,
-                            "logisticsShippingMarksCustomBarcode": None,
-                        },
-                        "numberOfPackages": {"logisticsPackageItemQuantity": None},
-                        "methodOfPacking": {"logisticsPackageType": None},
-                        "natureOfTheGoods": {"transportCargoIdentification": None},
-                        "grossWeightInKg": {"supplyChainConsignmentItemGrossWeight": None},
-                        "volumeInM3": {"supplyChainConsignmentItemGrossVolume": None},
-                    }
-                ],
-                "senders_instructions": {"transportInstructionsDescription": None},
-                "cash_on_delivery": None,
-                "payment_instructions": None,
                 "carrier_information": {
                     "carrierNameCompany": None,
                     "carrierNamePerson": None,
@@ -430,6 +414,22 @@ class ECMRDocument(BaseModel):
                     },
                 },
                 "carrier_reservations_and_observations": {"carrierReservationsObservations": None},
+                "item_list": [
+                    {
+                        "marksAndNos": {
+                            "logisticsShippingMarksMarking": None,
+                            "logisticsShippingMarksCustomBarcode": None,
+                        },
+                        "numberOfPackages": {"logisticsPackageItemQuantity": None},
+                        "methodOfPacking": {"logisticsPackageType": None},
+                        "natureOfTheGoods": {"transportCargoIdentification": None},
+                        "grossWeightInKg": {"supplyChainConsignmentItemGrossWeight": None},
+                        "volumeInM3": {"supplyChainConsignmentItemGrossVolume": None},
+                    }
+                ],
+                "senders_instructions": {"transportInstructionsDescription": None},
+                "cash_on_delivery": None,
+                "payment_instructions": None,
                 "to_be_paid_by": {
                     "customChargeCarriage": None,
                     "customChargeSupplementary": None,
