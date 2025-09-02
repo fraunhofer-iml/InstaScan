@@ -71,6 +71,7 @@ export class EvaluationComponent {
       })
     })
   }
+
   initializeImageInformation() {
     this.imageId$.subscribe((id: string) => {
       return this.imageService
@@ -94,6 +95,7 @@ export class EvaluationComponent {
       this.router.navigate([RoutingEnum.documents]);
     });
   }
+
   onModified(modified: boolean) {
     this.modified = modified;
   }

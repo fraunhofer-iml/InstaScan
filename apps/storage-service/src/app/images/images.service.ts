@@ -34,7 +34,7 @@ export class ImagesService {
     private readonly s3Service: MinioService,
     @InjectRepository(ImageInformation)
     readonly imageInformationRepository: Repository<ImageInformation>
-  ) {}
+  ) { }
 
   public async getImage(uuid: string): Promise<ImageDto> {
     const foundImageInformation: ImageInformation = await this.getImageInformation(uuid);
@@ -111,6 +111,10 @@ export class ImagesService {
     foundImage.image_analysis_result = JSON.stringify(
       imageInformationDto.image_analysis_result
     );
+    if ('sender_information' in imageInformationDto.image_analysis_result) {
+      foundImage.sender = imageInformationDto.image_analysis_result.sender_information.senderNameCompany;
+      foundImage.receiver = imageInformationDto.image_analysis_result.consignee_information.consigneeNameCompany;
+    }
     foundImage.analysisStatus = imageInformationDto.analysisStatus;
     const updateImage: ImageInformation =
       await this.imageInformationRepository.save(foundImage);
