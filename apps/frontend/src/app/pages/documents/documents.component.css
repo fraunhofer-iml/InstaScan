@@ -22,8 +22,7 @@
 
 .table-container {
     overflow-x: auto;
-    width: 98%;
-    margin: 0 auto;
+    margin: 1em 0 0 auto;
     padding: 1em;
 }
 
@@ -59,15 +58,6 @@ mat-chip {
     background-color: black;
     mask-repeat: no-repeat;
     mask-size: contain;
-}
-
-.delete-icon {
-    color: var(--darker-grey-color);
-}
-
-.delete-icon:hover {
-    cursor: pointer;
-    color: black;
 }
 
 .status-container {

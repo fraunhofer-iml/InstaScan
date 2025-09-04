@@ -8,6 +8,10 @@
 
 import { AnalysisStatus, DocumentTypeId, DocumentUploadType } from '@ap4/utils';
 import { Schema } from '@ap4/api';
+
+/**
+ * This dto is used to share image information entries between the individual backend components.
+ */
 export class ImageInformationAmqpDto {
 
   uuid: string;
@@ -18,9 +22,20 @@ export class ImageInformationAmqpDto {
   uploadType: DocumentUploadType;
   analysisStatus: AnalysisStatus;
   documentType: DocumentTypeId;
+  bundleId: string;
   image_analysis_result: Schema;
 
-  constructor(uuid: string, sender: string, receiver: string, creationDate: Date, lastModified: Date, uploadType: DocumentUploadType, analysisStatus: AnalysisStatus, documentType: DocumentTypeId, image_analysis_result: Schema) {
+  constructor(
+      uuid: string,
+      sender: string,
+      receiver: string,
+      creationDate: Date,
+      lastModified: Date,
+      uploadType: DocumentUploadType,
+      analysisStatus: AnalysisStatus,
+      documentType: DocumentTypeId,
+      bundleId: string,
+      image_analysis_result: Schema) {
     this.uuid = uuid;
     this.sender = sender;
     this.receiver = receiver;
@@ -29,6 +44,7 @@ export class ImageInformationAmqpDto {
     this.uploadType = uploadType;
     this.analysisStatus = analysisStatus;
     this.documentType = documentType;
+    this.bundleId = bundleId;
     this.image_analysis_result = image_analysis_result;
   }
 }

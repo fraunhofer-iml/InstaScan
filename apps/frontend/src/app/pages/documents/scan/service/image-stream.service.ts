@@ -29,6 +29,13 @@ export class ImageStreamService {
       this.isCameraConnected.next(false);
     });
   }
+  onDocumentResponse(): Observable<string> {
+    return new Observable(observer => {
+      this.socket.on(CameraCommandsEnum.uuid_topic, (uuid) => {
+        observer.next(uuid);
+      });
+    });
+  }
   onImageStream(): Observable<string> {
     return new Observable(observer => {
       this.socket.on(CameraCommandsEnum.dsCameraLowresStream, (data) => {

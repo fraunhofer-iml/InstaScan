@@ -15,8 +15,7 @@ import { AmqpBroker } from '@ap4/amqp';
   controllers: [ImagesController],
   providers: [ImagesService],
   imports: [
-    new AmqpBroker().getStorageServiceBroker(),
-    new AmqpBroker().getDASBroker()
+    new AmqpBroker().getStorageServiceBroker()
   ]
 })
 export class ImagesModule {}

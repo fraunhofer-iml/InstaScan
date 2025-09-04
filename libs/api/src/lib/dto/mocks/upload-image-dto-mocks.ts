@@ -6,9 +6,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DocumentUploadType } from '@ap4/utils';
-import { ImageDto } from '../image.dto';
+import {UploadImageDto} from "../upload.image.dto";
+import {DocumentUploadType} from "@ap4/utils";
 
-export const ImageDtoMocks: ImageDto[] = [
-  new ImageDto('test_image_base_64_string', DocumentUploadType.JPEG)
+export const UploadImageDtoMocks: UploadImageDto[] = [
+  new UploadImageDto('test_image_base_64_string', 'testBundleId', DocumentUploadType.JPEG)
 ];

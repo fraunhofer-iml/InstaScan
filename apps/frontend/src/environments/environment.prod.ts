@@ -13,7 +13,8 @@ export const environment = {
   production: true,
   IMAGE: {
     URL: `${BASE_URL}/images`,
-    URL_ANALYSIS: `${BASE_URL}/images/analysis`
+    URL_ANALYSIS: `${BASE_URL}/images/analysis`,
+    URL_BUNDLES: `${BASE_URL}/images/bundles`,
   },
   CAMERA: {
     URL: `${CAMERA_BASE_URL}`,

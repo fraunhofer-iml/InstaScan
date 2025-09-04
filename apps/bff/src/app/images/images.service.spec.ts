@@ -12,10 +12,11 @@ import {
   AmqpBrokerQueues,
   ImageMessagePattern,
   ImageInformationAmqpDtoMocks,
+  ImageInformationFilterAmqpDto,
 } from '@ap4/amqp';
 import { ClientProxy } from '@nestjs/microservices';
 import { of } from 'rxjs';
-import { ImageDtoMocks, ImageInformationDtoMocks} from '@ap4/api';
+import { UploadImageDtoMocks, ImageInformationDtoMocks} from '@ap4/api';
 
 describe('ImagesService', () => {
   let service: ImagesService;
@@ -46,12 +47,12 @@ describe('ImagesService', () => {
   it('getImage: should get an Image', (done) => {
     const sendImageRequestSpy = jest.spyOn(storageServiceClientProxy, 'send');
     sendImageRequestSpy.mockImplementation(() => {
-      return of(ImageDtoMocks[0]);
+      return of(UploadImageDtoMocks[0]);
     });
 
     service.getImage('testuuid').subscribe((response) => {
-      expect(sendImageRequestSpy).toHaveBeenCalledWith(ImageMessagePattern.GET_BY_ID, 'testuuid');
-      expect(response).toEqual(ImageDtoMocks[0]);
+      expect(sendImageRequestSpy).toHaveBeenCalledWith(ImageMessagePattern.GET_IMAGE, 'testuuid');
+      expect(response).toEqual(UploadImageDtoMocks[0]);
       done();
     });
   });
@@ -63,7 +64,7 @@ describe('ImagesService', () => {
     });
 
     service.getImageInformation(ImageInformationAmqpDtoMocks[0].uuid).subscribe((response) => {
-      expect(sendImageRequestSpy).toHaveBeenCalledWith(ImageMessagePattern.READ_ANALYSIS, ImageInformationAmqpDtoMocks[0].uuid);
+      expect(sendImageRequestSpy).toHaveBeenCalledWith(ImageMessagePattern.GET_IMAGE_INFORMATION, ImageInformationAmqpDtoMocks[0].uuid);
       expect(response).toEqual(ImageInformationAmqpDtoMocks[0]);
       done();
     });
@@ -75,8 +76,22 @@ describe('ImagesService', () => {
       return of([ImageInformationAmqpDtoMocks[0].uuid]);
     });
 
-    service.getAllImageInformation().subscribe((response) => {
-      expect(sendImageRequestSpy).toHaveBeenCalledWith(ImageMessagePattern.GET, []);
+    const imageInformationFilterAmqpDto: ImageInformationFilterAmqpDto = new ImageInformationFilterAmqpDto(
+        'testSender',
+        'testReceiver',
+        'testAnalysisStatus',
+        'testDocumentType',
+        'testBundleId'
+    );
+
+    service.getAllImageInformation(
+        'testSender',
+        'testReceiver',
+        'testAnalysisStatus',
+        'testDocumentType',
+        'testBundleId'
+    ).subscribe((response) => {
+      expect(sendImageRequestSpy).toHaveBeenCalledWith(ImageMessagePattern.GET_ALL_IMAGE_INFORMATION, imageInformationFilterAmqpDto);
       expect(response).toEqual([ImageInformationAmqpDtoMocks[0].uuid]);
       done();
     });
@@ -88,8 +103,20 @@ describe('ImagesService', () => {
       return of(ImageInformationAmqpDtoMocks[0].uuid);
     });
 
-    service.uploadImage(ImageDtoMocks[0]).subscribe((response) => {
+    service.uploadImage(UploadImageDtoMocks[0]).subscribe((response) => {
       expect(response).toEqual(ImageInformationAmqpDtoMocks[0].uuid);
+      done();
+    });
+  });
+
+  it('updateImageInformation: should update Image Information', (done) => {
+    const sendImageRequestSpy = jest.spyOn(storageServiceClientProxy, 'send');
+    sendImageRequestSpy.mockImplementation(() => {
+      return of(ImageInformationDtoMocks[0].uuid);
+    });
+
+    service.updateImageInformation(ImageInformationDtoMocks[0].uuid, ImageInformationDtoMocks[0]).subscribe((response) => {
+      expect(response).toEqual(ImageInformationDtoMocks[0].uuid);
       done();
     });
   });
@@ -100,7 +127,19 @@ describe('ImagesService', () => {
       return of(true);
     });
 
-    service.removeImageInformation(ImageInformationDtoMocks[0].uuid).subscribe((response) => {
+    service.removeImage(ImageInformationDtoMocks[0].uuid).subscribe((response) => {
+      expect(response).toEqual(true);
+      done();
+    });
+  });
+
+  it('analyzeImageBundle: should analyze all images of an image bundle', (done) => {
+    const sendImageRequestSpy = jest.spyOn(storageServiceClientProxy, 'send');
+    sendImageRequestSpy.mockImplementation(() => {
+      return of(true);
+    });
+
+    service.analyzeImageBundle('testBundleId').subscribe((response) => {
       expect(response).toEqual(true);
       done();
     });

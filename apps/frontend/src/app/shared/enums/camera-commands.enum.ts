@@ -14,4 +14,5 @@ export enum CameraCommandsEnum {
     connect = 'connect',
     disconnect = 'disconnect',
     connectError = 'connect_error',
+    uuid_topic = 'ds_uuid'
 }

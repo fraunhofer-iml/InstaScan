@@ -8,6 +8,7 @@
 
 export const DISPLAYED_COLUMNS: string[] = [
   'uuid',
+  'bundleId',
   'documentName',
   'documentType',
   'sender',

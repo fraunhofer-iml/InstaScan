@@ -6,42 +6,65 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {Body, Controller, Logger} from '@nestjs/common';
-import {ImagesService} from './images.service';
-import {AnalysisResultAmqpDto, ImageInformationAmqpDto, ImageMessagePattern, UploadImageAmqpDto} from '@ap4/amqp';
-import {MessagePattern, Payload} from '@nestjs/microservices';
-import {ImageDto, ImageInformationDto} from '@ap4/api';
-import {DocumentUploadType} from "@ap4/utils";
+import { Body, Controller, Logger } from '@nestjs/common';
+import { ImagesService } from './images.service';
+import {
+  ImageMessagePattern,
+  AnalysisResultAmqpDto,
+  ImageInformationAmqpDto,
+  ImageInformationFilterAmqpDto
+} from '@ap4/amqp';
+import { MessagePattern, Payload } from '@nestjs/microservices';
+import {ImageInformationDto, ReadImageDto, UploadImageDto} from '@ap4/api';
+import {DefaultBundleId, DocumentUploadType} from "@ap4/utils";
 
 @Controller()
 export class ImagesController {
 
-  private readonly logger = new Logger(ImagesController.name);
+  private readonly logger: Logger = new Logger(ImagesController.name);
 
   constructor(private readonly imagesService: ImagesService) {
   }
 
-  @MessagePattern(ImageMessagePattern.GET_BY_ID)
-  public getImage(@Payload() uuid: string): Promise<ImageDto> {
+  @MessagePattern(ImageMessagePattern.GET_IMAGE)
+  public getImage(@Payload() uuid: string): Promise<ReadImageDto> {
     return this.imagesService.getImage(uuid);
   }
 
-  @MessagePattern(ImageMessagePattern.READ_ANALYSIS)
+  @MessagePattern(ImageMessagePattern.GET_IMAGE_INFORMATION)
   public getImageInformation(@Payload() uuid: string): Promise<ImageInformationDto> {
-    return this.imagesService.getImageInformationDto(uuid);
+    return this.imagesService.getImageInformation(uuid);
   }
 
-  @MessagePattern(ImageMessagePattern.GET)
-  public getAllImageInformation(): Promise<ImageInformationDto[]> {
-    return this.imagesService.getAllImageInformation();
+  @MessagePattern(ImageMessagePattern.GET_ALL_IMAGE_INFORMATION)
+  public getAllImageInformation(@Payload() imageInformationFilterAmqpDto: ImageInformationFilterAmqpDto): Promise<ImageInformationDto[]> {
+    return this.imagesService.getAllImageInformation(imageInformationFilterAmqpDto);
   }
 
-  @MessagePattern(ImageMessagePattern.CREATE)
-  public uploadImage(@Body() body: UploadImageAmqpDto): Promise<ImageInformationDto> {
-    if(!body.uploadType){
-      body.uploadType = DocumentUploadType.JPEG;
-    }
-    return this.imagesService.uploadImage(body);
+  @MessagePattern(ImageMessagePattern.UPLOAD_NEW_IMAGE)
+  public uploadImage(@Body() uploadImageDto: UploadImageDto): Promise<ImageInformationDto> {
+      if(!uploadImageDto.documentUploadType){
+        uploadImageDto.documentUploadType = DocumentUploadType.JPEG;
+      }
+      if(!uploadImageDto.bundleId){
+        uploadImageDto.bundleId = DefaultBundleId;
+      }
+      return this.imagesService.uploadImage(uploadImageDto);
+  }
+
+  @MessagePattern(ImageMessagePattern.UPDATE_IMAGE_INFORMATION)
+  public updateImageInformation(@Body() imageInformationDto: ImageInformationDto): Promise<ImageInformationAmqpDto> {
+    return this.imagesService.updateImageInformation(imageInformationDto);
+  }
+
+  @MessagePattern(ImageMessagePattern.REMOVE_IMAGE)
+  public removeImage(@Payload() uuid: string): Promise<boolean> {
+    return this.imagesService.removeImage(uuid);
+  }
+
+  @MessagePattern(ImageMessagePattern.ANALYZE_BUNDLE)
+  public analyzeImageBundle(@Payload() uuid: string): Promise<boolean> {
+    return this.imagesService.analyzeImageBundle(uuid);
   }
 
   @MessagePattern(ImageMessagePattern.PUBLISH_ANALYSIS)
@@ -50,13 +73,4 @@ export class ImagesController {
     return this.imagesService.saveAnalysisResult(analysisResultAmqpDto);
   }
 
-  @MessagePattern(ImageMessagePattern.UPDATE)
-  public updateImageInformation(@Body() imageInformationDto: ImageInformationDto): Promise<ImageInformationAmqpDto> {
-    return this.imagesService.updateImageInformation(imageInformationDto);
-  }
-
-  @MessagePattern(ImageMessagePattern.REMOVE)
-  public removeImageInformation(@Payload() uuid: string): Promise<boolean> {
-    return this.imagesService.removeImage(uuid);
-  }
 }

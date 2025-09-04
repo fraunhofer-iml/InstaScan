@@ -16,8 +16,8 @@ import { RoutingEnum } from '../../shared/enums/routing.enum';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AnalysisStatus, DocumentUploadType } from '@ap4/utils';
-import { ErrorSchemaDto, ImageDto, ImageInformationDto } from '@ap4/api';
-import { ApproveMessage } from './enum/approved.enum';
+import {ErrorSchemaDto, ImageInformationDto, ReadImageDto} from '@ap4/api';
+import { SnackbarMessagesEnum } from '../../shared/enums/snackbar-messages.enum';
 
 jest.mock('pdfjs-dist', () => ({
   GlobalWorkerOptions: {
@@ -48,6 +48,7 @@ describe('EvaluationComponent', () => {
     lastModified: new Date(),
     analysisStatus: AnalysisStatus.APPROVED,
     documentType: 'CMR',
+    bundleId: 'testBundleId',
     image_analysis_result:new ErrorSchemaDto('status', 'message', 'error_details'),
   };
 
@@ -62,7 +63,7 @@ describe('EvaluationComponent', () => {
     params: of({ id: '1234-uuid' })
   };
   const mockSnackbar = {
-    sendMessage: jest.fn().mockReturnValue(ApproveMessage.SNACKBAR_APPROVED),
+    sendMessage: jest.fn().mockReturnValue(SnackbarMessagesEnum.APPROVED),
   }
 
   beforeEach(async () => {
@@ -85,7 +86,7 @@ describe('EvaluationComponent', () => {
     const imageId$ = of('1234-uuid');
     const image$ = mockImageService.getImageFileByUuid('1234-uuid');
     imageId$.subscribe(() => {
-      image$.subscribe((image:ImageDto) => {
+      image$.subscribe((image:ReadImageDto) => {
         const encoded = image?.image_base64
           ? `data:image/jpeg;base64,${image.image_base64}`
           : null;
@@ -99,7 +100,7 @@ describe('EvaluationComponent', () => {
     const id$ = of('1234-uuid');
     const image$ = of(null); 
     id$.subscribe(() => {
-      image$.subscribe( (image:ImageDto | null) => {
+      image$.subscribe( (image:ReadImageDto | null) => {
         const encoded = image?.image_base64
           ? `data:image/jpeg;base64,${image.image_base64}`
           : null;
@@ -162,7 +163,7 @@ describe('EvaluationComponent', () => {
     fixture.whenStable().then(() => {
       expect(component.getImage.analysisStatus).toBe(component.analysisStatus.APPROVED);
       expect(updateSpy).toHaveBeenCalledWith('1234-uuid', component.getImage);
-      expect(snackbarSpy).toHaveBeenCalledWith(component.approveEnum.SNACKBAR_SAVE_APPROVED);
+      expect(snackbarSpy).toHaveBeenCalledWith(component.snackbarMessagesEnum.SAVE_APPROVED);
       expect(mockRouter.navigate).toHaveBeenCalledWith([RoutingEnum.documents]);
     });
   });
@@ -178,6 +179,7 @@ describe('EvaluationComponent', () => {
       lastModified: new Date(),
       analysisStatus: AnalysisStatus.APPROVED,
       documentType: 'CMR',
+      bundleId: 'testBundleId',
       image_analysis_result: {
         status: 'status',
         message: 'message',
@@ -210,12 +212,12 @@ describe('EvaluationComponent', () => {
   
     await mockImageService.updateImageInformation(component.imageId$, component.getImage).subscribe(() => {
       mockSnackbar.sendMessage(
-        component.modified ? ApproveMessage.SNACKBAR_SAVE_APPROVED : ApproveMessage.SNACKBAR_APPROVED
+        component.modified ? SnackbarMessagesEnum.SAVE_APPROVED : SnackbarMessagesEnum.APPROVED
       );
       mockRouter.navigate([RoutingEnum.documents]);
   
       expect(mockImageService.updateImageInformation).toHaveBeenCalledWith(component.imageId$, component.getImage);
-      expect(mockSnackbar.sendMessage).toHaveBeenCalledWith(ApproveMessage.SNACKBAR_SAVE_APPROVED);
+      expect(mockSnackbar.sendMessage).toHaveBeenCalledWith(SnackbarMessagesEnum.SAVE_APPROVED);
       expect(mockRouter.navigate).toHaveBeenCalledWith([RoutingEnum.documents]);
     });
   });

@@ -7,11 +7,12 @@
  */
 
 export enum ImageMessagePattern {
-  CREATE = 'images/create',
-  UPDATE = 'images/update',
-  GET = 'images/read',
-  GET_BY_ID = 'images/read-by-id',
-  REMOVE = 'images/remove',
+  UPLOAD_NEW_IMAGE = 'images/create',
+  UPDATE_IMAGE_INFORMATION = 'images/update',
+  GET_ALL_IMAGE_INFORMATION = 'images/read',
+  GET_IMAGE = 'images/read-by-id',
+  REMOVE_IMAGE = 'images/remove',
   PUBLISH_ANALYSIS = 'analysis/publish',
-  READ_ANALYSIS = 'analysis/get'
+  GET_IMAGE_INFORMATION = 'analysis/get',
+  ANALYZE_BUNDLE = 'analysis/bundle/create',
 }

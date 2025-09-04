@@ -9,7 +9,7 @@
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { ImageService } from './imageService';
-import { ErrorSchemaDto, ImageDto, ImageInformationDto } from '@ap4/api';
+import {ErrorSchemaDto, ImageInformationDto, UploadImageDto} from '@ap4/api';
 import { environment } from '../../../../environments/environment';
 import { AnalysisStatus, DocumentTypeId, DocumentUploadType } from '@ap4/utils';
 
@@ -45,6 +45,7 @@ describe('ImageService', (): void => {
       lastModified: new Date('2025-04-03T06:24:59.535Z'),
       analysisStatus: AnalysisStatus.IN_PROGRESS,
       documentType: DocumentTypeId.CMR,
+      bundleId: 'bundleId',
       image_analysis_result: new ErrorSchemaDto('status', 'message', 'error_details'),
     };
     const uuid = '123';
@@ -68,6 +69,7 @@ describe('ImageService', (): void => {
         lastModified: new Date('2025-04-03T06:24:59.535Z'),
         analysisStatus: AnalysisStatus.IN_PROGRESS,
         documentType: DocumentTypeId.CMR,
+        bundleId: 'bundleId',
         image_analysis_result: new ErrorSchemaDto('status', 'message', 'error_details'),
       },
       {  uuid: '2',
@@ -78,6 +80,7 @@ describe('ImageService', (): void => {
         lastModified: new Date('2025-04-03T06:24:59.535Z'),
         analysisStatus: AnalysisStatus.IN_PROGRESS,
         documentType: DocumentTypeId.CMR,
+        bundleId: 'bundleId',
         image_analysis_result: new ErrorSchemaDto('status', 'message', 'error_details'),
       }
     ];
@@ -93,7 +96,7 @@ describe('ImageService', (): void => {
   });
 
   it('should upload an image and return a response string', () => {
-    const newImage: ImageDto = { image_base64: 'eyzwijh', documentUploadType: DocumentUploadType.JPEG};
+    const newImage: UploadImageDto = { image_base64: 'eyzwijh', bundleId: 'bundleId', documentUploadType: DocumentUploadType.JPEG};
     const responseMessage = 'Image uploaded';
 
     service.uploadImage(newImage).subscribe((response) => {
@@ -127,6 +130,7 @@ describe('ImageService', (): void => {
       lastModified: new Date(),
       analysisStatus: AnalysisStatus.IN_PROGRESS,
       documentType: DocumentTypeId.CMR,
+      bundleId: 'bundleId',
       image_analysis_result: new ErrorSchemaDto('status', 'message', 'error_details'),
     };
     const uuid = '123';

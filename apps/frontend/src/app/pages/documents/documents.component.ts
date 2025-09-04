@@ -24,10 +24,9 @@ import { map, Subject } from 'rxjs';
 import { DISPLAYED_COLUMNS } from './const/displayed-columns.const';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { ScanComponent } from './scan/scan.component';
-import { MatDialog } from '@angular/material/dialog';
-import { UploadComponent } from './upload/upload.component';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatIcon } from '@angular/material/icon';
+import { AnalysisStatus } from '@ap4/utils';
 
 @Component({
     selector: 'app-dashboard',
@@ -57,7 +56,6 @@ export class DocumentsComponent implements AfterViewInit {
 
     constructor(
       private readonly imageService: ImageService,
-      private readonly dialog: MatDialog,
       private readonly cdr: ChangeDetectorRef
     ) {
       this.initializeDataSource();
@@ -72,26 +70,15 @@ export class DocumentsComponent implements AfterViewInit {
       return value.replace(/_/g, ' ').toLowerCase();
     }
 
-    openUploadDocument() {
-      const dialogRef = this.dialog.open(UploadComponent, {
-        panelClass: 'mat-dialog-container',
-        width: '600px',
-        height: '400px',
-      });
-
-      dialogRef.afterClosed().subscribe(() => {
-        this.initializeDataSource();
-      });
-    }
-
     initializeDataSource(): void {
       this.imageService
         .getImages()
         .pipe(
           map((images) => {
-            images.reverse();
-            const dataSource =
-              new MatTableDataSource<ImageInformationDto>(images);
+            const filteredImages = images
+              .filter((image) => image.analysisStatus !== AnalysisStatus.PENDING)
+
+            const dataSource = new MatTableDataSource<ImageInformationDto>(filteredImages.reverse());
             this.setupPaginator(dataSource);
             dataSource.sort = this.sort;
             return dataSource;

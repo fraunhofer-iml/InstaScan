@@ -10,15 +10,15 @@ import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
-import { ImageDto, ImageInformationDto } from '@ap4/api';
+import {ReadImageDto, ImageInformationDto, UploadImageDto} from '@ap4/api';
 import { AnalysisResultAmqpDto } from '@ap4/amqp'
 
 @Injectable()
 export class ImageService {
   constructor(private readonly httpClient: HttpClient) {}
 
-  public getImageFileByUuid(uuid: string): Observable<ImageDto> {
-    return this.httpClient.get<ImageDto>(`${environment.IMAGE.URL}/${uuid}/file`);
+  public getImageFileByUuid(uuid: string): Observable<ReadImageDto> {
+    return this.httpClient.get<ReadImageDto>(`${environment.IMAGE.URL}/${uuid}/file`);
   }
 
   public getImageByUuid(uuid: string): Observable<ImageInformationDto> {
@@ -29,13 +29,14 @@ export class ImageService {
     return this.httpClient.get<ImageInformationDto[]>(environment.IMAGE.URL);
   }
 
-  public uploadImage(image: ImageDto): Observable<string> {
+  public uploadImage(image: UploadImageDto): Observable<string> {
     return this.httpClient.post<string>(environment.IMAGE.URL, image);
   }
 
   public getAnalysedImage(uuid: string): Observable<AnalysisResultAmqpDto>{
     return this.httpClient.get<AnalysisResultAmqpDto>(`${environment.IMAGE.URL_ANALYSIS}/${uuid}`);
   }
+
   public updateImageInformation(uuid: string, imageInformationDto: ImageInformationDto): Observable<ImageInformationDto> {
     return this.httpClient.put<ImageInformationDto>(`${environment.IMAGE.URL}/${uuid}`, imageInformationDto);
   }
@@ -43,4 +44,8 @@ export class ImageService {
   public deleteImage(uuid: string): Observable<ImageInformationDto[]> {
     return this.httpClient.delete<ImageInformationDto[]>(`${environment.IMAGE.URL}/${uuid}`);
     }
+
+  public analyzeImageBundle(uuid: string): Observable<boolean> {
+    return this.httpClient.put<boolean>(`${environment.IMAGE.URL_BUNDLES}/${uuid}`, null);
+  }
 }

@@ -11,12 +11,6 @@
         <h1>Documents</h1>
     </div>
     <app-scan-document (initializeDataSource)="initializeDataSource()"></app-scan-document>
-    <div class="button">
-        <button mat-flat-button (click)="openUploadDocument()">
-            Upload document
-        </button>
-    </div>
-
     <div class="table-container card">
         <table
             mat-table
@@ -32,6 +26,13 @@
                     <div class="uuid-link" [routerLink]="['/', element.uuid]">
                         {{ element.uuid }}
                     </div>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="bundleId">
+                <th mat-header-cell *matHeaderCellDef class="bold" mat-sort-header>Bundle ID</th>
+                <td mat-cell *matCellDef="let element">
+                    {{ element.bundleId }}
                 </td>
             </ng-container>
 

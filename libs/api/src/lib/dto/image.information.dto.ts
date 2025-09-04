@@ -10,10 +10,13 @@ import { ApiProperty } from '@nestjs/swagger';
 import { AnalysisStatus, DocumentTypeId, DocumentUploadType } from '@ap4/utils';
 import { Schema } from '../schema/schema.dto';
 
+/**
+ * This dto is used to return the image information entries from the database.
+ * It is also used to show updated or newly crated entries.
+ */
 export class ImageInformationDto {
   @ApiProperty()
   uuid: string;
-
   @ApiProperty()
   sender: string;
   @ApiProperty()
@@ -38,9 +41,11 @@ export class ImageInformationDto {
   })
   documentType: string;
   @ApiProperty()
+  bundleId: string;
+  @ApiProperty()
   image_analysis_result: Schema;
 
-  constructor(uuid: string, sender: string, receiver: string, creationDate: Date, lastModified: Date, documentUploadType: string, analysisStatus: string, documentType: string, image_analysis_result: Schema) {
+  constructor(uuid: string, sender: string, receiver: string, creationDate: Date, lastModified: Date, documentUploadType: string, analysisStatus: string, documentType: string, bundleId: string, image_analysis_result: Schema) {
     this.uuid = uuid;
     this.sender = sender;
     this.receiver = receiver;
@@ -49,6 +54,7 @@ export class ImageInformationDto {
     this.documentUploadType = documentUploadType;
     this.analysisStatus = analysisStatus;
     this.documentType = documentType;
+    this.bundleId = bundleId;
     this.image_analysis_result = image_analysis_result;
   }
 }

@@ -40,6 +40,9 @@ services:
       - AMQP_QUEUE_PREFIX=auavp-dev-
     env_file:
       - .env
+    networks:
+      - default
+      - skala-net
 
   frontend:
     build:
@@ -143,10 +146,5 @@ services:
       - .env
 
 networks:
-  camera_net:
-    driver: macvlan
-    driver_opts:
-      parent: enp0s31f6 # @TODO in .env Datei auslagern
-    ipam:
-      config:
-        - subnet: 169.254.0.0/16
+  skala-net:
+    external: true

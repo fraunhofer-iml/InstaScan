@@ -14,7 +14,6 @@ import { ErrorSchemaDto, ImageInformationDto } from '@ap4/api';
 import { AnalysisStatus, DocumentTypeId, DocumentUploadType } from '@ap4/utils';
 import { ActivatedRoute } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { PageEvent } from '@angular/material/paginator';
 
@@ -48,13 +47,10 @@ describe('DocumentsComponent', () => {
             documentUploadType: DocumentUploadType.JPEG,
             analysisStatus: AnalysisStatus.IN_PROGRESS,
             documentType: DocumentTypeId.CMR,
+            bundleId: 'bundleId',
             image_analysis_result: new ErrorSchemaDto('status', 'message', 'error_details'),
         },
     ];
-
-    const matDialogMock: jest.Mocked<MatDialog> = {
-        open: jest.fn(),
-    } as never;
 
   const mockImageService = {
     deleteImage: jest.fn(),
@@ -66,7 +62,6 @@ describe('DocumentsComponent', () => {
       imports: [DocumentsComponent, BrowserAnimationsModule],
       providers: [
         { provide: ImageService, useValue: mockImageService },
-        { provide: MatDialog, useValue: matDialogMock },
         {
           provide: ActivatedRoute,
           useValue: { params: of('1') },

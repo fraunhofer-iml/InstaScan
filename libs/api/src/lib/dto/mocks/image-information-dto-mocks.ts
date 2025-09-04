@@ -19,5 +19,6 @@ export const ImageInformationDtoMocks: ImageInformationDto[] = [
       DocumentUploadType.JPEG,
       AnalysisStatus.IN_PROGRESS,
       DocumentTypeId.CMR,
+      'testBundleId',
       JSON.parse("{\"sender_information\":{\"senderNameCompany\":\"testSender\"},\"consignee_information\":{\"consigneeNameCompany\":\"testReceiver\"}}"))
 ];

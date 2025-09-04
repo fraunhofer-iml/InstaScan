@@ -31,9 +31,18 @@ export class ImageInformation {
   @Column()
   documentType: string;
   @Column()
+  bundleId: string;
+  @Column()
   image_analysis_result: string;
 
-  constructor(uuid: string, creationDate: Date, lastModified: Date, uploadType: string, analysisStatus: string, documentType: string, image_analysis_result: string) {
+  constructor(
+      uuid: string,
+      creationDate: Date,
+      lastModified: Date,
+      uploadType: string,
+      analysisStatus: string,
+      documentType: string,
+      image_analysis_result: string) {
     this.uuid = uuid;
     this.sender = '';
     this.receiver = '';
@@ -55,6 +64,7 @@ export class ImageInformation {
       this.uploadType,
       this.analysisStatus,
       this.documentType,
+      this.bundleId,
       JSON.parse(this.image_analysis_result),
     );
   }
@@ -68,6 +78,7 @@ export class ImageInformation {
       DocumentUploadType[this.uploadType.toUpperCase()],
       AnalysisStatus[this.analysisStatus],
       DocumentTypeId[this.documentType],
+      this.bundleId,
       JSON.parse(this.image_analysis_result)
     );
   }

@@ -8,6 +8,9 @@
 
 import { Schema } from "@ap4/api";
 
+/**
+ * This dto is used to process finished analysis results sent by the DAS. The results sent by the DAS must correspond to this form.
+ */
 export class AnalysisResultAmqpDto {
 
   uuid: string;

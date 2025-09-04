@@ -11,3 +11,4 @@ export * from './document-type-id.enum';
 export * from './analysis-initial-result';
 export * from './analysis-initial-result'
 export * from './document-upload-type';
+export * from './bundle-constants';

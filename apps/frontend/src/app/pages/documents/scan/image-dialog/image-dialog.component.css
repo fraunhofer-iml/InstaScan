@@ -1,0 +1,27 @@
+/*!
+ * Copyright Fraunhofer Institute for Material Flow and Logistics
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * For details on the licensing terms, see the LICENSE file.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.image-dialog {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5em;
+}
+
+.close-icon {
+    position: absolute;
+    top: 2em;
+    right: 2em;
+    cursor: pointer;
+    padding: 1em;
+}
+
+.image {
+    padding: 1em;
+    width: 33em;
+}

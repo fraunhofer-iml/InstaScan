@@ -6,9 +6,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AnalyzeImageAmqpDto } from '../analyze-image-amqp.dto';
+import {ReadImageDto} from "@ap4/api";
 import {DocumentUploadType} from "@ap4/utils";
 
-export const UploadImageAmqpDtoMocks: AnalyzeImageAmqpDto[] = [
-  new AnalyzeImageAmqpDto('testUuid', 'testImageString', 'testBundleId', DocumentUploadType.JPEG)
+export const ReadImageDtoMocks: ReadImageDto[] = [
+  new ReadImageDto('testUuid','test_image_base_64_string', DocumentUploadType.JPEG)
 ];

@@ -28,6 +28,7 @@ import { from, switchMap } from "rxjs";
 })
 export class UploadComponent {
   document: FormControl = new FormControl(null, [Validators.required]);
+  isUploading = false;
 
   constructor(
       public dialogRef: MatDialogRef<UploadComponent>,
@@ -56,6 +57,7 @@ export class UploadComponent {
 
   submitDocument(): void {
     const reader = new FileReader();
+    this.isUploading = true;
     reader.onload = () => {
       const mimeType: string = (reader.result as string).split(',')[0];
       const extension: string = mimeType.split('/')[1].split(';')[0].toUpperCase();
@@ -64,15 +66,17 @@ export class UploadComponent {
       if(uploadType == DocumentUploadType.PDF){
         from(this.pdfConverter.convertToPdf(image_base64)).pipe(
             switchMap(result => {
-              return this.imageService.uploadImage({ image_base64: result, documentUploadType: uploadType });
+              return this.imageService.uploadImage({ image_base64: result, bundleId: 'testBundleId', documentUploadType: uploadType });
             })
-        ).subscribe(() => {
-          this.dialogRef.close();
+        ).subscribe((image) => {
+          this.isUploading = false;
+          this.dialogRef.close(image);
         });
       }
       else{
-        this.imageService.uploadImage({ image_base64: image_base64, documentUploadType: uploadType }).subscribe(() => {
-          this.dialogRef.close();
+        this.imageService.uploadImage({ image_base64: image_base64, bundleId: 'testBundleId', documentUploadType: uploadType }).subscribe((image) => {
+          this.isUploading = false;
+          this.dialogRef.close(image);
         });
       }
       this.document.setValue(null);

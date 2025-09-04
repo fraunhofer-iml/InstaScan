@@ -13,11 +13,21 @@ import { MinioModule } from 'nestjs-minio-client';
 import * as process from 'node:process';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ImageInformation } from '../entities/image.Information';
+import {AmqpBroker} from "@ap4/amqp";
+import {ImageInformationDatabaseService} from "./image.information.database.service";
+import {ImagesS3Service} from "./images.s3.service";
+import {AmqpBrokerService} from "./amqp.broker.service";
 
 @Module({
     controllers: [ImagesController],
-    providers: [ImagesService],
+    providers: [
+        ImagesService,
+      ImageInformationDatabaseService,
+      ImagesS3Service,
+      AmqpBrokerService
+    ],
   imports:[
+    new AmqpBroker().getDASBroker(),
     TypeOrmModule.forFeature([ImageInformation]),
     TypeOrmModule.forRoot({
       type: 'postgres',

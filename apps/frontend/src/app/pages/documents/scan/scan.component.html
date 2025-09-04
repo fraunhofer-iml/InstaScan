@@ -6,34 +6,57 @@
   ~ SPDX-License-Identifier: Apache-2.0
   -->
 
-<div class="container-scanning">
+<div class="container-camera card">
     <ng-container *ngIf="isCameraConnected | async; else noCamera">
-        <div class="container-camera">
-            <img
-                id="video"
-                [src]="liveImage | async"
-                alt="camera"
-                *ngIf="liveImage; else loading"
-            />
-            <div class="capture-image">
-                <button
-                        mat-flat-button
-                        (click)="captureImage()"
-                        [disabled]="!isCameraConnected"
-                >
-                    <img
-                            src="../../../assets/camera.svg"
-                            alt="camera icon"
-                            class="icon-camera"
-                    />
-                </button>
+        <img id="video"
+             [src]="liveImage | async"
+             alt="camera"
+             *ngIf="liveImage; else loading"
+        />
+    </ng-container>
+    <div class="grid-item bundle">
+        <h2 class="bundle-title">Bundle</h2>
+        <mat-form-field class="input-bundle">
+            <mat-label>Bundle ID</mat-label>
+            <input matInput [formControl]="bundleId" />
+        </mat-form-field>
+        <mat-divider class="divider"/>
+        <div class="document-header">
+            <h2 class="document-title">Documents</h2>
+            <span class="document-count">{{ encodedImageFiles.length || 0 }}</span>
+        </div>
+        <div *ngIf="encodedImageFiles" class="encodedImageFiles">
+            <div *ngFor="let encodedImageFile of encodedImageFiles; let index = index" class="encodedImageFile">
+                <img [src]="encodedImageFile"
+                     (click)="openImagePreview(encodedImageFile)"
+                     alt="Scanned document"
+                     class="image"
+                     onKeyUp=""
+                />
+                <mat-icon (click)="removeImage(index)" class="delete-icon icon" fontSet="material-symbols-outlined" onKeyUp="">delete</mat-icon>
             </div>
         </div>
-    </ng-container>
-    <ng-template #loading>
-        <p class="loading-text">Loading camera feed...</p>
-    </ng-template>
-    <ng-template #noCamera>
-        <p class="error-message">Camera not detected</p>
-    </ng-template>
+        <button mat-flat-button
+                class="confirm-button"
+                [disabled]="encodedImageFiles.length === 0 || bundleId.invalid"
+                (click)="confirmBundle(bundleId.value)"
+        >Analyse</button>
+    </div>
+    <div>
+        <div class="button-document" onKeyUp="" (click)="captureImage()" [class.disabled]="!(isCameraConnected | async)" >
+            <mat-icon class="icon-buttons" fontSet="material-symbols-outlined">camera</mat-icon>
+        </div>
+        <div class="button-document" onKeyUp="" (click)="openUploadDocument()">
+            <mat-icon class="icon-buttons" fontSet="material-symbols-outlined">cloud_upload</mat-icon>
+        </div>
+    </div>
 </div>
+
+<ng-template #loading>
+    <p class="loading-text">Loading camera feed...</p>
+</ng-template>
+<ng-template #noCamera>
+    <div class="camera-error-message">
+        <p>Camera not detected</p>
+    </div>
+</ng-template>

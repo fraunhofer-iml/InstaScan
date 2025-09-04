@@ -12,7 +12,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map, Observable } from 'rxjs';
-import { ImageDto, ImageInformationDto } from '@ap4/api';
+import { ReadImageDto, ImageInformationDto } from '@ap4/api';
 import { AnalysisStatus, DOCUMENT_UPLOAD_TYPE_TO_UPLOAD_VALUES } from '@ap4/utils'
 import { ImageService } from '../../shared/services/image/imageService';
 import { HttpClientModule } from '@angular/common/http';
@@ -24,7 +24,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { SnackbarService } from '../../shared/services/snackbar/SnackBar.Service';
 import { RoutingEnum } from '../../shared/enums/routing.enum';
-import { ApproveMessage } from './enum/approved.enum';
+import { SnackbarMessagesEnum } from '../../shared/enums/snackbar-messages.enum';
+import { ApproveEnum } from './enum/approve.enum';
 
 @Component({
   selector: 'app-pdf-preview',
@@ -49,10 +50,12 @@ export class EvaluationComponent {
   imageId$!: Observable<string>;
   getImage!: ImageInformationDto;
   encodedImageFile: string | null = null;
-  approveEnum = ApproveMessage;
+  snackbarMessagesEnum = SnackbarMessagesEnum;
   analysisStatus = AnalysisStatus;
   showImage = true;
   modified = false;
+  protected readonly approveEnum = ApproveEnum;
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
@@ -66,7 +69,7 @@ export class EvaluationComponent {
 
   initializeImage() {
     this.imageId$.subscribe((id: string) => {
-      this.imageService.getImageFileByUuid(id).subscribe((image: ImageDto) => {
+      this.imageService.getImageFileByUuid(id).subscribe((image: ReadImageDto) => {
         this.encodedImageFile = image?.image_base64 ? `${DOCUMENT_UPLOAD_TYPE_TO_UPLOAD_VALUES[image.documentUploadType].mimeType}${image.image_base64}` : null;
       })
     })
@@ -89,8 +92,8 @@ export class EvaluationComponent {
     this.imageService.updateImageInformation(uuid, this.getImage).subscribe(() => {
       this.snackBar.sendMessage(
         this.modified
-          ? this.approveEnum.SNACKBAR_SAVE_APPROVED
-          : this.approveEnum.SNACKBAR_APPROVED
+          ? this.snackbarMessagesEnum.SAVE_APPROVED
+          : this.snackbarMessagesEnum.APPROVED
       );
       this.router.navigate([RoutingEnum.documents]);
     });

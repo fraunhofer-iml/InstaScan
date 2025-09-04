@@ -8,15 +8,20 @@
 
 import { DocumentUploadType } from "@ap4/utils";
 
-export class UploadImageAmqpDto {
+/**
+ * This dto is used to send an image, that should be analyzed to the DAS.
+ */
+export class AnalyzeImageAmqpDto {
 
   uuid: string;
   image_base64: string;
-  uploadType: DocumentUploadType;
+  bundleId: string;
+  uploadType: string;
 
-  constructor(uuid: string, image_base64: string, uploadType: DocumentUploadType) {
+  constructor(uuid: string, image_base64: string, bundleId: string, uploadType: string) {
     this.uuid = uuid;
     this.image_base64 = image_base64;
+    this.bundleId = bundleId;
     this.uploadType = uploadType;
   }
 }

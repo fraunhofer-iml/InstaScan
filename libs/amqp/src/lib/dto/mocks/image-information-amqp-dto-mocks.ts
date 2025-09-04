@@ -19,5 +19,6 @@ export const ImageInformationAmqpDtoMocks: ImageInformationAmqpDto[] = [new Imag
   DocumentUploadType.JPEG,
   AnalysisStatus.IN_PROGRESS,
   DocumentTypeId.CMR,
+  'testId',
   new ErrorSchemaDto('error', 'message', 'error_details')
 )];

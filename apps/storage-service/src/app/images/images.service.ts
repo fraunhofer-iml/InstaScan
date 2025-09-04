@@ -6,105 +6,97 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { MinioService } from 'nestjs-minio-client';
-import {
-  AnalysisResultAmqpDto,
-  ImageInformationAmqpDto, UploadImageAmqpDto
-} from '@ap4/amqp';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { ImageDto, ImageInformationDto } from '@ap4/api';
+import {Injectable, Logger} from '@nestjs/common';
+import {AnalysisResultAmqpDto, ImageInformationAmqpDto, ImageInformationFilterAmqpDto} from '@ap4/amqp';
+import {ImageInformationDto, ReadImageDto, UploadImageDto} from '@ap4/api';
 import {
   ANALYSIS_INITIAL_RESULT,
   AnalysisStatus,
-  DOCUMENT_UPLOAD_TYPE_TO_UPLOAD_VALUES,
-  DocumentTypeId, DocumentUploadType
+  DocumentTypeId,
+  DocumentUploadType
 } from '@ap4/utils';
-import { ImageInformation } from '../entities/image.Information';
-import type { Readable as ReadableStream } from 'node:stream';
-import process from 'node:process';
+import {ImageInformation} from '../entities/image.Information';
+import {ImageInformationDatabaseService} from "./image.information.database.service";
+import {ImagesS3Service} from "./images.s3.service";
+import {AmqpBrokerService} from "./amqp.broker.service";
+import {v4 as uuidGenerator} from 'uuid';
+
 
 @Injectable()
 export class ImagesService {
 
-  private readonly logger = new Logger(ImagesService.name);
+  private readonly logger: Logger = new Logger(ImagesService.name);
 
   constructor(
-    private readonly s3Service: MinioService,
-    @InjectRepository(ImageInformation)
-    readonly imageInformationRepository: Repository<ImageInformation>
-  ) { }
+    readonly imageInformationDatabaseService: ImageInformationDatabaseService,
+    readonly imagesS3Service: ImagesS3Service,
+    readonly amqpBrokerService: AmqpBrokerService,
+  ) {}
 
-  public async getImage(uuid: string): Promise<ImageDto> {
-    const foundImageInformation: ImageInformation = await this.getImageInformation(uuid);
+  /**
+   * Returns an image for a specific uuid. The image is specified as a base64 string within a dto.
+   * @param uuid The uuid of the image, that should be returned.
+   */
+  public async getImage(uuid: string): Promise<ReadImageDto> {
+    const foundImageInformation: ImageInformation = await this.imageInformationDatabaseService.getImageInformation(uuid);
     if (!foundImageInformation) {
       return null;
     }
-    const s3FileName = `${foundImageInformation.uuid}${DOCUMENT_UPLOAD_TYPE_TO_UPLOAD_VALUES[foundImageInformation.uploadType].extension}`;
-    const objectResult: ReadableStream = await this.s3Service.client.getObject(process.env.S3_BUCKET, s3FileName);
-    const pictureBuffer: Buffer = await new Promise((resolve, reject) => {
-      const chunks: Buffer[] = [];
-
-      objectResult.on('data', (chunk) => chunks.push(chunk));
-      objectResult.on('end', () => resolve(Buffer.concat(chunks)));
-      objectResult.on('error', () => reject(new Error('Could not read content')));
-    });
-    return new ImageDto(pictureBuffer.toString('base64'), DocumentUploadType[foundImageInformation.uploadType.toUpperCase()]);
+    return this.imagesS3Service.getImage(uuid).then(base64Image => new ReadImageDto(foundImageInformation.uuid, base64Image, DocumentUploadType[foundImageInformation.uploadType.toUpperCase()]));
   }
 
-  private async getImageInformation(uuid: string): Promise<ImageInformation> {
-    return this.imageInformationRepository.findOne({
-      where: { uuid: uuid },
-    });
+  /**
+   * Returns an image information entry fo a certain uuid.
+   * @param uuid The uuid of the image information that should be returned.
+   */
+  public async getImageInformation(uuid: string): Promise<ImageInformationDto> {
+    return this.imageInformationDatabaseService.getImageInformation(uuid)
+        .then(foundImage => foundImage ? foundImage.toImageInformationDto() : null);
   }
 
-  public async getImageInformationDto(
-    uuid: string
-  ): Promise<ImageInformationDto> {
-    const foundImage: ImageInformation = await this.getImageInformation(
-      uuid
-    );
-    return foundImage ? foundImage.toImageInformationDto() : null;
-  }
-
-  public async getAllImageInformation(): Promise<ImageInformationDto[]> {
-    const storedImageInformation: ImageInformation[] = await this.imageInformationRepository.find();
+  /**
+   * Returns every image information entry. If a bundle id is specified, it only returns image information entries with that specific bundle id.
+   * @param imageInformationFilterAmqpDto The attributes, that can be used to filter the list of image information.
+   */
+  public async getAllImageInformation(imageInformationFilterAmqpDto: ImageInformationFilterAmqpDto): Promise<ImageInformationDto[]> {
+    const storedImageInformation: ImageInformation[] = await this.imageInformationDatabaseService.getAllImageInformation(imageInformationFilterAmqpDto);
     return storedImageInformation.map((imageInformation: ImageInformation) => imageInformation.toImageInformationDto());
   }
 
-  public async uploadImage(body: UploadImageAmqpDto): Promise<ImageInformationDto> {
-    if (!await this.s3Service.client.bucketExists(process.env.S3_BUCKET)) {
-      await this.s3Service.client.makeBucket(process.env.S3_BUCKET);
-    }
-    try {
-      const s3FileName = `${body.uuid}${DOCUMENT_UPLOAD_TYPE_TO_UPLOAD_VALUES[body.uploadType].extension}`;
-      const fileBuffer: Buffer = Buffer.from(body.image_base64, 'base64');
-      await this.s3Service.client.putObject(process.env.S3_BUCKET, s3FileName, fileBuffer);
+  /**
+   * Uploads the a new image to the s3 serve and saves a new image information entry in the database.
+   * It also generates a new uuid for this image and the image information.
+   * @param uploadImageAmqpDto The dto that contains the image that should be uploaded as base64 string and the bundle id.
+   */
+  public async uploadImage(uploadImageAmqpDto: UploadImageDto): Promise<ImageInformationDto> {
+    try{
+      const newUuid: string = uuidGenerator();
+      await this.imagesS3Service.uploadImage(uploadImageAmqpDto.image_base64, newUuid);
 
       const newImageInformation: ImageInformation = new ImageInformation(
-        body.uuid,
-        new Date(),
-        new Date(),
-        body.uploadType,
-        AnalysisStatus.IN_PROGRESS,
-        DocumentTypeId.CMR,
-        ANALYSIS_INITIAL_RESULT
+          newUuid,
+          new Date(),
+          new Date(),
+          uploadImageAmqpDto.documentUploadType,
+          AnalysisStatus.PENDING,
+          DocumentTypeId.CMR,
+          ANALYSIS_INITIAL_RESULT
       );
-      return this.imageInformationRepository.save(newImageInformation).then((result: ImageInformation) => result.toImageInformationDto());
+      newImageInformation.bundleId = uploadImageAmqpDto.bundleId;
+      return this.imageInformationDatabaseService.saveImageInformation(newImageInformation)
+          .then((result: ImageInformation) => result.toImageInformationDto());
     }
-    catch (e) {
-      this.logger.error('Could not upload image', e);
-      return null;
+    catch(e){
+      this.logger.error('The image could not be saved correctly.', e);
     }
   }
 
-  public async updateImageInformation(
-    imageInformationDto: ImageInformationDto
-  ): Promise<ImageInformationAmqpDto> {
-    const foundImage = await this.getImageInformation(
-      imageInformationDto.uuid
-    );
+  /**
+   * Update a certain image information entry.
+   * @param imageInformationDto The new data of the image information.
+   */
+  public async updateImageInformation(imageInformationDto: ImageInformationDto): Promise<ImageInformationAmqpDto> {
+    const foundImage: ImageInformation = await this.imageInformationDatabaseService.getImageInformation(imageInformationDto.uuid);
     if (!foundImage) {
       return null;
     }
@@ -116,39 +108,77 @@ export class ImagesService {
       foundImage.receiver = imageInformationDto.image_analysis_result.consignee_information.consigneeNameCompany;
     }
     foundImage.analysisStatus = imageInformationDto.analysisStatus;
-    const updateImage: ImageInformation =
-      await this.imageInformationRepository.save(foundImage);
-    return updateImage.toImageInformationAmqpDto();
+    foundImage.bundleId = imageInformationDto.bundleId;
+    return this.imageInformationDatabaseService.saveImageInformation(foundImage).then(updatedImage => updatedImage.toImageInformationAmqpDto());
   }
 
-  public async saveAnalysisResult(
-    analysisResultAmqpDto: AnalysisResultAmqpDto
-  ): Promise<ImageInformationAmqpDto> {
-    const foundImageInformation: ImageInformation = await this.getImageInformation(analysisResultAmqpDto.uuid);
-
-    if ('error_details' in analysisResultAmqpDto.image_analysis_result) {
-      foundImageInformation.analysisStatus = AnalysisStatus.FAILED;
-    } else {
-      foundImageInformation.analysisStatus = AnalysisStatus.FINISHED;
-      foundImageInformation.sender = analysisResultAmqpDto.image_analysis_result.sender_information.senderNameCompany;
-      foundImageInformation.receiver = analysisResultAmqpDto.image_analysis_result.consignee_information.consigneeNameCompany;
-    }
-    foundImageInformation.image_analysis_result =
-      JSON.stringify(analysisResultAmqpDto.image_analysis_result);
-    const updateImage: ImageInformation =
-      await this.imageInformationRepository.save(foundImageInformation);
-    return updateImage.toImageInformationAmqpDto();
-  }
-
+  /**
+   * Removes an image from the database and from the s3 server.
+   * @param uuid The uuid of the image, that should be removed.
+   */
   public async removeImage(uuid: string): Promise<boolean> {
+    const foundImageInformation: ImageInformation = await this.imageInformationDatabaseService.getImageInformation(uuid);
+    if (!foundImageInformation) {
+      return false;
+    }
 
-    const foundImageInformation: ImageInformation = await this.getImageInformation(uuid);
-    if (!foundImageInformation) return false;
-
-    await this.s3Service.client.removeObjects(process.env.S3_BUCKET, [`${uuid}.jpeg`]);
-    await this.imageInformationRepository.remove([foundImageInformation]);
+    await this.imagesS3Service.removeImage(uuid);
+    await this.imageInformationDatabaseService.removeImageInformation(foundImageInformation);
 
     this.logger.log('Removed image with uuid ', uuid);
     return true;
+  }
+
+  /**
+   * Finds every image for a specific bundle id and sends them to the DAS for the analysis.
+   * @param bundleId The id of the bundle whose images are to be analyzed.
+   */
+  public async analyzeImageBundle(bundleId: string): Promise<boolean> {
+    try {
+      const foundImageInformation: ImageInformation[] = await this.imageInformationDatabaseService.getAllImageInformation(
+          {
+            bundleId: bundleId,
+            analysisStatus: AnalysisStatus.PENDING
+          });
+      for (const imageInformation of foundImageInformation) {
+        this.logger.log('Send imageInformation to DAS with uuid: ', imageInformation.uuid);
+        const imageBase64: string = await this.imagesS3Service.getImage(imageInformation.uuid);
+        this.amqpBrokerService.sendImageToAnalysisService(imageInformation.uuid, imageBase64, imageInformation.bundleId, imageInformation.documentType);
+        imageInformation.analysisStatus = AnalysisStatus.IN_PROGRESS;
+        await this.imageInformationDatabaseService.saveImageInformation(imageInformation);
+      }
+      return true;
+    }
+    catch(e) {
+      this.logger.error('Not all images could be transferred to the DAS.', e);
+      return false;
+    }
+  }
+
+  /**
+   * Receives an analysis result and updates the entry in the database.
+   * @param analysisResultAmqpDto The result of the analysis, that should be stored.
+   */
+  public async saveAnalysisResult(analysisResultAmqpDto: AnalysisResultAmqpDto): Promise<ImageInformationAmqpDto> {
+    try{
+      const foundImageInformation: ImageInformation = await this.imageInformationDatabaseService.getImageInformation(analysisResultAmqpDto.uuid);
+      if(!foundImageInformation) {
+        return null;
+      }
+
+      if ('error_details' in analysisResultAmqpDto.image_analysis_result) {
+        foundImageInformation.analysisStatus = AnalysisStatus.FAILED;
+      } else {
+        foundImageInformation.analysisStatus = AnalysisStatus.FINISHED;
+        foundImageInformation.sender = analysisResultAmqpDto.image_analysis_result.sender_information.senderNameCompany;
+        foundImageInformation.receiver = analysisResultAmqpDto.image_analysis_result.consignee_information.consigneeNameCompany;
+      }
+      foundImageInformation.image_analysis_result = JSON.stringify(analysisResultAmqpDto.image_analysis_result);
+      return this.imageInformationDatabaseService.saveImageInformation(foundImageInformation).then(saveImageInformationResponse => saveImageInformationResponse.toImageInformationAmqpDto());
+    }
+    catch(e){
+      this.logger.error('The analysis result could not be saved. ', e);
+      return null;
+    }
   }
 }
