@@ -11,6 +11,12 @@
         <h1>Documents</h1>
     </div>
     <app-scan-document (initializeDataSource)="initializeDataSource()"></app-scan-document>
+    <div class="filter">
+        <mat-icon fontSet="material-symbols-outlined" class="search-icon">search</mat-icon>
+        <mat-form-field class="searchbar">
+            <input matInput (keyup)="applyFilter($event)"/>
+        </mat-form-field>
+    </div>
     <div class="table-container card">
         <table
             mat-table

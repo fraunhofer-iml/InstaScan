@@ -106,12 +106,38 @@ describe('DocumentsComponent', () => {
         expect(setItemSpy).toHaveBeenCalledWith('itemsPerPage', '50');
     });
 
-  it('should call deleteImage and then initializeDataSource', () => {
-    const uuid = '1234-uuid';
-    mockImageService.deleteImage.mockReturnValue(of(null));
+    it('should call deleteImage and then initializeDataSource', () => {
+      const uuid = '1234-uuid';
+      mockImageService.deleteImage.mockReturnValue(of(null));
 
-    component.deleteImage(uuid);
-    expect(component.initializeDataSource).toHaveBeenCalled();
+      component.deleteImage(uuid);
+      expect(component.initializeDataSource).toHaveBeenCalled();
+    });
+
+    it('should format date to lowercase string with DATETIME format', () => {
+      const date = new Date(2025, 1, 1, 13, 37);
+      const result = component['formatDate'](date);
+      expect(result).toContain('2025');
+      expect(typeof result).toBe('string');
+      expect(result).toEqual(result.toLowerCase());
+    });
+
+    it('should return true when bundleId matches filter', () => {
+      const image: ImageInformationDto = {
+        uuid: '',
+        bundleId: 'Bundle1',
+        sender: '',
+        receiver: '',
+        analysisStatus: '',
+        creationDate: new Date(),
+        lastModified: new Date(),
+        documentUploadType: '',
+        documentType: '',
+        image_analysis_result: {} as ErrorSchemaDto
+      };
+      const dataSource = new MatTableDataSource<ImageInformationDto>([image]);
+      component['setFilterPredicate'](dataSource);
+      expect(dataSource.filterPredicate(image, 'bundle1')).toBe(true);
   });
 });
 
