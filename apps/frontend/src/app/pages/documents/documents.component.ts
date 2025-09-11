@@ -23,7 +23,6 @@ import { HttpClientModule } from '@angular/common/http';
 import { BehaviorSubject, map, Subject, tap } from 'rxjs';
 import { DISPLAYED_COLUMNS } from './const/displayed-columns.const';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { ScanComponent } from './scan/scan.component';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatIcon } from '@angular/material/icon';
 import { AnalysisStatus } from '@ap4/utils';
@@ -32,6 +31,8 @@ import { MatInput } from '@angular/material/input';
 import { DialogDeleteDocumentComponent } from '../../layout/delete-document-dialog/delete-document-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { DATETIME } from './const/date-time.const';
+import { STATUS_ICONS_MAP } from './const/status-icons-map.const';
+import { ScanComponent } from './scan/scan.component';
 
 @Component({
     selector: 'app-dashboard',
@@ -43,9 +44,9 @@ import { DATETIME } from './const/date-time.const';
       HttpClientModule,
       RouterModule,
       MatPaginator,
-      ScanComponent,
       MatSortModule,
       MatIcon,
+      ScanComponent,
       MatFormField,
       MatInput,
     ],
@@ -118,6 +119,10 @@ export class DocumentsComponent implements AfterViewInit {
         });
       }
     });
+  }
+
+  getStatusIcon(analysisStatus: string) {
+    return STATUS_ICONS_MAP[analysisStatus as AnalysisStatus] || '';
   }
 
   private setupPaginator(

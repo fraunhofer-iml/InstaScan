@@ -69,8 +69,8 @@ export class ScanComponent implements OnDestroy {
   openUploadDocument() {
     const dialogRef = this.dialog.open(UploadComponent, {
       panelClass: 'mat-dialog-container',
-      width: '600px',
-      height: '400px',
+      width: '38em',
+      height: '28em',
     });
 
     dialogRef.afterClosed().subscribe((image: ImageInformationDto) => {
@@ -132,8 +132,7 @@ export class ScanComponent implements OnDestroy {
 
   openImagePreview(encodedImageFile: string) {
     this.dialog.open(ImageDialogComponent, {
-      data: encodedImageFile,
-      panelClass: 'mat-dialog-container',
+      data: encodedImageFile
     });
   }
 }

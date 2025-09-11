@@ -30,14 +30,6 @@ $my-theme: mat.define-theme((
   --green-color: #32ff7f;
   --red-color: #ff4317;
 
-  --icon-cloud-upload: url('assets/cloud-upload.svg');
-  --icon-check: url('assets/check-icon.svg');
-  --icon-progess: url('assets/progress-icon.svg');
-  --icon-failed: url('assets/failed-icon.svg');
-  --icon-finished: url('assets/finished-icon.svg');
-  --icon-approved: url('assets/approved-icon.svg');
-  --icon-upload: url('assets/upload-icon.svg');
-
   @include mat.all-component-themes($my-theme);
 }
 
@@ -76,12 +68,12 @@ h1 {
 }
 
 .delete-icon {
-  color: var(--darker-grey-color);
+  color: var(--darker-grey-color) !important;
 }
 
 .delete-icon:hover {
   cursor: pointer;
-  color: black;
+  color: black !important;
 }
 
 .mdc-text-field--filled:not(.mdc-text-field--disabled) {

@@ -11,12 +11,13 @@ import { Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { RoutingEnum } from '../../shared/enums/routing.enum';
+import { MatIcon } from '@angular/material/icon';
 
 
 @Component({
     selector: 'app-scan-document',
     standalone: true,
-    imports: [CommonModule, MatButtonModule, RouterLinkActive, RouterLink],
+    imports: [CommonModule, MatButtonModule, RouterLinkActive, RouterLink, MatIcon],
     templateUrl: './dashboard.component.html',
     styleUrl: './dashboard.component.css',
 })

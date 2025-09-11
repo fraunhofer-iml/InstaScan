@@ -7,27 +7,28 @@
   -->
 
 <div>
-    <img src="assets/failed-icon.svg" alt="Close upload document" id="close" (keyup)="dialogRef.close()" (click)="dialogRef.close()" />
+    <mat-icon fontSet="material-symbols-outlined" id="close" onKeyUp (click)="dialogRef.close()">close</mat-icon>
     <h1 class="title">Upload Document</h1>
 </div>
 <div class="container">
-    <div class="upload-container">
-        <label for="dropzone-file"
-               class="dropzone"
-               (drop)="onDrop($event)"
-               (dragover)="onDragOver($event)"
-        >
-            <div class="dropzone-content" *ngIf="!document.value">
-                <div class="icon-cloud-upload"></div>
-                <p class="text"><strong>Click to upload</strong> or drag and drop</p>
-                <p class="text small">PNG, JPG, PDF</p>
-                <div class="spinner" *ngIf="isUploading"></div>
+  <div class="upload-container">
+    <label
+      for="dropzone-file"
+      class="dropzone"
+      (drop)="onDrop($event)"
+      (dragover)="onDragOver($event)"
+    >
+      <div class="dropzone-content" *ngIf="!document.value">
+          <mat-icon fontSet="material-symbols-outlined" class="icon-cloud-upload">cloud_upload</mat-icon>
+          <p class="text"><strong>Click to upload</strong> or drag and drop</p>
+          <p class="text small">PNG, JPG, PDF</p>
+      <div class="spinner" *ngIf="isUploading"></div>
             </div>
 
-            <div class="dropzone-content" *ngIf="document.value">
-                <div class="icon-check"></div>
-                <span class="text bold">{{ document.value.name }}</span>
-            </div>
+      <div class="dropzone-content" *ngIf="document.value">
+          <div class="icon-check"></div>
+          <span class="text bold">{{ document.value.name }}</span>
+      </div>
 
             <input id="dropzone-file"
                    type="file"

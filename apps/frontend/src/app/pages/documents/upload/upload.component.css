@@ -7,6 +7,7 @@
  */
 
 .title {
+    margin-top: 2em;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -14,8 +15,9 @@
 }
 
 #close {
+    color: var(--dark-grey-color);
     padding: 1em 1em 0 0;
-    width: 24px;
+    width: 1em;
     cursor: pointer;
     float: right;
 }
@@ -67,22 +69,10 @@
 }
 
 .icon-cloud-upload {
-    width: 40px;
-    height: 40px;
-    background-color: var(--dark-grey-color);
-    mask-repeat: no-repeat;
-    mask-image: var(--icon-cloud-upload);
-    -webkit-mask-image: var(--icon-cloud-upload);
-}
-
-.icon-check {
-    width: 35px;
-    height: 35px;
-    background-color: var(--main-color);
-    mask-repeat: no-repeat;
-    mask-image: var(--icon-check);
-    -webkit-mask-image: var(--icon-check);
-    display: block;
+    color: var(--dark-grey-color);
+    font-size: xxx-large;
+    width: 1em;
+    height: 1em;
 }
 
 .upload-status {

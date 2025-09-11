@@ -53,11 +53,7 @@ mat-chip {
 }
 
 .icons {
-    width: 20px;
-    height: 20px;
-    background-color: black;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+    color: var(--dark-grey-color);
 }
 
 .status-container {
@@ -82,31 +78,7 @@ mat-chip {
 }
 
 .search-icon {
+    color: black;
     align-self: flex-start;
     margin-top: 0.7em;
-}
-
-.in_progress {
-    mask-image: var(--icon-progess);
-    -webkit-mask-image: var(--icon-progess);
-}
-
-.failed {
-    mask-image: var(--icon-failed);
-    -webkit-mask-image: var(--icon-failed);
-}
-
-.finished {
-    mask-image: var(--icon-finished);
-    -webkit-mask-image: var(--icon-finished);
-}
-
-.approved {
-    mask-image: var(--icon-approved);
-    -webkit-mask-image: var(--icon-approved);
-}
-
-.upload {
-    mask-image: var(--icon-upload);
-    -webkit-mask-image: var(--icon-upload);
 }

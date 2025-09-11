@@ -100,8 +100,8 @@ describe('ScanComponent', () => {
       UploadComponent,
       expect.objectContaining({
         panelClass: 'mat-dialog-container',
-        width: '600px',
-        height: '400px'
+        width: '38em',
+        height: '28em'
       })
     );
   });

@@ -10,7 +10,7 @@ import {from, Observable, Subscriber, switchMap} from 'rxjs';
 import {Injectable} from '@angular/core';
 import * as pdfjsLib from 'pdfjs-dist';
 import {GlobalWorkerOptions} from 'pdfjs-dist';
-import {PDFPageProxy} from "pdfjs-dist/types/src/display/api";
+import {PDFDocumentProxy, PDFPageProxy} from "pdfjs-dist/types/src/display/api";
 import {PageViewport} from "pdfjs-dist/types/src/display/display_utils";
 
 @Injectable()
@@ -33,7 +33,7 @@ export class PdfConverter {
         );
     }
 
-    private getPage(pdfDocument: any): Observable<string> {
+    private getPage(pdfDocument: PDFDocumentProxy): Observable<string> {
         return from(pdfDocument.getPage(1)).pipe(
             switchMap(page => this.getCanvas(page as PDFPageProxy))
         );
