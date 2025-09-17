@@ -9,7 +9,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, EventEmitter, OnDestroy, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { ImageStreamService } from './service/image-stream.service';
+import { CameraStreamService } from './service/camera-stream.service';
 import { catchError, forkJoin, Observable, of, switchMap } from 'rxjs';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -29,7 +29,7 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
   selector: 'app-scan-document',
   standalone: true,
   imports: [CommonModule, MatButtonModule, MatFormField, MatLabel, MatInput, MatIcon, MatDivider, ReactiveFormsModule],
-  providers: [ImageStreamService, SnackbarService],
+  providers: [CameraStreamService, SnackbarService],
   templateUrl: './scan.component.html',
   styleUrl: './scan.component.css',
 })
@@ -44,25 +44,25 @@ export class ScanComponent implements OnDestroy {
     new EventEmitter<void>();
 
   constructor(
-    private readonly imageStreamService: ImageStreamService,
+    private readonly cameraStreamService: CameraStreamService,
     private readonly imageService: ImageService,
     private readonly dialog: MatDialog,
     private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly snackBar: SnackbarService
   ) {
-    this.liveImage = this.imageStreamService.onImageStream();
-    this.isCameraConnected = this.imageStreamService.getCameraStatus();
-    this.imageStreamService.onDocumentResponse().subscribe(uuid => {
+    this.liveImage = this.cameraStreamService.onImageStream();
+    this.isCameraConnected = this.cameraStreamService.getCameraStatus();
+    this.cameraStreamService.onDocumentResponse().subscribe(uuid => {
         console.log('received new document with uuid', uuid);
         this.getImageInformation(uuid);
         this.getImageFile(uuid);
     });
   }
   ngOnDestroy(): void {
-    this.imageStreamService.disconnect();
+    this.cameraStreamService.disconnect();
   }
   captureImage(): void {
-    this.imageStreamService.takeImage();
+    this.cameraStreamService.takeImage();
     this.initializeDataSource.emit();
   }
 

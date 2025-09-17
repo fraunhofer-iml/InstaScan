@@ -10,10 +10,12 @@ import { Module } from '@nestjs/common';
 import { ImagesService } from './images.service';
 import { ImagesController } from './images.controller';
 import { AmqpBroker } from '@ap4/amqp';
+import { ImageSubscribeController } from './gateway/image-subscribe.controller';
+import { ImageGateway } from './gateway/image.gateway';
 
 @Module({
-  controllers: [ImagesController],
-  providers: [ImagesService],
+  controllers: [ImagesController, ImageSubscribeController],
+  providers: [ImagesService, ImageGateway],
   imports: [
     new AmqpBroker().getStorageServiceBroker()
   ]

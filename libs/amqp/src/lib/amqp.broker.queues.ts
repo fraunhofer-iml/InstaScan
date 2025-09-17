@@ -9,4 +9,5 @@
 export class AmqpBrokerQueues{
   public static SKALA_AP4_STORAGE_SERVICE_QUEUE = process.env['AMQP_QUEUE_PREFIX'] + 'SKALA_AP4_STORAGE_SERVICE_QUEUE';
   public static SKALA_AP4_DAS_QUEUE = process.env['AMQP_QUEUE_PREFIX'] + 'SKALA_AP4_DAS_QUEUE';
+  public static SKALA_AP4_BFF_QUEUE = process.env['AMQP_QUEUE_PREFIX'] + 'SKALA_AP4_BFF_QUEUE';
 }

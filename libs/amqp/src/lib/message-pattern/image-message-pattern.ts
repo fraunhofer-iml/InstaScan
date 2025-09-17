@@ -13,6 +13,7 @@ export enum ImageMessagePattern {
   GET_IMAGE = 'images/read-by-id',
   REMOVE_IMAGE = 'images/remove',
   PUBLISH_ANALYSIS = 'analysis/publish',
+  REFRESH_ANALYSIS = 'analysis/refresh',
   GET_IMAGE_INFORMATION = 'analysis/get',
   ANALYZE_BUNDLE = 'analysis/bundle/create',
 }

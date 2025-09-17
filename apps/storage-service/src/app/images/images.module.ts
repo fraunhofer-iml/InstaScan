@@ -28,6 +28,7 @@ import {AmqpBrokerService} from "./amqp.broker.service";
     ],
   imports:[
     new AmqpBroker().getDASBroker(),
+    new AmqpBroker().getBFFBroker(),
     TypeOrmModule.forFeature([ImageInformation]),
     TypeOrmModule.forRoot({
       type: 'postgres',

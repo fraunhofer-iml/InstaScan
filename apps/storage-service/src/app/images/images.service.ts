@@ -174,6 +174,7 @@ export class ImagesService {
         foundImageInformation.receiver = analysisResultAmqpDto.image_analysis_result.consignee_information.consigneeNameCompany;
       }
       foundImageInformation.image_analysis_result = JSON.stringify(analysisResultAmqpDto.image_analysis_result);
+      this.amqpBrokerService.sendRefreshToBff();
       return this.imageInformationDatabaseService.saveImageInformation(foundImageInformation).then(saveImageInformationResponse => saveImageInformationResponse.toImageInformationAmqpDto());
     }
     catch(e){

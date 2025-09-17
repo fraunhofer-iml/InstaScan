@@ -8,14 +8,14 @@
 
 import { TestBed } from '@angular/core/testing';
 import { io, Socket } from 'socket.io-client';
-import { ImageStreamService } from './image-stream.service';
+import { CameraStreamService } from './camera-stream.service';
 import { environment } from '../../../../../environments/environment';
 import { CameraCommandsEnum } from '../../../../shared/enums/camera-commands.enum';
 
 jest.mock('socket.io-client');
 
-describe('ImageStreamService', () => {
-  let service: ImageStreamService;
+describe('CameraStreamService', () => {
+  let service: CameraStreamService;
   let mockSocket: Socket;
 
   beforeEach(() => {
@@ -27,9 +27,9 @@ describe('ImageStreamService', () => {
     (io as jest.Mock).mockReturnValue(mockSocket);
 
     TestBed.configureTestingModule({
-      providers: [ImageStreamService],
+      providers: [CameraStreamService],
     });
-    service = TestBed.inject(ImageStreamService);
+    service = TestBed.inject(CameraStreamService);
   });
 
   it('should be created', () => {
@@ -37,7 +37,7 @@ describe('ImageStreamService', () => {
   });
 
   it('should initialize socket with correct URL', () => {
-    expect(io).toHaveBeenCalledWith(environment.CAMERA.URL + CameraCommandsEnum.nsFrontend, { transports: ['websocket'] });
+    expect(io).toHaveBeenCalledWith(environment.SOCKET.CAMERA_URL + CameraCommandsEnum.nsFrontend, { transports: ['websocket'] });
   });
 
   it('should set isCameraConnected to true on connect event', () => {

@@ -16,7 +16,8 @@ export const environment = {
     URL_ANALYSIS: `${BASE_URL}/images/analysis`,
     URL_BUNDLES: `${BASE_URL}/images/bundles`,
   },
-  CAMERA: {
-    URL: `${CAMERA_BASE_URL}`,
+  SOCKET: {
+    CAMERA_URL: `${CAMERA_BASE_URL}`,
+    ANALYSIS_REFRESH_URL: `${BASE_URL}/ws`,
   }
 };

@@ -19,14 +19,14 @@ import {
   UploadImageAmqpDtoMocks
 } from '@ap4/amqp';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import {ImageInformationDto, ReadImageDto, UploadImageDtoMocks} from '@ap4/api';
+import { ImageInformationDto, ReadImageDto, UploadImageDtoMocks } from '@ap4/api';
 import { ImageInformation } from '../entities/image.Information';
 import { Repository } from 'typeorm';
 import { ImageInformationMocks } from '../entities/mocks/image-Information-mocks';
-import {ImageInformationDatabaseService} from "./image.information.database.service";
-import {ImagesS3Service} from "./images.s3.service";
-import {AmqpBrokerService} from "./amqp.broker.service";
-import {ClientProxy} from "@nestjs/microservices";
+import { ImageInformationDatabaseService } from "./image.information.database.service";
+import { ImagesS3Service } from "./images.s3.service";
+import { AmqpBrokerService } from "./amqp.broker.service";
+import { ClientProxy } from "@nestjs/microservices";
 import { DocumentUploadType } from '@ap4/utils';
 
 describe('ImagesController', () => {
@@ -49,13 +49,13 @@ describe('ImagesController', () => {
     getObject: jest.fn().mockImplementation(() => readable),
     listObjects: jest.fn(),
     removeObjects: jest.fn(),
-    bucketExists: jest.fn().mockImplementation(() =>  false),
+    bucketExists: jest.fn().mockImplementation(() => false),
     makeBucket: jest.fn(),
     putObject: jest.fn().mockImplementation(() => {
       return Promise.resolve(
-          {
-            etag: testEtag
-          }
+        {
+          etag: testEtag
+        }
       )
     })
   };
@@ -64,12 +64,12 @@ describe('ImagesController', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         MinioModule.register({
-        endPoint: process.env.S3_HOST || 'localhost',
-        port: process.env.S3_PORT? parseInt(process.env.S3_PORT) : 9000,
-        useSSL: (process.env.S3_USESSL || 'false') === 'true',
-        accessKey: process.env.S3_ACCESSKEY || '' ,
-        secretKey: process.env.S3_SECRETKEY || '',
-      })],
+          endPoint: process.env.S3_HOST || 'localhost',
+          port: process.env.S3_PORT ? parseInt(process.env.S3_PORT) : 9000,
+          useSSL: (process.env.S3_USESSL || 'false') === 'true',
+          accessKey: process.env.S3_ACCESSKEY || '',
+          secretKey: process.env.S3_SECRETKEY || '',
+        })],
       controllers: [ImagesController],
       providers: [
         ImagesService,
@@ -78,6 +78,13 @@ describe('ImagesController', () => {
         AmqpBrokerService,
         {
           provide: AmqpBrokerQueues.SKALA_AP4_DAS_QUEUE,
+          useValue: {
+            send: jest.fn(),
+            emit: jest.fn(),
+          },
+        },
+        {
+          provide: AmqpBrokerQueues.SKALA_AP4_BFF_QUEUE,
           useValue: {
             send: jest.fn(),
             emit: jest.fn(),
@@ -99,7 +106,7 @@ describe('ImagesController', () => {
             client: mockedMinioClient
           }
         },
-        ],
+      ],
     }).compile();
 
     controller = module.get<ImagesController>(ImagesController);
@@ -159,15 +166,15 @@ describe('ImagesController', () => {
       return ImageInformationMocks;
     });
     const expectedReturnValue: ImageInformationDto[] = [
-        ImageInformationMocks[0].toImageInformationDto(),
-        ImageInformationMocks[1].toImageInformationDto(),
+      ImageInformationMocks[0].toImageInformationDto(),
+      ImageInformationMocks[1].toImageInformationDto(),
     ];
     const imageInformationFilterAmqpDto: ImageInformationFilterAmqpDto = new ImageInformationFilterAmqpDto(
-        'testSender',
-        'testReceiver',
-        'testAnalysisStatus',
-        'testDocumentType',
-        'testBundleId'
+      'testSender',
+      'testReceiver',
+      'testAnalysisStatus',
+      'testDocumentType',
+      'testBundleId'
     );
     const returnValue = await controller.getAllImageInformation(imageInformationFilterAmqpDto);
     expect(returnValue).toEqual(expectedReturnValue);

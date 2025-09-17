@@ -13,8 +13,8 @@ import { CameraCommandsEnum } from '../../../../shared/enums/camera-commands.enu
 import { environment } from '../../../../../environments/environment';
 
 @Injectable()
-export class ImageStreamService {
-  url = environment.CAMERA.URL + CameraCommandsEnum.nsFrontend;
+export class CameraStreamService {
+  url = environment.SOCKET.CAMERA_URL + CameraCommandsEnum.nsFrontend;
   private readonly socket: Socket;
   isCameraConnected = new BehaviorSubject<boolean>(false);
   constructor() {

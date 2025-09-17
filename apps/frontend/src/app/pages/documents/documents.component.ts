@@ -7,11 +7,11 @@
  */
 
 import {
-    ChangeDetectionStrategy,
-    ChangeDetectorRef,
-    AfterViewInit,
-    Component,
-    ViewChild,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  AfterViewInit,
+  Component,
+  ViewChild,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
@@ -20,7 +20,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { ImageService } from '../../shared/services/image/imageService';
 import { HttpClientModule } from '@angular/common/http';
-import { BehaviorSubject, map, Subject, tap } from 'rxjs';
+import { BehaviorSubject, map, startWith, Subject, tap } from 'rxjs';
 import { DISPLAYED_COLUMNS } from './const/displayed-columns.const';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
@@ -33,53 +33,57 @@ import { MatDialog } from '@angular/material/dialog';
 import { DATETIME } from './const/date-time.const';
 import { STATUS_ICONS_MAP } from './const/status-icons-map.const';
 import { ScanComponent } from './scan/scan.component';
+import { ImageStreamService } from '../../shared/services/socket/image-stream.service';
 
 @Component({
-    selector: 'app-dashboard',
-    standalone: true,
-    imports: [
-      CommonModule,
-      MatButtonModule,
-      MatTableModule,
-      HttpClientModule,
-      RouterModule,
-      MatPaginator,
-      MatSortModule,
-      MatIcon,
-      ScanComponent,
-      MatFormField,
-      MatInput,
-    ],
-    providers: [ImageService, DatePipe],
-    templateUrl: './documents.component.html',
-    styleUrl: './documents.component.css',
-    changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-dashboard',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatTableModule,
+    HttpClientModule,
+    RouterModule,
+    MatPaginator,
+    MatSortModule,
+    MatIcon,
+    ScanComponent,
+    MatFormField,
+    MatInput,
+  ],
+  providers: [ImageService, ImageStreamService, DatePipe],
+  templateUrl: './documents.component.html',
+  styleUrl: './documents.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DocumentsComponent implements AfterViewInit {
-    @ViewChild(MatPaginator) paginator!: MatPaginator;
-    @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
-    dataSource$ = new Subject<MatTableDataSource<ImageInformationDto>>();
-    filterValue$: BehaviorSubject<string> = new BehaviorSubject<string>('');
-    displayedColumns: string[] = DISPLAYED_COLUMNS;
+  dataSource$ = new Subject<MatTableDataSource<ImageInformationDto>>();
+  filterValue$: BehaviorSubject<string> = new BehaviorSubject<string>('');
+  displayedColumns: string[] = DISPLAYED_COLUMNS;
+  constructor(
+    private readonly imageService: ImageService,
+    private readonly imageStreamService: ImageStreamService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly datePipe: DatePipe,
+    private readonly dialog: MatDialog
+  ) { }
 
-    constructor(
-      private readonly imageService: ImageService,
-      private readonly cdr: ChangeDetectorRef,
-      private readonly datePipe: DatePipe,
-      private readonly dialog: MatDialog
-    ) {
+  ngAfterViewInit(): void {
+    this.imageStreamService.connect();
+    this.imageStreamService.getUpdates().pipe(
+      startWith(null),
+    ).subscribe(() => {
       this.initializeDataSource();
-    }
+    })
+  }
 
-    ngAfterViewInit(): void {
-      this.initializeDataSource();
-    }
-
-    transformStatus(value: string): string {
-      if (!value) return value;
-      return value.replace(/_/g, ' ').toLowerCase();
-    }
+  transformStatus(value: string): string {
+    if (!value) return value;
+    return value.replace(/_/g, ' ').toLowerCase();
+  }
 
   initializeDataSource(): void {
     this.imageService
@@ -98,11 +102,11 @@ export class DocumentsComponent implements AfterViewInit {
           this.filterValue$.subscribe((filter: string) => dataSource.filter = filter);
         })
       )
-        .subscribe((dataSource) => {
-          this.dataSource$.next(dataSource);
-          this.cdr.markForCheck();
-        });
-    }
+      .subscribe((dataSource) => {
+        this.cdr.detectChanges();
+        this.dataSource$.next(dataSource);
+      });
+  }
 
   applyFilter(event: Event) {
     const value = (event.target as HTMLInputElement).value.trim().toLowerCase();
@@ -128,12 +132,12 @@ export class DocumentsComponent implements AfterViewInit {
   private setupPaginator(
     dataSource: MatTableDataSource<ImageInformationDto>
   ): void {
-      this.paginator.pageSize = Number(localStorage.getItem('itemsPerPage'));
-      dataSource.paginator = this.paginator;
-      this.paginator.page.subscribe((event: PageEvent) => {
-        localStorage.setItem('itemsPerPage', String(event.pageSize));
-      });
-    }
+    this.paginator.pageSize = Number(localStorage.getItem('itemsPerPage'));
+    dataSource.paginator = this.paginator;
+    this.paginator.page.subscribe((event: PageEvent) => {
+      localStorage.setItem('itemsPerPage', String(event.pageSize));
+    });
+  }
 
   private setFilterPredicate(dataSource: MatTableDataSource<ImageInformationDto>): void {
     dataSource.filterPredicate = (image: ImageInformationDto, value: string): boolean => {

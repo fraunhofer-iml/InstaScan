@@ -9,7 +9,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ScanComponent } from './scan.component';
 import { By } from '@angular/platform-browser';
-import { ImageStreamService } from './service/image-stream.service';
+import { CameraStreamService } from './service/camera-stream.service';
 import { of } from 'rxjs';
 import { ImageService } from '../../../shared/services/image/imageService';
 import { HttpClientModule } from '@angular/common/http';
@@ -58,7 +58,7 @@ describe('ScanComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ScanComponent, HttpClientModule, BrowserAnimationsModule, NoopAnimationsModule],
       providers: [
-        ImageStreamService,
+        CameraStreamService,
         { provide: MatDialog, useValue: matDialogMock },
         { provide: ImageService, useValue: imageServiceMock },
         { provide: SnackbarService, useValue: snackBarMock }

@@ -20,6 +20,10 @@ export class AmqpBroker {
     return this.getMessageBroker(AmqpBrokerQueues.SKALA_AP4_DAS_QUEUE);
   }
 
+  public getBFFBroker(): DynamicModule {
+    return this.getMessageBroker(AmqpBrokerQueues.SKALA_AP4_BFF_QUEUE);
+  }
+
   private getMessageBroker(queue: string): DynamicModule {
     const amqpUri = process.env['BROKER_URI'];
 

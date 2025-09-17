@@ -17,7 +17,9 @@ export class AmqpBrokerService {
 
   constructor(
     @Inject(AmqpBrokerQueues.SKALA_AP4_DAS_QUEUE)
-    private readonly analysisServiceAMQPClient: ClientProxy
+    private readonly analysisServiceAMQPClient: ClientProxy,
+    @Inject(AmqpBrokerQueues.SKALA_AP4_BFF_QUEUE)
+    private readonly bffAMQPClient: ClientProxy
   ) {}
 
   /**
@@ -29,5 +31,12 @@ export class AmqpBrokerService {
    */
   public sendImageToAnalysisService(uuid: string, imageBase64: string, bundleId: string, documentUploadType: string){
     this.analysisServiceAMQPClient.emit(ImageMessagePattern.UPLOAD_NEW_IMAGE, new AnalyzeImageAmqpDto(uuid, imageBase64, bundleId, documentUploadType));
+  }
+
+  /**
+   * Sends a message to BFF to refresh the images.
+   */
+  public sendRefreshToBff(){
+    this.bffAMQPClient.emit(ImageMessagePattern.REFRESH_ANALYSIS, {});
   }
 }
