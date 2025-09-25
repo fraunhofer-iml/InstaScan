@@ -5,7 +5,14 @@
   ~ For details on the licensing terms, see the LICENSE file.
   ~ SPDX-License-Identifier: Apache-2.0
   -->
-  <div class="wrapper">
+
+<header class="header-evaluation">
+    <a [routerLink]="['/', RoutingEnum.documents]" routerLinkActive="active" class="header-documents">Documents</a>
+    <mat-icon fontSet="material-symbols-outlined">chevron_right</mat-icon>
+    <a>Evaluation</a>
+</header>
+
+ <div class="wrapper">
     <div
         class="ImageJsoncontainer"
         [ngClass]="{ 'image-visible': showImage, 'image-hidden': !showImage }"

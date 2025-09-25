@@ -8,7 +8,7 @@
 
 import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { EvaluationComponent } from './evaluation.component';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { ImageService } from '../../shared/services/image/imageService';
 import { SnackbarService } from '../../shared/services/snackbar/SnackBar.Service';
@@ -18,6 +18,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AnalysisStatus, DocumentUploadType } from '@ap4/utils';
 import {ErrorSchemaDto, ImageInformationDto, ReadImageDto} from '@ap4/api';
 import { SnackbarMessagesEnum } from '../../shared/enums/snackbar-messages.enum';
+import { RouterTestingModule } from '@angular/router/testing';
 
 jest.mock('pdfjs-dist', () => ({
   GlobalWorkerOptions: {
@@ -52,7 +53,6 @@ describe('EvaluationComponent', () => {
     image_analysis_result:new ErrorSchemaDto('status', 'message', 'error_details'),
   };
 
-
   const mockImageService = {
     getImageByUuid: jest.fn().mockReturnValue(of(mockImage)),
     getImageFileByUuid: jest.fn().mockReturnValue(of({ image_base64: 'mockedBase64String' })),
@@ -68,10 +68,16 @@ describe('EvaluationComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EvaluationComponent, HttpClientTestingModule, BrowserAnimationsModule],
+      imports: [
+        EvaluationComponent,
+        HttpClientTestingModule,
+        BrowserAnimationsModule,
+        RouterTestingModule.withRoutes([
+          { path: '', component: EvaluationComponent }
+      ]),
+      ],
       providers: [
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
-        { provide: Router, useValue: mockRouter },
         { provide: ImageService, useValue: mockImageService },
         { provide: SnackbarService, userValue: mockSnackbar },
       ]

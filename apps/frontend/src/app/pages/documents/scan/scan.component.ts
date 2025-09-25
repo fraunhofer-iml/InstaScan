@@ -24,6 +24,7 @@ import { ImageDialogComponent } from './image-dialog/image-dialog.component';
 import { SnackbarService } from '../../../shared/services/snackbar/SnackBar.Service';
 import { SnackbarMessagesEnum } from '../../../shared/enums/snackbar-messages.enum';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { BundleCharsEnum } from './enum/bundle-chars.enum';
 
 @Component({
   selector: 'app-scan-document',
@@ -50,6 +51,7 @@ export class ScanComponent implements OnDestroy {
     private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly snackBar: SnackbarService
   ) {
+    this.generateBundleId();
     this.liveImage = this.cameraStreamService.onImageStream();
     this.isCameraConnected = this.cameraStreamService.getCameraStatus();
     this.cameraStreamService.onDocumentResponse().subscribe(uuid => {
@@ -103,6 +105,7 @@ export class ScanComponent implements OnDestroy {
       this.images = [];
       this.encodedImageFiles = [];
       this.bundleId.reset();
+      this.generateBundleId();
       this.initializeDataSource.emit();
     });
     }
@@ -126,6 +129,7 @@ export class ScanComponent implements OnDestroy {
   }
 
   removeImage(index: number) {
+    this.generateBundleId();
     this.encodedImageFiles.splice(index, 1);
     this.images?.splice(index, 1);
   }
@@ -134,5 +138,14 @@ export class ScanComponent implements OnDestroy {
     this.dialog.open(ImageDialogComponent, {
       data: encodedImageFile
     });
+  }
+
+  private generateBundleId(): void {
+    const values = new Uint8Array(6);
+    crypto.getRandomValues(values);
+    this.bundleId.setValue(Array.from(values, (value) => {
+      const index = value % BundleCharsEnum.CHARS.length;
+      return BundleCharsEnum.CHARS[index];
+    }).join(''));
   }
 }

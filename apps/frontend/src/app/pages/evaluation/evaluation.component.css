@@ -6,10 +6,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+.header-evaluation {
+    display: flex;
+    align-items: center;
+    margin: 5em 0 0 1em;
+}
+
+.header-documents {
+    color: var(--main-color);
+    text-decoration: none;
+}
+
 .wrapper {
     height: 100%;
     display: flex;
-    padding: 5em 1em 1em 1em;
+    padding: 1em;
     gap: 1em;
     transition: all 0.3s ease-in-out;
     align-items: flex-start;

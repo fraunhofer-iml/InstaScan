@@ -6,7 +6,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export enum RoutingEnum {
-    dashboard = 'dashboard',
-    documents = 'documents',
+export enum BundleCharsEnum {
+  CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 }

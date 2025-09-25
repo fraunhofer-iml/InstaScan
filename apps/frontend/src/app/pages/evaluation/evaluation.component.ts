@@ -10,7 +10,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { map, Observable } from 'rxjs';
 import { ReadImageDto, ImageInformationDto } from '@ap4/api';
 import { AnalysisStatus, DOCUMENT_UPLOAD_TYPE_TO_UPLOAD_VALUES } from '@ap4/utils'
@@ -26,6 +26,7 @@ import { SnackbarService } from '../../shared/services/snackbar/SnackBar.Service
 import { RoutingEnum } from '../../shared/enums/routing.enum';
 import { SnackbarMessagesEnum } from '../../shared/enums/snackbar-messages.enum';
 import { ApproveEnum } from './enum/approve.enum';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'app-pdf-preview',
@@ -41,6 +42,9 @@ import { ApproveEnum } from './enum/approve.enum';
     HttpClientModule,
     MatExpansionModule,
     JsonComponent,
+    RouterLink,
+    MatIcon,
+    RouterLinkActive,
   ],
   providers: [ImageService, SnackbarService],
   templateUrl: './evaluation.component.html',
@@ -55,6 +59,7 @@ export class EvaluationComponent {
   showImage = true;
   modified = false;
   protected readonly approveEnum = ApproveEnum;
+  protected readonly RoutingEnum = RoutingEnum;
 
   constructor(
     private readonly route: ActivatedRoute,
