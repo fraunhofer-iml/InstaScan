@@ -6,6 +6,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+.wrapper{
+    height: 100%;
+    width: 100%;
+}
+
 .toolbar-icon {
     margin: 0.3em 0.5em 0 0;
     cursor: pointer;
@@ -28,6 +33,7 @@ mat-toolbar {
     z-index: 2;
 }
 
-mat-sidenav-content {
+mat-sidenav-content, .content {
     background-color: var(--sub-color);
+    height: 100%;
 }

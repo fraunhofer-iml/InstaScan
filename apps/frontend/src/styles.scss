@@ -33,9 +33,14 @@ $my-theme: mat.define-theme((
   @include mat.all-component-themes($my-theme);
 }
 
-body {
+html, body {
   margin: 0;
   font-family: roboto, 'Helvetica Neue', sans-serif;
+  height: 100%;
+}
+
+app-root{
+  display: block;
   height: 100%;
 }
 
