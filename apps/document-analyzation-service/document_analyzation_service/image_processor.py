@@ -97,7 +97,7 @@ def retrieve_document_data(data_url: str, client: AzureOpenAI) -> object:
                 "content": [
                     {
                         "type": "text",
-                        "text": "A CMR consists of several fields, give me the information that is written on the document for all of these fields. In other words: Extract all relevant information.",
+                        "text": 'A CMR consists of several fields, give me the information that is written on the document for all of these fields. In other words: Extract all relevant information. If you cannot find a value for a field, fill in this value with an empty string ("").',
                     },
                     {
                         "type": "image_url",
