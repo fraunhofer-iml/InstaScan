@@ -136,8 +136,11 @@ export class ScanComponent implements OnDestroy {
 
   openImagePreview(encodedImageFile: string) {
     this.dialog.open(ImageDialogComponent, {
-      data: encodedImageFile
-    });
+        data: encodedImageFile,
+        maxWidth: '100%',
+        maxHeight: '100%'
+    }
+    );
   }
 
   private generateBundleId(): void {

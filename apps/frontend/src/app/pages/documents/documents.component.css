@@ -82,3 +82,9 @@ mat-chip {
     align-self: flex-start;
     margin-top: 0.7em;
 }
+
+@media (max-width: 40em) {
+    .searchbar {
+        width: 20em;
+    }
+}

@@ -25,3 +25,9 @@
     padding: 1em;
     width: 33em;
 }
+
+@media (max-width: 40em) {
+    .image {
+        width: 20em;
+    }
+}

@@ -5,7 +5,7 @@
  * For details on the licensing terms, see the LICENSE file.
  * SPDX-License-Identifier: Apache-2.0
  */
-export enum UploadMessages{
+export enum UploadMessages {
     UPLOAD_SUCCESS = 'File uploaded successfully!',
     UPLOAD_LOADING = 'File is uploading...',
 }

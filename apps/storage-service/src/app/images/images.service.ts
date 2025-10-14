@@ -109,6 +109,7 @@ export class ImagesService {
     }
     foundImage.analysisStatus = imageInformationDto.analysisStatus;
     foundImage.bundleId = imageInformationDto.bundleId;
+    foundImage.lastModified = new Date();
     return this.imageInformationDatabaseService.saveImageInformation(foundImage).then(updatedImage => updatedImage.toImageInformationAmqpDto());
   }
 

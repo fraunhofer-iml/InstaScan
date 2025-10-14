@@ -181,11 +181,16 @@
     }
 
     .icon-buttons {
-        margin-left: 1.5em;
         font-size: xx-large;
+        padding: 0.2em;
     }
 
     .input-bundle {
         width: 100%;
+    }
+
+    .confirm-button {
+        margin-top: 1em;
+        align-self: center
     }
 }

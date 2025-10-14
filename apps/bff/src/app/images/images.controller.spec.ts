@@ -14,7 +14,7 @@ import {
   ImageInformationAmqpDtoMocks
 } from '@ap4/amqp';
 import { firstValueFrom, of } from 'rxjs';
-import {UploadImageDtoMocks, ImageInformationDtoMocks, ReadImageDtoMocks, ImageInformationDto} from '@ap4/api';
+import { UploadImageDtoMocks, ImageInformationDtoMocks, ReadImageDtoMocks } from '@ap4/api';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('ImagesController', () => {

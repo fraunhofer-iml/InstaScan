@@ -15,8 +15,7 @@ import { Readable } from 'stream';
 import {
   AmqpBrokerQueues,
   AnalysisResultAmqpDtoMocks,
-  ImageInformationFilterAmqpDto,
-  UploadImageAmqpDtoMocks
+  ImageInformationFilterAmqpDto
 } from '@ap4/amqp';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ImageInformationDto, ReadImageDto, UploadImageDtoMocks } from '@ap4/api';
@@ -26,13 +25,11 @@ import { ImageInformationMocks } from '../entities/mocks/image-Information-mocks
 import { ImageInformationDatabaseService } from "./image.information.database.service";
 import { ImagesS3Service } from "./images.s3.service";
 import { AmqpBrokerService } from "./amqp.broker.service";
-import { ClientProxy } from "@nestjs/microservices";
 import { DocumentUploadType } from '@ap4/utils';
 
 describe('ImagesController', () => {
   let controller: ImagesController;
   let imageInformationRepository: Repository<ImageInformation>;
-  let s3ServiceMock: MinioService;
 
   const testUuid = 'testUuid';
   const testEtag = 'testEtag';
@@ -111,7 +108,6 @@ describe('ImagesController', () => {
 
     controller = module.get<ImagesController>(ImagesController);
     imageInformationRepository = module.get<Repository<ImageInformation>>(getRepositoryToken(ImageInformation));
-    s3ServiceMock = module.get<MinioService>(MinioService);
   });
 
   it('getImage: should get an image for an uuid', async () => {
@@ -193,6 +189,9 @@ describe('ImagesController', () => {
   });
 
   it('updateImageInformation: should update a dataset of image information', async () => {
+    const fixedDate = new Date('2025-04-03T06:24:59.535Z');
+    jest.useFakeTimers().setSystemTime(fixedDate);
+
     const getImageSpy = jest.spyOn(imageInformationRepository, 'findOne');
     getImageSpy.mockImplementationOnce(() => {
       return Promise.resolve(ImageInformationMocks[0]);
@@ -209,6 +208,7 @@ describe('ImagesController', () => {
 
     const returnValue = await controller.updateImageInformation(ImageInformationMocks[0].toImageInformationDto());
     expect(returnValue).toEqual(expectedReturnValue);
+    jest.useRealTimers();
   });
 
   it('removeImageInformation: should remove a dataset of image information', async () => {

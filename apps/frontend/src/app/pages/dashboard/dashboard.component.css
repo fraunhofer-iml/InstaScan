@@ -23,3 +23,14 @@
     width: 10em;
     height: 1em;
 }
+
+@media (max-width: 40em) {
+    .icon-logo {
+        font-size: 6em;
+        width: 6em;
+    }
+
+    h1 {
+        font-size: 1em;
+    }
+}

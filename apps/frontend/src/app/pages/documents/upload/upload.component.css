@@ -103,7 +103,15 @@
 
 @media (max-width: 30em) {
     .upload-container {
-        width: 60%
+        width: 90%;
+    }
+
+    .text {
+        font-size: small;
+    }
+
+    .icon-cloud-upload {
+        font-size: xx-large;
     }
 }
 
