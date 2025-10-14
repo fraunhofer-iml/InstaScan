@@ -17,24 +17,28 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { DocumentUploadType } from '@ap4/utils';
 import { PdfConverter } from "./pdfConverter";
 import { from, switchMap } from "rxjs";
+import { SnackbarService } from '../../../shared/services/snackbar/SnackBar.Service';
+import { UploadMessages } from '../const/upload-messages.enum';
 
 @Component({
   selector: 'app-upload-document',
   standalone: true,
   imports: [CommonModule, MatButtonModule, MatIconModule, HttpClientModule],
-  providers: [ImageService, PdfConverter],
+  providers: [ImageService, PdfConverter, SnackbarService],
   templateUrl: './upload.component.html',
   styleUrl: './upload.component.css',
 })
 export class UploadComponent {
   document: FormControl = new FormControl(null, [Validators.required]);
+  uploadMessages = UploadMessages;
   isUploading = false;
-
+  uploadSuccessful = false;
   constructor(
-      public dialogRef: MatDialogRef<UploadComponent>,
-      private readonly imageService: ImageService,
-      private readonly pdfConverter: PdfConverter,
-  ) {}
+    public dialogRef: MatDialogRef<UploadComponent>,
+    private readonly imageService: ImageService,
+    private readonly pdfConverter: PdfConverter,
+    private readonly snackbarService: SnackbarService
+  ) { }
 
   onDragOver(event: DragEvent): void {
     event.preventDefault();
@@ -55,31 +59,37 @@ export class UploadComponent {
     this.document.patchValue(file);
   }
 
+  onUploadSuccess(image: string): void {
+    this.isUploading = false;
+    this.uploadSuccessful = true;
+    this.document.setValue(null);
+    this.dialogRef.close(image);
+    this.snackbarService.sendMessage(this.uploadMessages.UPLOAD_SUCCESS);
+  }
+
   submitDocument(): void {
     const reader = new FileReader();
     this.isUploading = true;
-    reader.onload = () => {
+    this.uploadSuccessful = false;
+    reader.onloadend = () => {
       const mimeType: string = (reader.result as string).split(',')[0];
       const extension: string = mimeType.split('/')[1].split(';')[0].toUpperCase();
       const uploadType: DocumentUploadType = DocumentUploadType[extension as keyof typeof DocumentUploadType];
       const image_base64 = (reader.result as string).split(',')[1];
-      if(uploadType == DocumentUploadType.PDF){
+      if (uploadType == DocumentUploadType.PDF) {
         from(this.pdfConverter.convertToPdf(image_base64)).pipe(
-            switchMap(result => {
-              return this.imageService.uploadImage({ image_base64: result, bundleId: 'testBundleId', documentUploadType: uploadType });
-            })
+          switchMap(result => {
+            return this.imageService.uploadImage({ image_base64: result, bundleId: 'testBundleId', documentUploadType: uploadType });
+          })
         ).subscribe((image) => {
-          this.isUploading = false;
-          this.dialogRef.close(image);
+          this.onUploadSuccess(image);
         });
       }
-      else{
+      else {
         this.imageService.uploadImage({ image_base64: image_base64, bundleId: 'testBundleId', documentUploadType: uploadType }).subscribe((image) => {
-          this.isUploading = false;
-          this.dialogRef.close(image);
+          this.onUploadSuccess(image);
         });
       }
-      this.document.setValue(null);
     };
     reader.readAsDataURL(this.document.value);
   }

@@ -7,40 +7,28 @@
   -->
 
 <div>
-    <mat-icon fontSet="material-symbols-outlined" id="close" onKeyUp (click)="dialogRef.close()">close</mat-icon>
-    <h1 class="title">Upload Document</h1>
+  <mat-icon fontSet="material-symbols-outlined" id="close" onKeyUp (click)="dialogRef.close()">close</mat-icon>
+  <h1 class="title">Upload Document</h1>
 </div>
 <div class="container">
   <div class="upload-container">
-    <label
-      for="dropzone-file"
-      class="dropzone"
-      (drop)="onDrop($event)"
-      (dragover)="onDragOver($event)"
-    >
-      <div class="dropzone-content" *ngIf="!document.value">
-          <mat-icon fontSet="material-symbols-outlined" class="icon-cloud-upload">cloud_upload</mat-icon>
-          <p class="text"><strong>Click to upload</strong> or drag and drop</p>
-          <p class="text small">PNG, JPG, PDF</p>
-      <div class="spinner" *ngIf="isUploading"></div>
-            </div>
-
-      <div class="dropzone-content" *ngIf="document.value">
-          <div class="icon-check"></div>
-          <span class="text bold">{{ document.value.name }}</span>
+    <label for="dropzone-file" class="dropzone" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
+      <div class="dropzone-content" *ngIf="!document.value && !uploadSuccessful && !isUploading">
+        <mat-icon fontSet="material-symbols-outlined" class="icon-cloud-upload">cloud_upload</mat-icon>
+        <p class="text"><strong>Click to upload</strong> or drag and drop</p>
+        <p class="text small">PNG, JPG, PDF</p>
       </div>
-
-            <input id="dropzone-file"
-                   type="file"
-                   class="hidden"
-                   (change)="onFileSelected($event)"
-            />
-        </label>
-    </div>
-    <button mat-flat-button
-            [disabled]="!document.valid"
-            (click)="submitDocument()"
-    >
-        Upload
-    </button>
+      <div class="dropzone-content" *ngIf="isUploading && !uploadSuccessful">
+        <div class="spinner"></div>
+        <p class="text">{{ uploadMessages.UPLOAD_LOADING }}</p>
+      </div>
+      <div class="dropzone-content" *ngIf="document.value && !isUploading">
+        <span class="text bold">{{ document.value.name }}</span>
+      </div>
+      <input id="dropzone-file" type="file" class="hidden" (change)="onFileSelected($event)" />
+    </label>
+  </div>
+  <button mat-flat-button [disabled]="!document.valid || isUploading" (click)="submitDocument()">
+    Upload
+  </button>
 </div>
