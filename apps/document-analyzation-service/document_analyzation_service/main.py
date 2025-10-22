@@ -14,14 +14,8 @@ from typing import Any
 import pika
 from dotenv import load_dotenv
 
-from document_analyzation_service.image_processor import (
-    convert_image_to_data_url,
-    process_image,
-)
-from document_analyzation_service.message_broker import (
-    RabbitMQReceiver,
-    decode_image_from_message,
-)
+from document_analyzation_service.image_processor import convert_image_to_data_url, process_image
+from document_analyzation_service.message_broker import RabbitMQReceiver, decode_image_from_message
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -77,7 +71,13 @@ def on_image_received(
 
 
 def send_event_to_queue(event: dict[str, Any]) -> None:
-    """Send the processed JSON event to a RabbitMQ queue."""
+    """Send the processed JSON event to a RabbitMQ queue.
+
+    Args:
+    ----------
+    event : dict[str, Any]
+        The event data to be sent to the queue.
+    """
     # Convert event to a JSON string
     event_json = json.dumps(event)
 
@@ -88,7 +88,7 @@ def send_event_to_queue(event: dict[str, Any]) -> None:
 
     channel = connection.channel()
 
-    # Decalre queue
+    # Declare queue
     channel.queue_declare(queue=SEND_QUEUE_NAME)
 
     # Send JSON-Event to Queue
@@ -110,9 +110,7 @@ def main() -> None:
     )
     try:
         logger.info(f"Listening for messages on queue '{RECEIVE_QUEUE_NAME}'...")
-        receiver.start_listening(
-            on_image_received  # type: ignore[arg-type]
-        )
+        receiver.start_listening(on_image_received)  # type: ignore[arg-type]
     except KeyboardInterrupt:
         logger.info("Stopping Document Analyzation Service...")
         receiver.stop()

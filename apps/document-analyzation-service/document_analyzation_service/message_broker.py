@@ -9,7 +9,7 @@
 import base64
 import logging
 import time
-from typing import Callable
+from typing import Any, Callable
 
 import pika
 
@@ -33,7 +33,7 @@ class RabbitMQReceiver:
         self.username = username
         self.password = password
         self.connection: pika.BlockingConnection | None = None
-        self.channel = None
+        self.channel: Any | None = None
         # Direkter Verbindungsaufbau im Konstruktor
         self.connect()
 
@@ -48,21 +48,35 @@ class RabbitMQReceiver:
                 parameters = pika.ConnectionParameters(self.uri, 5672, "/", credentials)
                 self.connection = pika.BlockingConnection(parameters)
                 self.channel = self.connection.channel()
-                self.channel.queue_declare(queue=self.queue_name)  # type: ignore[attr-defined]
+                self.channel.queue_declare(queue=self.queue_name)
                 logger.info("RabbitMQ connection established to %s", self.uri)
                 return
             except pika.exceptions.AMQPConnectionError as e:
                 retries -= 1
                 logger.error(
-                    "Error connecting to RabbitMQ: %s. Retrying... %d attempts left.", e, retries
+                    "Error connecting to RabbitMQ: %s. Retrying... %d attempts left.",
+                    e,
+                    retries,
                 )
                 time.sleep(5)  # Wartezeit zwischen den Verbindungsversuchen
         raise pika.exceptions.AMQPConnectionError(
             "ERROR: Failed to connect to RabbitMQ after multiple retries"
         )
 
-    def start_listening(self, callback: Callable[[object, object], None]) -> None:
-        """Start waiting for messages in the queue and executes the callback."""
+    def start_listening(self, callback: Callable[[object, object, object, object], None]) -> None:
+        """Start waiting for messages in the queue and executes the callback.
+
+        Args:
+        ----------
+        callback : Callable[[object, object, object, object], None]
+            The callback function to process incoming messages. It should accept four parameters:
+            channel, method, properties, and body.
+
+        Raises:
+        ------
+        pika.exceptions.AMQPConnectionError
+            If the RabbitMQ connection is not established.
+        """
         if not self.connection or not self.channel:
             raise pika.exceptions.AMQPConnectionError(
                 "ERROR: RabbitMQ connection not established."
@@ -83,6 +97,17 @@ class RabbitMQReceiver:
 
 
 def decode_image_from_message(body: bytes) -> bytes:
-    """Decode base64 image data from message body."""
+    """Decode base64 image data from message body.
+
+    Args:
+    ----------
+    body : bytes
+        The base64-encoded image data.
+
+    Returns:
+    -------
+    bytes
+        The decoded image data.
+    """
     image_data = base64.b64decode(body)
     return image_data

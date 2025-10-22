@@ -6,12 +6,13 @@
 
 """This module provides utility functions for image processing and serialization."""
 
-import os
-from mimetypes import guess_type
 import base64
 import io
+import os
+from mimetypes import guess_type
 from pathlib import Path
 from typing import AnyStr
+
 from PIL.Image import Image
 
 
@@ -38,7 +39,18 @@ def local_image_to_data_url(image_path: str) -> str:
 
 
 def image_to_data_url(image: Image) -> str:
-    """Konvertiert ein PIL.Image-Objekt in eine Data-URL."""
+    """Convert a PIL.Image object to a data URL.
+
+    Args:
+    ----------
+    image : Image
+        The PIL Image object to be converted.
+
+    Returns:
+    -------
+    str
+        The data URL representation of the image.
+    """
     # MIME-Typ anhand des Bildformats bestimmen
     mime_type = f"image/{image.format.lower()}" if image.format else "application/octet-stream"
 

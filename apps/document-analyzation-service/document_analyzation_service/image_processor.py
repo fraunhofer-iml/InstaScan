@@ -13,6 +13,7 @@ import time
 from typing import Any
 
 from openai import AzureOpenAI
+from openai.types.chat.parsed_chat_completion import ParsedChatCompletion
 from PIL import Image
 
 from document_analyzation_service.ecmr_schema import ECMRDocument
@@ -23,14 +24,40 @@ logger = logging.getLogger(__name__)
 
 
 def convert_image_to_data_url(image_data: bytes) -> str:
-    """Convert binary image data to a Data URL."""
+    """Convert binary image data to a Data URL.
+
+    Args:
+    ----------
+    image_data : bytes
+        The binary data of the image.
+
+    Returns:
+    -------
+    str
+        The Data URL representation of the image.
+    """
     image = Image.open(io.BytesIO(image_data))
     data_url = image_to_data_url(image)
     return data_url
 
 
 def process_image(data_url: str, image_uuid: str, message_pattern: str) -> dict[str, Any]:
-    """Process an image by converting it to a Data URL and extracting document data using Azure API."""
+    """Process an image Data URL and extracting document data using Azure API.
+
+    Args:
+    ----------
+    data_url : str
+        The Data URL representation of the image.
+    image_uuid : str
+        The unique identifier for the image.
+    message_pattern : str
+        Topic name for sending the result.
+
+    Returns:
+    -------
+    dict[str, Any]
+        The resulting event of the image processing.
+    """
     max_attempts = 2
     attempt = 0
     last_exception = None
@@ -71,7 +98,18 @@ def process_image(data_url: str, image_uuid: str, message_pattern: str) -> dict[
 
 
 def process_image_with_azure(data_url: str) -> object:
-    """Communicate with the Azure API to process the image and returns the serialized result."""
+    """Communicate with the Azure API to process the image Data URL and return the serialized result.
+
+    Args:
+    ----------
+    data_url : str
+        The Data URL representation of the image.
+
+    Returns:
+    -------
+    object
+        The serialized result from the Azure API.
+    """
     client = AzureOpenAI(
         azure_endpoint=str(os.getenv("AZURE_API_ENDPOINT")),
         api_key=os.getenv("AZURE_API_KEY"),
@@ -79,12 +117,27 @@ def process_image_with_azure(data_url: str) -> object:
     )
 
     completion = retrieve_document_data(data_url, client)
-    event = completion.choices[0].message.parsed  # type: ignore[attr-defined]
+    event = completion.choices[0].message.parsed
     return make_serializable(event)
 
 
-def retrieve_document_data(data_url: str, client: AzureOpenAI) -> object:
-    """Retrieve document data from the Azure API and returns the result."""
+def retrieve_document_data(
+    data_url: str, client: AzureOpenAI
+) -> ParsedChatCompletion[ECMRDocument]:
+    """Retrieve the document data from the Azure API, by assembling an Open AI message.
+
+    Args:
+    ----------
+    data_url : str
+        The Data URL representation of the image.
+    client : AzureOpenAI
+        The Azure OpenAI client instance.
+
+    Returns:
+    -------
+    ParsedChatCompletion[ECMRDocument]
+        The document data retrieved from the Azure API.
+    """
     completion = client.beta.chat.completions.parse(
         model=str(os.getenv("GPT_MODEL")),
         messages=[
