@@ -10,24 +10,31 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 2em;
 }
 
 .close-icon {
     position: absolute;
     top: 0;
     right: 0;
+    padding: 0.5em;
+}
+
+.close-icon:hover{
+    background-color: lightgray;
+    border-radius: 1em;
     cursor: pointer;
-    padding: 1em;
 }
 
 .image {
     padding: 1em;
-    width: 33em;
+    width: auto;
+    height: 90vh;
+    object-fit: contain;
 }
 
 @media (max-width: 40em) {
     .image {
         width: 20em;
+        height: auto;
     }
 }
