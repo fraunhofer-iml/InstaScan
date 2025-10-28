@@ -14,7 +14,7 @@ import { FormControl, Validators } from '@angular/forms';
 import { ImageService } from '../../../shared/services/image/imageService';
 import { HttpClientModule } from '@angular/common/http';
 import { MatDialogRef } from '@angular/material/dialog';
-import { DocumentUploadType } from '@ap4/utils';
+import { DocumentTypeId, DocumentUploadType } from '@ap4/utils';
 import { PdfConverter } from "./pdfConverter";
 import { from, switchMap } from "rxjs";
 import { SnackbarService } from '../../../shared/services/snackbar/SnackBar.Service';
@@ -79,14 +79,14 @@ export class UploadComponent {
       if (uploadType == DocumentUploadType.PDF) {
         from(this.pdfConverter.convertToPdf(image_base64)).pipe(
           switchMap(result => {
-            return this.imageService.uploadImage({ image_base64: result, bundleId: 'testBundleId', documentUploadType: uploadType });
+            return this.imageService.uploadImage({ image_base64: result, bundleId: 'testBundleId', documentUploadType: uploadType, documentType: DocumentTypeId.CMR });
           })
         ).subscribe((image) => {
           this.onUploadSuccess(image);
         });
       }
       else {
-        this.imageService.uploadImage({ image_base64: image_base64, bundleId: 'testBundleId', documentUploadType: uploadType }).subscribe((image) => {
+        this.imageService.uploadImage({ image_base64: image_base64, bundleId: 'testBundleId', documentUploadType: uploadType, documentType: DocumentTypeId.CMR }).subscribe((image) => {
           this.onUploadSuccess(image);
         });
       }

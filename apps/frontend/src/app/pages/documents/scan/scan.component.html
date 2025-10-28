@@ -27,20 +27,27 @@
         </div>
         <div *ngIf="encodedImageFiles" class="encodedImageFiles">
             <div *ngFor="let encodedImageFile of encodedImageFiles; let index = index" class="encodedImageFile">
-                <img [src]="encodedImageFile"
-                     (click)="openImagePreview(encodedImageFile)"
-                     alt="Scanned document"
-                     class="image"
-                     onKeyUp=""
-                />
-                <mat-icon (click)="removeImage(index)" class="delete-icon icon" fontSet="material-symbols-outlined" onKeyUp="">delete</mat-icon>
+              <img [src]="encodedImageFile"
+                   (click)="openImagePreview(encodedImageFile)"
+                   alt="Scanned document"
+                   onKeyUp=""
+                   class="image" />
+              <mat-icon (click)="removeImage(index)" class="delete-icon icon" fontSet="material-symbols-outlined" onKeyUp="">delete</mat-icon>
+              <mat-form-field class="dropdown-document-type" appearance="outline">
+                <mat-label>Document type</mat-label>
+                <mat-select [(ngModel)]="documentTypeSelections[index]">
+                  <mat-option *ngFor="let option of documentTypes" [value]="option">
+                    {{ option }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
             </div>
         </div>
-        <button mat-flat-button
-                class="confirm-button"
-                [disabled]="encodedImageFiles.length === 0 || bundleId.invalid"
-                (click)="confirmBundle(bundleId.value)"
-        >Analyse</button>
+      <button mat-flat-button
+              class="confirm-button"
+              [disabled]="isAnalyseDisabled"
+              (click)="confirmBundle(bundleId.value, documentTypeSelections)"
+      >Analyse</button>
     </div>
     <div class="bundle-controls">
         <div class="button-document" onKeyUp="" (click)="captureImage()" [class.disabled]="!(isCameraConnected | async)" >

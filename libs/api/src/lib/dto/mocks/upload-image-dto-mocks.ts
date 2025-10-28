@@ -7,8 +7,8 @@
  */
 
 import {UploadImageDto} from "../upload.image.dto";
-import {DocumentUploadType} from "@ap4/utils";
+import { DocumentTypeId, DocumentUploadType} from "@ap4/utils";
 
 export const UploadImageDtoMocks: UploadImageDto[] = [
-  new UploadImageDto('test_image_base_64_string', 'testBundleId', DocumentUploadType.JPEG)
+  new UploadImageDto('test_image_base_64_string', 'testBundleId', DocumentUploadType.JPEG, DocumentTypeId.CMR)
 ];

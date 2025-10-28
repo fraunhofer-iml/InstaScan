@@ -96,8 +96,13 @@ describe('ImageService', (): void => {
   });
 
   it('should upload an image and return a response string', () => {
-    const newImage: UploadImageDto = { image_base64: 'eyzwijh', bundleId: 'bundleId', documentUploadType: DocumentUploadType.JPEG};
     const responseMessage = 'Image uploaded';
+    const newImage: UploadImageDto = {
+      image_base64: 'eyzwijh',
+      bundleId: 'bundleId',
+      documentUploadType: DocumentUploadType.JPEG,
+      documentType: DocumentTypeId.CMR
+    };
 
     service.uploadImage(newImage).subscribe((response) => {
       expect(response).toBe(responseMessage);

@@ -108,7 +108,7 @@ describe('ScanComponent', () => {
 
   it('should clean encodedImageFiles by confirm', () => {
     imageServiceMock.analyzeImageBundle.mockReturnValue(of(true));
-    component.confirmBundle('bundleId');
+    component.confirmBundle('bundleId', []);
     expect(component.encodedImageFiles.length).toBe(0);
   });
 
@@ -142,7 +142,7 @@ describe('ScanComponent', () => {
     component.images = [mockImage];
     component.encodedImageFiles = ['encodedData'];
 
-    component.confirmBundle('bundle1');
+    component.confirmBundle('bundle1', []);
 
     expect(component.images).toEqual([]);
     expect(component.encodedImageFiles).toEqual([]);

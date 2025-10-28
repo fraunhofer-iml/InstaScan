@@ -27,9 +27,13 @@ export class UploadImageDto {
   @ApiProperty({ type: String, enum: DocumentUploadType})
   documentUploadType: string;
 
-  constructor(imageBase64: string, bundleId: string, documentUploadType: string) {
+  @ApiProperty()
+  documentType: string;
+
+  constructor(imageBase64: string, bundleId: string, documentUploadType: string, documentType: string) {
     this.image_base64 = imageBase64;
     this.bundleId = bundleId ? bundleId : DefaultBundleId;
     this.documentUploadType = documentUploadType ? documentUploadType : DocumentUploadType.JPEG;
+    this.documentType = documentType;
   }
 }

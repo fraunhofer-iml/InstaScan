@@ -19,17 +19,30 @@ import { ImageService } from '../../../shared/services/image/imageService';
 import { UploadComponent } from '../upload/upload.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ImageInformationDto, ReadImageDto } from '@ap4/api';
-import { DOCUMENT_UPLOAD_TYPE_TO_UPLOAD_VALUES } from '@ap4/utils';
+import { DOCUMENT_UPLOAD_TYPE_TO_UPLOAD_VALUES, DocumentTypeId } from '@ap4/utils';
 import { ImageDialogComponent } from './image-dialog/image-dialog.component';
 import { SnackbarService } from '../../../shared/services/snackbar/SnackBar.Service';
 import { SnackbarMessagesEnum } from '../../../shared/enums/snackbar-messages.enum';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BundleCharsEnum } from './enum/bundle-chars.enum';
+import { MatOption, MatSelect } from '@angular/material/select';
 
 @Component({
   selector: 'app-scan-document',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatFormField, MatLabel, MatInput, MatIcon, MatDivider, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatIcon,
+    MatDivider,
+    ReactiveFormsModule,
+    MatSelect,
+    MatOption,
+    FormsModule
+  ],
   providers: [CameraStreamService, SnackbarService],
   templateUrl: './scan.component.html',
   styleUrl: './scan.component.css',
@@ -40,6 +53,8 @@ export class ScanComponent implements OnDestroy {
   bundleId: FormControl<string | null> = new FormControl('', Validators.required);
   encodedImageFiles: string[] = [];
   images: ImageInformationDto[] | undefined = [];
+  documentTypes: DocumentTypeId[] = Object.values(DocumentTypeId);
+  documentTypeSelections: string[] = [];
 
   @Output() initializeDataSource: EventEmitter<void> =
     new EventEmitter<void>();
@@ -55,17 +70,24 @@ export class ScanComponent implements OnDestroy {
     this.liveImage = this.cameraStreamService.onImageStream();
     this.isCameraConnected = this.cameraStreamService.getCameraStatus();
     this.cameraStreamService.onDocumentResponse().subscribe(uuid => {
-        console.log('received new document with uuid', uuid);
         this.getImageInformation(uuid);
         this.getImageFile(uuid);
     });
   }
+
+  get isAnalyseDisabled(): boolean {
+    return Boolean(this.encodedImageFiles.length === 0) ||
+      Boolean(this.bundleId.invalid) ||
+      this.documentTypeSelections.some(type => !type);
+  }
+
   ngOnDestroy(): void {
     this.cameraStreamService.disconnect();
   }
   captureImage(): void {
     this.cameraStreamService.takeImage();
     this.initializeDataSource.emit();
+    this.documentTypeSelections.push('');
   }
 
   openUploadDocument() {
@@ -79,17 +101,17 @@ export class ScanComponent implements OnDestroy {
       if (image) {
         this.images?.push(image);
         this.getImageFile(image.uuid);
+        this.documentTypeSelections.push('');
         }
     });
   }
 
-  confirmBundle(bundleId: string | null) {
+  confirmBundle(bundleId: string | null, documentTypeSelections: string[]) {
     if (this.images && bundleId !== null){
-
-    const images: Observable<ImageInformationDto>[] = this.images.map((image: ImageInformationDto) => {
-      const updatedImageInformation: ImageInformationDto = { ...image, bundleId };
-      return this.imageService.updateImageInformation(image.uuid, updatedImageInformation);
-    });
+      const images: Observable<ImageInformationDto>[] = this.images.map((image: ImageInformationDto, index: number) => {
+        const updatedImageInformation: ImageInformationDto = { ...image, bundleId, documentType: documentTypeSelections[index] };
+        return this.imageService.updateImageInformation(image.uuid, updatedImageInformation);
+      });
 
     forkJoin(images).pipe(
       switchMap(() =>
@@ -104,6 +126,7 @@ export class ScanComponent implements OnDestroy {
       this.snackBar.sendMessage(SnackbarMessagesEnum.ANALYSE_DOCUMENTS);
       this.images = [];
       this.encodedImageFiles = [];
+      this.documentTypeSelections = [];
       this.bundleId.reset();
       this.generateBundleId();
       this.initializeDataSource.emit();
@@ -132,6 +155,7 @@ export class ScanComponent implements OnDestroy {
     this.generateBundleId();
     this.encodedImageFiles.splice(index, 1);
     this.images?.splice(index, 1);
+    this.documentTypeSelections.splice(index, 1)
   }
 
   openImagePreview(encodedImageFile: string) {
@@ -139,8 +163,7 @@ export class ScanComponent implements OnDestroy {
         data: encodedImageFile,
         maxWidth: '100%',
         maxHeight: '100%'
-    }
-    );
+    });
   }
 
   private generateBundleId(): void {

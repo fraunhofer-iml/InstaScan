@@ -7,5 +7,7 @@
  */
 
 export enum DocumentTypeId {
-  CMR = 'CMR'
+  CMR = 'CMR',
+  PALLET_NOTE = 'Pallet Note',
+  DELIVERY_NOTE = 'Delivery Note',
 }

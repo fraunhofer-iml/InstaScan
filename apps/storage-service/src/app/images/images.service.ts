@@ -74,13 +74,13 @@ export class ImagesService {
       await this.imagesS3Service.uploadImage(uploadImageAmqpDto.image_base64, newUuid);
 
       const newImageInformation: ImageInformation = new ImageInformation(
-          newUuid,
-          new Date(),
-          new Date(),
-          uploadImageAmqpDto.documentUploadType,
-          AnalysisStatus.PENDING,
-          DocumentTypeId.CMR,
-          ANALYSIS_INITIAL_RESULT
+        newUuid,
+        new Date(),
+        new Date(),
+        uploadImageAmqpDto.documentUploadType,
+        AnalysisStatus.PENDING,
+        uploadImageAmqpDto.documentType,
+        ANALYSIS_INITIAL_RESULT
       );
       newImageInformation.bundleId = uploadImageAmqpDto.bundleId;
       return this.imageInformationDatabaseService.saveImageInformation(newImageInformation)
@@ -109,6 +109,7 @@ export class ImagesService {
     }
     foundImage.analysisStatus = imageInformationDto.analysisStatus;
     foundImage.bundleId = imageInformationDto.bundleId;
+    foundImage.documentType = imageInformationDto.documentType;
     foundImage.lastModified = new Date();
     return this.imageInformationDatabaseService.saveImageInformation(foundImage).then(updatedImage => updatedImage.toImageInformationAmqpDto());
   }
