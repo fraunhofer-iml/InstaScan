@@ -9,12 +9,7 @@
 import {Injectable, Logger} from '@nestjs/common';
 import {AnalysisResultAmqpDto, ImageInformationAmqpDto, ImageInformationFilterAmqpDto} from '@ap4/amqp';
 import {ImageInformationDto, ReadImageDto, UploadImageDto} from '@ap4/api';
-import {
-  ANALYSIS_INITIAL_RESULT,
-  AnalysisStatus,
-  DocumentTypeId,
-  DocumentUploadType
-} from '@ap4/utils';
+import {ANALYSIS_INITIAL_RESULT, AnalysisStatus, DocumentUploadType} from '@ap4/utils';
 import {ImageInformation} from '../entities/image.Information';
 import {ImageInformationDatabaseService} from "./image.information.database.service";
 import {ImagesS3Service} from "./images.s3.service";
