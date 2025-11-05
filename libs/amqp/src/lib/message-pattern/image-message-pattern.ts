@@ -15,5 +15,6 @@ export enum ImageMessagePattern {
   PUBLISH_ANALYSIS = 'analysis/publish',
   REFRESH_ANALYSIS = 'analysis/refresh',
   GET_IMAGE_INFORMATION = 'analysis/get',
+  GET_IMAGE_NFT = 'images/nft',
   ANALYZE_BUNDLE = 'analysis/bundle/create',
 }

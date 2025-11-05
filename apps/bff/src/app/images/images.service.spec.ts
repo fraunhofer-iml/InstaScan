@@ -6,17 +6,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AmqpBrokerQueues, ImageInformationAmqpDtoMocks, ImageInformationFilterAmqpDto, ImageMessagePattern } from '@ap4/amqp';
+import { ImageInformationDtoMocks, TokenReadDtoMock, UploadImageDtoMocks } from '@ap4/api';
+import { of } from 'rxjs';
+import { ClientProxy } from '@nestjs/microservices';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ImagesService } from './images.service';
-import {
-  AmqpBrokerQueues,
-  ImageMessagePattern,
-  ImageInformationAmqpDtoMocks,
-  ImageInformationFilterAmqpDto,
-} from '@ap4/amqp';
-import { ClientProxy } from '@nestjs/microservices';
-import { of } from 'rxjs';
-import { UploadImageDtoMocks, ImageInformationDtoMocks} from '@ap4/api';
 
 describe('ImagesService', () => {
   let service: ImagesService;
@@ -24,7 +19,8 @@ describe('ImagesService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ImagesService,
+      providers: [
+        ImagesService,
         {
           provide: AmqpBrokerQueues.SKALA_AP4_STORAGE_SERVICE_QUEUE,
           useValue: {
@@ -37,7 +33,8 @@ describe('ImagesService', () => {
             send: jest.fn(),
             emit: jest.fn(),
           },
-        }],
+        },
+      ],
     }).compile();
 
     service = module.get<ImagesService>(ImagesService);
@@ -70,6 +67,18 @@ describe('ImagesService', () => {
     });
   });
 
+  it('getImageNft: should get nft', (done) => {
+    const sendImageRequestSpy = jest.spyOn(storageServiceClientProxy, 'send');
+    sendImageRequestSpy.mockImplementation(() => {
+      return of(TokenReadDtoMock);
+    });
+
+    service.getImageNft(TokenReadDtoMock.remoteId).subscribe((response) => {
+      expect(response).toEqual(TokenReadDtoMock);
+      done();
+    });
+  });
+
   it('getAllImageInformation: should read existing Image ids', (done) => {
     const sendImageRequestSpy = jest.spyOn(storageServiceClientProxy, 'send');
     sendImageRequestSpy.mockImplementation(() => {
@@ -77,24 +86,20 @@ describe('ImagesService', () => {
     });
 
     const imageInformationFilterAmqpDto: ImageInformationFilterAmqpDto = new ImageInformationFilterAmqpDto(
-        'testSender',
-        'testReceiver',
-        'testAnalysisStatus',
-        'testDocumentType',
-        'testBundleId'
+      'testSender',
+      'testReceiver',
+      'testAnalysisStatus',
+      'testDocumentType',
+      'testBundleId'
     );
 
-    service.getAllImageInformation(
-        'testSender',
-        'testReceiver',
-        'testAnalysisStatus',
-        'testDocumentType',
-        'testBundleId'
-    ).subscribe((response) => {
-      expect(sendImageRequestSpy).toHaveBeenCalledWith(ImageMessagePattern.GET_ALL_IMAGE_INFORMATION, imageInformationFilterAmqpDto);
-      expect(response).toEqual([ImageInformationAmqpDtoMocks[0].uuid]);
-      done();
-    });
+    service
+      .getAllImageInformation('testSender', 'testReceiver', 'testAnalysisStatus', 'testDocumentType', 'testBundleId')
+      .subscribe((response) => {
+        expect(sendImageRequestSpy).toHaveBeenCalledWith(ImageMessagePattern.GET_ALL_IMAGE_INFORMATION, imageInformationFilterAmqpDto);
+        expect(response).toEqual([ImageInformationAmqpDtoMocks[0].uuid]);
+        done();
+      });
   });
 
   it('uploadImage: should create a new Image', (done) => {

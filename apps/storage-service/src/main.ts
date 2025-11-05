@@ -6,14 +6,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AmqpBrokerQueues } from '@ap4/amqp';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app/app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { AmqpBrokerQueues } from '@ap4/amqp';
+import { AppModule } from './app/app.module';
 
 async function bootstrap() {
-
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
     transport: Transport.RMQ,
     options: {

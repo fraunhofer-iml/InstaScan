@@ -7,47 +7,47 @@
  */
 
 export class EcmrSchemaDto{
-    sender_information: SenderInformation;
-    consignee_information: ConsigneeInformation;
-    taking_over_the_goods: TakingOverTheGoods;
-    delivery_of_the_goods: DeliveryOfTheGoods;
-    documents_handed_to_carrier: DocumentsHandedToCarrier;
-    item_list: ItemList[];
-    senders_instructions: SenderInstructions;
-    cash_on_delivery: number;
-    payment_instructions: string;
-    carrier_information: CarrierInformation;
-    successive_carrier_information: SuccessiveCarrierInformation;
-    carrier_reservations_and_observations: CarrierReservationsAndObservations;
-    to_be_paid_by: ToBePaidBy;
-    other_useful_particulars: string;
-    signature_or_stamp_of_the_sender: SignatureOrStampOfTheSender;
-    signature_or_stamp_of_the_carrier: SignatureOrStampOfTheCarrier;
-    signature_or_stamp_of_the_consignee: SignatureOrStampOfTheConsignee;
-    code_carrier: string;
-    reference_identification_number: string;
-    established_delivery_date: EstablishedDeliveryDate;
+    sender_information: SenderInformation | null;
+    consignee_information: ConsigneeInformation | null;
+    taking_over_the_goods: TakingOverTheGoods | null;
+    delivery_of_the_goods: DeliveryOfTheGoods | null;
+    documents_handed_to_carrier: DocumentsHandedToCarrier | null;
+    item_list: ItemList[] | null;
+    senders_instructions: SenderInstructions | null;
+    cash_on_delivery: number | null;
+    payment_instructions: string | null;
+    carrier_information: CarrierInformation | null;
+    successive_carrier_information: SuccessiveCarrierInformation | null;
+    carrier_reservations_and_observations: CarrierReservationsAndObservations | null;
+    to_be_paid_by: ToBePaidBy | null;
+    other_useful_particulars: string | null;
+    signature_or_stamp_of_the_sender: SignatureOrStampOfTheSender | null;
+    signature_or_stamp_of_the_carrier: SignatureOrStampOfTheCarrier | null;
+    signature_or_stamp_of_the_consignee: SignatureOrStampOfTheConsignee | null;
+    code_carrier: string | null;
+    reference_identification_number: string | null;
+    established_delivery_date: EstablishedDeliveryDate | null;
     constructor(
-        sender_information: SenderInformation,
-        consignee_information: ConsigneeInformation,
-        taking_over_the_goods: TakingOverTheGoods,
-        delivery_of_the_goods: DeliveryOfTheGoods,
-        documents_handed_to_carrier: DocumentsHandedToCarrier,
-        item_list: ItemList[],
-        senders_instructions: SenderInstructions,
-        cash_on_delivery: number,
-        payment_instructions: string,
-        carrier_information: CarrierInformation,
-        successive_carrier_information: SuccessiveCarrierInformation,
-        carrier_reservations_and_observations: CarrierReservationsAndObservations,
-        to_be_paid_by: ToBePaidBy,
-        other_useful_particulars: string,
-        signature_or_stamp_of_the_sender: SignatureOrStampOfTheSender,
-        signature_or_stamp_of_the_carrier: SignatureOrStampOfTheCarrier,
-        signature_or_stamp_of_the_consignee: SignatureOrStampOfTheConsignee,
-        code_carrier: string,
-        reference_identification_number: string,
-        established_delivery_date: EstablishedDeliveryDate
+        sender_information: SenderInformation | null = null,
+        consignee_information: ConsigneeInformation | null = null,
+        taking_over_the_goods: TakingOverTheGoods | null = null,
+        delivery_of_the_goods: DeliveryOfTheGoods | null = null,
+        documents_handed_to_carrier: DocumentsHandedToCarrier | null = null,
+        item_list: ItemList[] | null = null,
+        senders_instructions: SenderInstructions | null = null,
+        cash_on_delivery: number | null = null,
+        payment_instructions: string | null = null,
+        carrier_information: CarrierInformation | null = null,
+        successive_carrier_information: SuccessiveCarrierInformation | null = null,
+        carrier_reservations_and_observations: CarrierReservationsAndObservations | null = null,
+        to_be_paid_by: ToBePaidBy | null = null,
+        other_useful_particulars: string | null = null,
+        signature_or_stamp_of_the_sender: SignatureOrStampOfTheSender | null = null,
+        signature_or_stamp_of_the_carrier: SignatureOrStampOfTheCarrier | null = null,
+        signature_or_stamp_of_the_consignee: SignatureOrStampOfTheConsignee | null = null,
+        code_carrier: string | null = null,
+        reference_identification_number: string | null = null,
+        established_delivery_date: EstablishedDeliveryDate | null = null
     ){
         this.sender_information = sender_information;
         this.consignee_information = consignee_information;

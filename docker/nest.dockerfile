@@ -11,6 +11,10 @@ RUN npm run build:${APP}
 FROM node:lts-alpine AS production
 ARG APP
 WORKDIR /app
-COPY --from=builder /app/dist/apps/${APP} .
+COPY package*.json ./
 RUN npm install --omit=dev
+
+COPY --from=builder /app/dist/apps/${APP} .
+COPY ./blockchain/abi ./blockchain/abi
+
 CMD ["node", "main.js"]

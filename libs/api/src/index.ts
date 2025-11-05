@@ -15,3 +15,5 @@ export * from './lib/dto/mocks/upload-image-dto-mocks';
 export * from './lib/schema/ecmr.schema.dto';
 export * from './lib/schema/error.schema.dto';
 export * from './lib/schema/schema.dto'
+export * from './lib/dto/mocks/token-read-dto.mock';
+export * from './lib/dto/mocks/token-update-dto.mock';

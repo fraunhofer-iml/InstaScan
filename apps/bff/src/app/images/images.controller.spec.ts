@@ -6,16 +6,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AmqpBrokerQueues, ImageInformationAmqpDtoMocks } from '@ap4/amqp';
+import { ImageInformationDtoMocks, ReadImageDtoMocks, TokenReadDtoMock, UploadImageDtoMocks } from '@ap4/api';
+import { TokenReadDto } from 'nft-folder-blockchain-connector-besu';
+import { firstValueFrom, of } from 'rxjs';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ImagesController } from './images.controller';
 import { ImagesService } from './images.service';
-import {
-  AmqpBrokerQueues,
-  ImageInformationAmqpDtoMocks
-} from '@ap4/amqp';
-import { firstValueFrom, of } from 'rxjs';
-import { UploadImageDtoMocks, ImageInformationDtoMocks, ReadImageDtoMocks } from '@ap4/api';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('ImagesController', () => {
   let controller: ImagesController;
@@ -31,6 +29,7 @@ describe('ImagesController', () => {
           useValue: {
             uploadImage: jest.fn(),
             getImage: jest.fn(),
+            getImageNft: jest.fn(),
             getImageInformation: jest.fn(),
             getAllImageInformation: jest.fn(),
             removeImage: jest.fn(),
@@ -56,8 +55,8 @@ describe('ImagesController', () => {
             send: jest.fn(),
             emit: jest.fn(),
           },
-        }
-        ]
+        },
+      ],
     }).compile();
 
     controller = module.get<ImagesController>(ImagesController);
@@ -108,23 +107,38 @@ describe('ImagesController', () => {
     await expect(firstValueFrom(controller.getImageInformation(ImageInformationAmqpDtoMocks[0].uuid))).rejects.toThrow(NotFoundException);
   });
 
+  it('getNft: should not get an image nft', (done) => {
+    const imageServiceSpy = jest.spyOn(imagesService, 'getImageNft');
+    imageServiceSpy.mockImplementation(() => {
+      return of(TokenReadDtoMock);
+    });
+    controller.getImageNft(TokenReadDtoMock.remoteId).subscribe((response) => {
+      expect(response).toEqual(TokenReadDtoMock);
+      done();
+    });
+  });
+
+  it('getNft: should not get the nft due to invalid remoteid', async () => {
+    const imageServiceSpy = jest.spyOn(imagesService, 'getImageNft');
+    imageServiceSpy.mockImplementation(() => {
+      return of(null);
+    });
+    await expect(firstValueFrom(controller.getImageNft(TokenReadDtoMock.remoteId))).rejects.toThrow(NotFoundException);
+  });
+
   it('getAllImageInformation: should get the image id list', (done) => {
     const imageServiceSpy = jest.spyOn(imagesService, 'getAllImageInformation');
     imageServiceSpy.mockImplementation(() => {
       return of(ImageInformationDtoMocks);
     });
 
-    controller.getAllImageInformation(
-        'testSender',
-        'testReceiver',
-        'testAnalysisStatus',
-        'testDocumentType',
-        'testBundleId'
-    ).subscribe((response) => {
-      expect(imageServiceSpy).toHaveBeenCalledTimes(1);
-      expect(response).toEqual(ImageInformationDtoMocks);
-      done();
-    });
+    controller
+      .getAllImageInformation('testSender', 'testReceiver', 'testAnalysisStatus', 'testDocumentType', 'testBundleId')
+      .subscribe((response) => {
+        expect(imageServiceSpy).toHaveBeenCalledTimes(1);
+        expect(response).toEqual(ImageInformationDtoMocks);
+        done();
+      });
   });
 
   it('uploadImage: should create an image', (done) => {
@@ -168,7 +182,9 @@ describe('ImagesController', () => {
     imageServiceSpy.mockImplementation(() => {
       return of(null);
     });
-    await expect(firstValueFrom(controller.updateImageInformation(ImageInformationDtoMocks[0].uuid, ImageInformationDtoMocks[0]))).rejects.toThrow(NotFoundException);
+    await expect(
+      firstValueFrom(controller.updateImageInformation(ImageInformationDtoMocks[0].uuid, ImageInformationDtoMocks[0]))
+    ).rejects.toThrow(NotFoundException);
   });
 
   it('removeImage: should remove an image', (done) => {

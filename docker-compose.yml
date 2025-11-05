@@ -1,4 +1,29 @@
 services:
+
+  ##############
+  # BLOCKCHAIN #
+  ##############
+  blockchain-network:
+    build:
+      context: ./blockchain/network
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - '8545:8545'
+
+  blockchain-network-setup:
+    build:
+      context: ./blockchain/network-setup
+      dockerfile: Dockerfile
+      args:
+        DEPLOYMENT_MNEMONIC: 'test test test test test test test test test test test test'
+        TOKEN_NAME: DocumentAnalysis
+        TOKEN_SYMBOL: AP4
+    depends_on:
+      blockchain-network:
+        condition: service_started
+    environment:
+      DEV_NODE_URL: 'http://blockchain-network:8545'
   
   rabbitmq:
     image: rabbitmq:3-management
@@ -67,6 +92,10 @@ services:
         condition: service_started
       rabbitmq:
         condition: service_started
+      blockchain-network:
+        condition: service_started
+      blockchain-network-setup:
+        condition: service_completed_successfully
     environment:
       - S3_ACCESS_KEY=${S3_USER}
       - S3_SECRET_KEY=${S3_PASSWORD}
@@ -81,6 +110,7 @@ services:
       - POSTGRES_USERNAME=${POSTGRES_USERNAME}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DATABASE=ap4
+      - BCC_BLOCKCHAIN_URL=http://blockchain-network:8545
     ports:
       - "3030:3030"
     env_file:

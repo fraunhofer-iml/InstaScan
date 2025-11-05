@@ -7,10 +7,26 @@
  */
 
 import { Module } from '@nestjs/common';
-
-import {ImagesModule} from "./images/images.module";
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ImageInformation } from './entities/image.Information';
+import { Nft } from './entities/nft';
+import { ImagesModule } from './images/images.module';
+import { NftsModule } from './nfts/nfts.module';
 
 @Module({
-  imports: [ImagesModule]
+  imports: [
+    ImagesModule,
+    NftsModule,
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.POSTGRES_HOST ?? '',
+      port: process.env.POSTGRES_PORT ? parseInt(process.env.POSTGRES_PORT) : 5432,
+      username: process.env.POSTGRES_USERNAME ?? '',
+      password: process.env.POSTGRES_PASSWORD ?? '',
+      database: process.env.POSTGRES_DATABASE ?? '',
+      entities: [ImageInformation, Nft],
+      synchronize: true,
+    }),
+  ],
 })
 export class AppModule {}

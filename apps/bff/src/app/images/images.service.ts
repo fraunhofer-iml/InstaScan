@@ -6,15 +6,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {Injectable, Inject} from '@nestjs/common';
-import {AmqpBrokerQueues, ImageInformationFilterAmqpDto, ImageMessagePattern} from '@ap4/amqp';
-import { ClientProxy } from '@nestjs/microservices';
+import { AmqpBrokerQueues, ImageInformationFilterAmqpDto, ImageMessagePattern } from '@ap4/amqp';
+import { ImageInformationDto, ReadImageDto, UploadImageDto } from '@ap4/api';
+import { TokenReadDto } from 'nft-folder-blockchain-connector-besu';
 import { Observable } from 'rxjs';
-import {ImageInformationDto, ReadImageDto, UploadImageDto} from '@ap4/api';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class ImagesService {
-
   constructor(
     @Inject(AmqpBrokerQueues.SKALA_AP4_STORAGE_SERVICE_QUEUE)
     private readonly storageServiceAMQPClient: ClientProxy
@@ -37,6 +37,14 @@ export class ImagesService {
   }
 
   /**
+   * Return the token information for a specific uuid.
+   * @param uuid The uuid whose image token information is to be returned.
+   */
+  public getImageNft(uuid: string): Observable<TokenReadDto> {
+    return this.storageServiceAMQPClient.send(ImageMessagePattern.GET_IMAGE_NFT, uuid);
+  }
+
+  /**
    * Returns all image information entries. Optionally, a bundle id can be specified to return only image information entries with this bundle id.
    * @param sender The sender of the document
    * @param receiver The receiver of the document
@@ -44,8 +52,20 @@ export class ImagesService {
    * @param documentType The type of the document
    * @param bundleId The bundle id that can be used to filter the image information.
    */
-  public getAllImageInformation(sender: string, receiver: string, analysisStatus: string, documentType: string, bundleId: string): Observable<ImageInformationDto[]>{
-    const imageInformationFilterAmqpDto: ImageInformationFilterAmqpDto = new ImageInformationFilterAmqpDto(sender, receiver, analysisStatus, documentType, bundleId);
+  public getAllImageInformation(
+    sender: string,
+    receiver: string,
+    analysisStatus: string,
+    documentType: string,
+    bundleId: string
+  ): Observable<ImageInformationDto[]> {
+    const imageInformationFilterAmqpDto: ImageInformationFilterAmqpDto = new ImageInformationFilterAmqpDto(
+      sender,
+      receiver,
+      analysisStatus,
+      documentType,
+      bundleId
+    );
     return this.storageServiceAMQPClient.send(ImageMessagePattern.GET_ALL_IMAGE_INFORMATION, imageInformationFilterAmqpDto);
   }
 

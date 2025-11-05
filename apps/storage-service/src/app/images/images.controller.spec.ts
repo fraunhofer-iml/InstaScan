@@ -6,30 +6,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { ImagesController } from './images.controller';
-import { ImagesService } from './images.service';
-import { MinioModule, MinioService } from 'nestjs-minio-client';
 import process from 'node:process';
 import { Readable } from 'stream';
-import {
-  AmqpBrokerQueues,
-  AnalysisResultAmqpDtoMocks,
-  ImageInformationFilterAmqpDto
-} from '@ap4/amqp';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { ImageInformationDto, ReadImageDto, UploadImageDtoMocks } from '@ap4/api';
-import { ImageInformation } from '../entities/image.Information';
-import { Repository } from 'typeorm';
-import { ImageInformationMocks } from '../entities/mocks/image-Information-mocks';
-import { ImageInformationDatabaseService } from "./image.information.database.service";
-import { ImagesS3Service } from "./images.s3.service";
-import { AmqpBrokerService } from "./amqp.broker.service";
+import { AmqpBrokerQueues, AnalysisResultAmqpDtoMocks, ImageInformationFilterAmqpDto } from '@ap4/amqp';
+import { ImageInformationDto, ReadImageDto, TokenReadDtoMock, UploadImageDtoMocks } from '@ap4/api';
 import { DocumentUploadType } from '@ap4/utils';
+import { MinioModule, MinioService } from 'nestjs-minio-client';
+import { Repository } from 'typeorm';
+import { ClientProxy } from '@nestjs/microservices';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { ImageInformation } from '../entities/image.Information';
+import { ImageInformationMocks } from '../entities/mocks/image-Information-mocks';
+import { Nft } from '../entities/nft';
+import { NftsService } from '../nfts/nfts.service';
+import { AmqpBrokerService } from './amqp.broker.service';
+import { ImageInformationDatabaseService } from './image.information.database.service';
+import { ImagesController } from './images.controller';
+import { ImagesS3Service } from './images.s3.service';
+import { ImagesService } from './images.service';
 
 describe('ImagesController', () => {
   let controller: ImagesController;
   let imageInformationRepository: Repository<ImageInformation>;
+  let s3ServiceMock: MinioService;
+  let nftsService: NftsService;
 
   const testUuid = 'testUuid';
   const testEtag = 'testEtag';
@@ -49,12 +50,10 @@ describe('ImagesController', () => {
     bucketExists: jest.fn().mockImplementation(() => false),
     makeBucket: jest.fn(),
     putObject: jest.fn().mockImplementation(() => {
-      return Promise.resolve(
-        {
-          etag: testEtag
-        }
-      )
-    })
+      return Promise.resolve({
+        etag: testEtag,
+      });
+    }),
   };
 
   beforeEach(async () => {
@@ -66,7 +65,8 @@ describe('ImagesController', () => {
           useSSL: (process.env.S3_USESSL || 'false') === 'true',
           accessKey: process.env.S3_ACCESSKEY || '',
           secretKey: process.env.S3_SECRETKEY || '',
-        })],
+        }),
+      ],
       controllers: [ImagesController],
       providers: [
         ImagesService,
@@ -98,16 +98,26 @@ describe('ImagesController', () => {
           },
         },
         {
+          provide: NftsService,
+          useValue: {
+            readNft: jest.fn(),
+            updateNft: jest.fn(),
+            createNft: jest.fn(),
+          },
+        },
+        {
           provide: MinioService,
           useValue: {
-            client: mockedMinioClient
-          }
+            client: mockedMinioClient,
+          },
         },
       ],
     }).compile();
 
     controller = module.get<ImagesController>(ImagesController);
     imageInformationRepository = module.get<Repository<ImageInformation>>(getRepositoryToken(ImageInformation));
+    s3ServiceMock = module.get<MinioService>(MinioService);
+    nftsService = module.get<NftsService>(NftsService) as NftsService;
   });
 
   it('getImage: should get an image for an uuid', async () => {
@@ -154,6 +164,18 @@ describe('ImagesController', () => {
 
     const returnValue = await controller.getImageInformation('testUuid');
     expect(returnValue).toBeNull();
+  });
+
+  it('getImageNft: should get image nft', async () => {
+    const getImageSpy = jest.spyOn(nftsService, 'readNft');
+    getImageSpy.mockImplementationOnce(() => {
+      return Promise.resolve(TokenReadDtoMock);
+    });
+
+    const expectedReturnValue = TokenReadDtoMock;
+
+    const returnValue = await controller.getImageNft('testUuid');
+    expect(returnValue).toEqual(expectedReturnValue);
   });
 
   it('getAllImageInformation: should get all image information', async () => {
@@ -203,8 +225,8 @@ describe('ImagesController', () => {
     });
 
     const expectedReturnValue = ImageInformationMocks[0].toImageInformationAmqpDto();
-    expectedReturnValue.sender = "testSender";
-    expectedReturnValue.receiver = "testReceiver";
+    expectedReturnValue.sender = 'testSender';
+    expectedReturnValue.receiver = 'testReceiver';
 
     const returnValue = await controller.updateImageInformation(ImageInformationMocks[0].toImageInformationDto());
     expect(returnValue).toEqual(expectedReturnValue);
@@ -237,12 +259,12 @@ describe('ImagesController', () => {
       return [ImageInformationMocks[0]];
     });
 
-    controller.analyzeImageBundle(ImageInformationMocks[0].uuid).then(returnValue => {
+    controller.analyzeImageBundle(ImageInformationMocks[0].uuid).then((returnValue) => {
       expect(returnValue).toEqual(true);
     });
   });
 
-  it('saveAnalysisResult: should save image information', async () => {
+  it('saveAnalysisResult: should save image information', () => {
     const getImageSpy = jest.spyOn(imageInformationRepository, 'findOne');
     getImageSpy.mockImplementationOnce(() => {
       return Promise.resolve(ImageInformationMocks[0]);
@@ -251,18 +273,21 @@ describe('ImagesController', () => {
     const saveImageSpy = jest.spyOn(imageInformationRepository, 'save');
     saveImageSpy.mockImplementationOnce(() => {
       return Promise.resolve(ImageInformationMocks[0]);
+    });
+
+    const crateNftSpy = jest.spyOn(nftsService, 'createNft');
+    crateNftSpy.mockImplementationOnce(() => {
+      return Promise.resolve(null);
     });
 
     const expectedReturnValue = ImageInformationMocks[0].toImageInformationAmqpDto();
-    expectedReturnValue.sender = "testSender";
-    expectedReturnValue.receiver = "testReceiver";
+    expectedReturnValue.sender = 'testSender';
+    expectedReturnValue.receiver = 'testReceiver';
 
-    const returnValue = await controller.saveAnalysisResult(AnalysisResultAmqpDtoMocks[0]);
-
-    expect(returnValue).toEqual(expectedReturnValue);
+    expect(controller.saveAnalysisResult(AnalysisResultAmqpDtoMocks[0])).resolves.toEqual(expectedReturnValue);
   });
 
-  it('saveAnalysisResult: should save a analysation failure', async () => {
+  it('saveAnalysisResult: should save a analysation failure', () => {
     const getImageSpy = jest.spyOn(imageInformationRepository, 'findOne');
     getImageSpy.mockImplementationOnce(() => {
       return Promise.resolve(ImageInformationMocks[1]);
@@ -271,11 +296,24 @@ describe('ImagesController', () => {
     const saveImageSpy = jest.spyOn(imageInformationRepository, 'save');
     saveImageSpy.mockImplementationOnce(() => {
       return Promise.resolve(ImageInformationMocks[1]);
+    });
+
+    const crateNftSpy = jest.spyOn(nftsService, 'createNft');
+    crateNftSpy.mockImplementationOnce(() => {
+      return Promise.resolve(null);
     });
 
     const expectedReturnValue = ImageInformationMocks[1].toImageInformationAmqpDto();
 
-    const returnValue = await controller.saveAnalysisResult(AnalysisResultAmqpDtoMocks[1]);
-    expect(returnValue).toEqual(expectedReturnValue);
+    expect(controller.saveAnalysisResult(AnalysisResultAmqpDtoMocks[1])).resolves.toEqual(expectedReturnValue);
+  });
+
+  it('saveAnalysisResult: should not save an analysis result due to missing image', () => {
+    const getImageSpy = jest.spyOn(imageInformationRepository, 'findOne');
+    getImageSpy.mockImplementationOnce(() => {
+      return Promise.resolve(null);
+    });
+
+    expect(controller.saveAnalysisResult(AnalysisResultAmqpDtoMocks[1])).resolves.toEqual(null);
   });
 });

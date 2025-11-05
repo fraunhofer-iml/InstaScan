@@ -6,14 +6,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Entity, Column, PrimaryColumn } from 'typeorm';
-import { ImageInformationDto } from '@ap4/api';
 import { ImageInformationAmqpDto } from '@ap4/amqp';
+import { ImageInformationDto } from '@ap4/api';
 import { AnalysisStatus, DocumentTypeId, DocumentUploadType } from '@ap4/utils';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class ImageInformation {
-
   @PrimaryColumn()
   uuid: string;
   @Column()
@@ -36,13 +35,14 @@ export class ImageInformation {
   image_analysis_result: string;
 
   constructor(
-      uuid: string,
-      creationDate: Date,
-      lastModified: Date,
-      uploadType: string,
-      analysisStatus: string,
-      documentType: string,
-      image_analysis_result: string) {
+    uuid: string,
+    creationDate: Date,
+    lastModified: Date,
+    uploadType: string,
+    analysisStatus: string,
+    documentType: string,
+    image_analysis_result: string
+  ) {
     this.uuid = uuid;
     this.sender = '';
     this.receiver = '';
@@ -65,15 +65,15 @@ export class ImageInformation {
       this.analysisStatus,
       this.documentType,
       this.bundleId,
-      JSON.parse(this.image_analysis_result),
+      JSON.parse(this.image_analysis_result)
     );
   }
-  public toImageInformationAmqpDto(): ImageInformationAmqpDto{
+  public toImageInformationAmqpDto(): ImageInformationAmqpDto {
     return new ImageInformationAmqpDto(
       this.uuid,
       this.sender,
       this.receiver,
-      this.creationDate, 
+      this.creationDate,
       this.lastModified,
       DocumentUploadType[this.uploadType.toUpperCase()],
       AnalysisStatus[this.analysisStatus],

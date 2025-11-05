@@ -6,26 +6,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {Injectable, Logger} from '@nestjs/common';
-import {AnalysisResultAmqpDto, ImageInformationAmqpDto, ImageInformationFilterAmqpDto} from '@ap4/amqp';
-import {ImageInformationDto, ReadImageDto, UploadImageDto} from '@ap4/api';
-import {ANALYSIS_INITIAL_RESULT, AnalysisStatus, DocumentUploadType} from '@ap4/utils';
-import {ImageInformation} from '../entities/image.Information';
-import {ImageInformationDatabaseService} from "./image.information.database.service";
-import {ImagesS3Service} from "./images.s3.service";
-import {AmqpBrokerService} from "./amqp.broker.service";
-import {v4 as uuidGenerator} from 'uuid';
-
+import { AnalysisResultAmqpDto, ImageInformationAmqpDto, ImageInformationFilterAmqpDto } from '@ap4/amqp';
+import { ImageInformationDto, ReadImageDto, UploadImageDto } from '@ap4/api';
+import { ANALYSIS_INITIAL_RESULT, AnalysisStatus, DocumentUploadType } from '@ap4/utils';
+import { TokenReadDto } from 'nft-folder-blockchain-connector-besu';
+import { v4 as uuidGenerator } from 'uuid';
+import { Injectable, Logger } from '@nestjs/common';
+import { ImageInformation } from '../entities/image.Information';
+import { NftsService } from '../nfts/nfts.service';
+import { AmqpBrokerService } from './amqp.broker.service';
+import { ImageInformationDatabaseService } from './image.information.database.service';
+import { ImagesS3Service } from './images.s3.service';
 
 @Injectable()
 export class ImagesService {
-
   private readonly logger: Logger = new Logger(ImagesService.name);
 
   constructor(
     readonly imageInformationDatabaseService: ImageInformationDatabaseService,
     readonly imagesS3Service: ImagesS3Service,
     readonly amqpBrokerService: AmqpBrokerService,
+    readonly nftService: NftsService
   ) {}
 
   /**
@@ -37,7 +38,12 @@ export class ImagesService {
     if (!foundImageInformation) {
       return null;
     }
-    return this.imagesS3Service.getImage(uuid).then(base64Image => new ReadImageDto(foundImageInformation.uuid, base64Image, DocumentUploadType[foundImageInformation.uploadType.toUpperCase()]));
+    return this.imagesS3Service
+      .getImage(uuid)
+      .then(
+        (base64Image) =>
+          new ReadImageDto(foundImageInformation.uuid, base64Image, DocumentUploadType[foundImageInformation.uploadType.toUpperCase()])
+      );
   }
 
   /**
@@ -45,8 +51,17 @@ export class ImagesService {
    * @param uuid The uuid of the image information that should be returned.
    */
   public async getImageInformation(uuid: string): Promise<ImageInformationDto> {
-    return this.imageInformationDatabaseService.getImageInformation(uuid)
-        .then(foundImage => foundImage ? foundImage.toImageInformationDto() : null);
+    return this.imageInformationDatabaseService
+      .getImageInformation(uuid)
+      .then((foundImage) => (foundImage ? foundImage.toImageInformationDto() : null));
+  }
+
+  /**
+   * Returns token information for a specific image.
+   * @param uuid The uuid of the nft that should be returned.
+   */
+  public async getImageNft(uuid: string): Promise<TokenReadDto> {
+    return this.nftService.readNft(uuid);
   }
 
   /**
@@ -54,7 +69,8 @@ export class ImagesService {
    * @param imageInformationFilterAmqpDto The attributes, that can be used to filter the list of image information.
    */
   public async getAllImageInformation(imageInformationFilterAmqpDto: ImageInformationFilterAmqpDto): Promise<ImageInformationDto[]> {
-    const storedImageInformation: ImageInformation[] = await this.imageInformationDatabaseService.getAllImageInformation(imageInformationFilterAmqpDto);
+    const storedImageInformation: ImageInformation[] =
+      await this.imageInformationDatabaseService.getAllImageInformation(imageInformationFilterAmqpDto);
     return storedImageInformation.map((imageInformation: ImageInformation) => imageInformation.toImageInformationDto());
   }
 
@@ -64,7 +80,7 @@ export class ImagesService {
    * @param uploadImageAmqpDto The dto that contains the image that should be uploaded as base64 string and the bundle id.
    */
   public async uploadImage(uploadImageAmqpDto: UploadImageDto): Promise<ImageInformationDto> {
-    try{
+    try {
       const newUuid: string = uuidGenerator();
       await this.imagesS3Service.uploadImage(uploadImageAmqpDto.image_base64, newUuid);
 
@@ -78,10 +94,10 @@ export class ImagesService {
         ANALYSIS_INITIAL_RESULT
       );
       newImageInformation.bundleId = uploadImageAmqpDto.bundleId;
-      return this.imageInformationDatabaseService.saveImageInformation(newImageInformation)
-          .then((result: ImageInformation) => result.toImageInformationDto());
-    }
-    catch(e){
+      return this.imageInformationDatabaseService
+        .saveImageInformation(newImageInformation)
+        .then((result: ImageInformation) => result.toImageInformationDto());
+    } catch (e) {
       this.logger.error('The image could not be saved correctly.', e);
     }
   }
@@ -91,22 +107,29 @@ export class ImagesService {
    * @param imageInformationDto The new data of the image information.
    */
   public async updateImageInformation(imageInformationDto: ImageInformationDto): Promise<ImageInformationAmqpDto> {
-    const foundImage: ImageInformation = await this.imageInformationDatabaseService.getImageInformation(imageInformationDto.uuid);
-    if (!foundImage) {
-      return null;
+    try {
+      const foundImage: ImageInformation = await this.imageInformationDatabaseService.getImageInformation(imageInformationDto.uuid);
+      if (!foundImage) {
+        return null;
+      }
+      foundImage.image_analysis_result = JSON.stringify(imageInformationDto.image_analysis_result);
+      if ('sender_information' in imageInformationDto.image_analysis_result) {
+        foundImage.sender = imageInformationDto.image_analysis_result.sender_information.senderNameCompany;
+        foundImage.receiver = imageInformationDto.image_analysis_result.consignee_information.consigneeNameCompany;
+      }
+      foundImage.analysisStatus = imageInformationDto.analysisStatus;
+      foundImage.bundleId = imageInformationDto.bundleId;
+      foundImage.documentType = imageInformationDto.documentType;
+      foundImage.lastModified = new Date();
+
+      const updatedImageInformation: ImageInformationAmqpDto = await this.imageInformationDatabaseService
+        .saveImageInformation(foundImage)
+        .then((updatedImage) => updatedImage.toImageInformationAmqpDto());
+      await this.nftService.updateNft(updatedImageInformation);
+      return updatedImageInformation;
+    } catch (e) {
+      this.logger.error('The image could not be updated correctly.', e);
     }
-    foundImage.image_analysis_result = JSON.stringify(
-      imageInformationDto.image_analysis_result
-    );
-    if ('sender_information' in imageInformationDto.image_analysis_result) {
-      foundImage.sender = imageInformationDto.image_analysis_result.sender_information.senderNameCompany;
-      foundImage.receiver = imageInformationDto.image_analysis_result.consignee_information.consigneeNameCompany;
-    }
-    foundImage.analysisStatus = imageInformationDto.analysisStatus;
-    foundImage.bundleId = imageInformationDto.bundleId;
-    foundImage.documentType = imageInformationDto.documentType;
-    foundImage.lastModified = new Date();
-    return this.imageInformationDatabaseService.saveImageInformation(foundImage).then(updatedImage => updatedImage.toImageInformationAmqpDto());
   }
 
   /**
@@ -132,21 +155,24 @@ export class ImagesService {
    */
   public async analyzeImageBundle(bundleId: string): Promise<boolean> {
     try {
-      const foundImageInformation: ImageInformation[] = await this.imageInformationDatabaseService.getAllImageInformation(
-          {
-            bundleId: bundleId,
-            analysisStatus: AnalysisStatus.PENDING
-          });
+      const foundImageInformation: ImageInformation[] = await this.imageInformationDatabaseService.getAllImageInformation({
+        bundleId: bundleId,
+        analysisStatus: AnalysisStatus.PENDING,
+      });
       for (const imageInformation of foundImageInformation) {
         this.logger.log('Send imageInformation to DAS with uuid: ', imageInformation.uuid);
         const imageBase64: string = await this.imagesS3Service.getImage(imageInformation.uuid);
-        this.amqpBrokerService.sendImageToAnalysisService(imageInformation.uuid, imageBase64, imageInformation.bundleId, imageInformation.documentType);
+        this.amqpBrokerService.sendImageToAnalysisService(
+          imageInformation.uuid,
+          imageBase64,
+          imageInformation.bundleId,
+          imageInformation.documentType
+        );
         imageInformation.analysisStatus = AnalysisStatus.IN_PROGRESS;
         await this.imageInformationDatabaseService.saveImageInformation(imageInformation);
       }
       return true;
-    }
-    catch(e) {
+    } catch (e) {
       this.logger.error('Not all images could be transferred to the DAS.', e);
       return false;
     }
@@ -157,11 +183,14 @@ export class ImagesService {
    * @param analysisResultAmqpDto The result of the analysis, that should be stored.
    */
   public async saveAnalysisResult(analysisResultAmqpDto: AnalysisResultAmqpDto): Promise<ImageInformationAmqpDto> {
-    try{
-      const foundImageInformation: ImageInformation = await this.imageInformationDatabaseService.getImageInformation(analysisResultAmqpDto.uuid);
-      if(!foundImageInformation) {
+    try {
+      const storedImage = await this.getImage(analysisResultAmqpDto.uuid);
+      if (!storedImage) {
         return null;
       }
+      const foundImageInformation: ImageInformation = await this.imageInformationDatabaseService.getImageInformation(
+        analysisResultAmqpDto.uuid
+      );
 
       if ('error_details' in analysisResultAmqpDto.image_analysis_result) {
         foundImageInformation.analysisStatus = AnalysisStatus.FAILED;
@@ -172,9 +201,14 @@ export class ImagesService {
       }
       foundImageInformation.image_analysis_result = JSON.stringify(analysisResultAmqpDto.image_analysis_result);
       this.amqpBrokerService.sendRefreshToBff();
-      return this.imageInformationDatabaseService.saveImageInformation(foundImageInformation).then(saveImageInformationResponse => saveImageInformationResponse.toImageInformationAmqpDto());
-    }
-    catch(e){
+      const updatedImageInformation = await this.imageInformationDatabaseService
+        .saveImageInformation(foundImageInformation)
+        .then((saveImageInformationResponse) => saveImageInformationResponse.toImageInformationAmqpDto());
+
+      await this.nftService.createNft(analysisResultAmqpDto, updatedImageInformation, storedImage);
+
+      return updatedImageInformation;
+    } catch (e) {
       this.logger.error('The analysis result could not be saved. ', e);
       return null;
     }

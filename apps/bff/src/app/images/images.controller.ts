@@ -6,23 +6,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  Controller,
-  Get,
-  Post,
-  Param,
-  Body,
-  NotFoundException,
-  BadRequestException,
-  Put,
-  Delete,
-  Query
-} from '@nestjs/common';
-import { ImagesService } from './images.service';
-import {ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags} from '@nestjs/swagger';
 import { ImageInformationAmqpDto } from '@ap4/amqp';
-import {ImageInformationDto, ReadImageDto, UploadImageDto} from '@ap4/api';
+import { ImageInformationDto, ReadImageDto, UploadImageDto } from '@ap4/api';
+import { TokenReadDto } from 'nft-folder-blockchain-connector-besu';
 import { map, Observable } from 'rxjs';
+import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query } from '@nestjs/common';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ImagesService } from './images.service';
 
 @Controller('images')
 @ApiTags('Images')
@@ -37,12 +27,12 @@ export class ImagesController {
     description: 'The uuid used to identify the image that should be returned',
     required: true,
   })
-  @ApiResponse({  })
+  @ApiResponse({})
   @ApiResponse({ status: 200, description: 'The image with the given uuid', type: String })
   @ApiResponse({ status: 404, description: 'Image not found' })
   getImage(@Param('uuid') uuid: string): Observable<ReadImageDto> {
     return this.imagesService.getImage(uuid).pipe(
-      map(image => {
+      map((image) => {
         if (!image) {
           throw new NotFoundException('Image not found');
         }
@@ -63,9 +53,30 @@ export class ImagesController {
   @ApiResponse({ status: 404, description: 'Image not found' })
   getImageInformation(@Param('uuid') uuid: string): Observable<ImageInformationDto> {
     return this.imagesService.getImageInformation(uuid).pipe(
-      map(image => {
+      map((image) => {
         if (!image) {
           throw new NotFoundException('Image not found');
+        }
+        return image;
+      })
+    );
+  }
+
+  @Get('nft/:uuid')
+  @ApiOperation({ description: 'Return the token information for an image' })
+  @ApiParam({
+    name: 'uuid',
+    type: String,
+    description: 'The uuid used to identify the nft of the image that should be returned',
+    required: true,
+  })
+  @ApiResponse({ status: 200, description: 'The nft with the given uuid', type: String })
+  @ApiResponse({ status: 404, description: 'Nft not found' })
+  getImageNft(@Param('uuid') uuid: string): Observable<TokenReadDto> {
+    return this.imagesService.getImageNft(uuid).pipe(
+      map((image) => {
+        if (!image) {
+          throw new NotFoundException('Nft not found');
         }
         return image;
       })
@@ -78,48 +89,42 @@ export class ImagesController {
     name: 'sender',
     type: String,
     description: 'The sender name of the document.',
-    required: false
+    required: false,
   })
   @ApiQuery({
     name: 'receiver',
     type: String,
     description: 'The receiver name of the document.',
-    required: false
+    required: false,
   })
   @ApiQuery({
     name: 'analysisStatus',
     type: String,
     description: 'The analysisStatus name of the document.',
-    required: false
+    required: false,
   })
   @ApiQuery({
     name: 'documentType',
     type: String,
     description: 'The documentType name of the document.',
-    required: false
+    required: false,
   })
   @ApiQuery({
     name: 'bundleId',
     type: String,
     description: 'The bundleId name of the document.',
-    required: false
+    required: false,
   })
   @ApiResponse({ type: String, description: 'Every image information that is currently saved' })
   @ApiResponse({ status: 200, description: 'A list of the stored image information' })
   getAllImageInformation(
-      @Query('sender') sender: string,
-      @Query('receiver') receiver: string,
-      @Query('analysisStatus') analysisStatus: string,
-      @Query('documentType') documentType: string,
-      @Query('bundleId') bundleId: string,
+    @Query('sender') sender: string,
+    @Query('receiver') receiver: string,
+    @Query('analysisStatus') analysisStatus: string,
+    @Query('documentType') documentType: string,
+    @Query('bundleId') bundleId: string
   ): Observable<ImageInformationDto[]> {
-    return this.imagesService.getAllImageInformation(
-        sender,
-        receiver,
-        analysisStatus,
-        documentType,
-        bundleId
-    );
+    return this.imagesService.getAllImageInformation(sender, receiver, analysisStatus, documentType, bundleId);
   }
 
   @Post()
@@ -132,7 +137,7 @@ export class ImagesController {
   @ApiResponse({ status: 400, description: 'Wrong image format' })
   uploadImage(@Body() uploadImageDto: UploadImageDto): Observable<ImageInformationDto> {
     return this.imagesService.uploadImage(uploadImageDto).pipe(
-      map(image => {
+      map((image) => {
         if (!image) {
           throw new BadRequestException('The image is in the wrong format');
         }
@@ -156,12 +161,12 @@ export class ImagesController {
   @ApiResponse({ status: 200, description: 'ImageInformation updated', type: ImageInformationAmqpDto })
   updateImageInformation(@Param('uuid') uuid: string, @Body() imageInformationDto: ImageInformationDto): Observable<ImageInformationDto> {
     return this.imagesService.updateImageInformation(uuid, imageInformationDto).pipe(
-        map(response => {
-          if (!response) {
-            throw new NotFoundException('Image not found');
-          }
-          return response;
-        })
+      map((response) => {
+        if (!response) {
+          throw new NotFoundException('Image not found');
+        }
+        return response;
+      })
     );
   }
 
@@ -177,12 +182,12 @@ export class ImagesController {
   @ApiResponse({ status: 404, description: 'Image not found' })
   removeImage(@Param('uuid') uuid: string): Observable<boolean> {
     return this.imagesService.removeImage(uuid).pipe(
-        map(response => {
-          if (!response) {
-            throw new NotFoundException('Image not found');
-          }
-          return response;
-        })
+      map((response) => {
+        if (!response) {
+          throw new NotFoundException('Image not found');
+        }
+        return response;
+      })
     );
   }
 
@@ -194,16 +199,20 @@ export class ImagesController {
     description: 'The uuid used of the specified bundle',
     required: true,
   })
-  @ApiResponse({ status: 200, description: 'The image information elements of a certain bundle are sent to the DAS to be analyzed', type: String })
+  @ApiResponse({
+    status: 200,
+    description: 'The image information elements of a certain bundle are sent to the DAS to be analyzed',
+    type: String,
+  })
   @ApiResponse({ status: 404, description: 'BundleId not found' })
   analyzeImageBundle(@Param('uuid') uuid: string): Observable<boolean> {
     return this.imagesService.analyzeImageBundle(uuid).pipe(
-        map(response => {
-          if (!response) {
-            throw new NotFoundException('Image bundle not found');
-          }
-          return response;
-        })
+      map((response) => {
+        if (!response) {
+          throw new NotFoundException('Image bundle not found');
+        }
+        return response;
+      })
     );
   }
 }

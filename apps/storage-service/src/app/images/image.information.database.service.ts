@@ -6,15 +6,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {Injectable, Logger} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { ImageInformationFilterAmqpDto } from '@ap4/amqp';
 import { Repository } from 'typeorm';
+import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { ImageInformation } from '../entities/image.Information';
-import {ImageInformationFilterAmqpDto} from "@ap4/amqp";
 
 @Injectable()
 export class ImageInformationDatabaseService {
-
   private readonly logger: Logger = new Logger(ImageInformationDatabaseService.name);
 
   constructor(
@@ -46,21 +45,22 @@ export class ImageInformationDatabaseService {
    * @param imageInformationFilterAmqpDto The filter attributes, that should be applied to the list of image information
    */
   public async getAllImageInformation(imageInformationFilterAmqpDto: ImageInformationFilterAmqpDto): Promise<ImageInformation[]> {
-
     const filterQuery = this.imageInformationRepository.createQueryBuilder('imageInformation');
-    if(imageInformationFilterAmqpDto.sender){
+    if (imageInformationFilterAmqpDto.sender) {
       filterQuery.andWhere('imageInformation.sender = :sender', { sender: imageInformationFilterAmqpDto.sender });
     }
-    if(imageInformationFilterAmqpDto.receiver){
+    if (imageInformationFilterAmqpDto.receiver) {
       filterQuery.andWhere('imageInformation.receiver = :receiver', { receiver: imageInformationFilterAmqpDto.receiver });
     }
-    if(imageInformationFilterAmqpDto.analysisStatus){
-      filterQuery.andWhere('imageInformation.analysisStatus = :analysisStatus', { analysisStatus: imageInformationFilterAmqpDto.analysisStatus });
+    if (imageInformationFilterAmqpDto.analysisStatus) {
+      filterQuery.andWhere('imageInformation.analysisStatus = :analysisStatus', {
+        analysisStatus: imageInformationFilterAmqpDto.analysisStatus,
+      });
     }
-    if(imageInformationFilterAmqpDto.documentType){
+    if (imageInformationFilterAmqpDto.documentType) {
       filterQuery.andWhere('imageInformation.documentType = :documentType', { documentType: imageInformationFilterAmqpDto.documentType });
     }
-    if(imageInformationFilterAmqpDto.bundleId){
+    if (imageInformationFilterAmqpDto.bundleId) {
       filterQuery.andWhere('imageInformation.bundleId = :bundleId', { bundleId: imageInformationFilterAmqpDto.bundleId });
     }
     return filterQuery.getMany();

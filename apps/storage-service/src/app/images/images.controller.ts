@@ -6,25 +6,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AnalysisResultAmqpDto, ImageInformationAmqpDto, ImageInformationFilterAmqpDto, ImageMessagePattern } from '@ap4/amqp';
+import { ImageInformationDto, ReadImageDto, UploadImageDto } from '@ap4/api';
+import { DefaultBundleId, DocumentUploadType } from '@ap4/utils';
+import { TokenReadDto } from 'nft-folder-blockchain-connector-besu';
 import { Body, Controller, Logger } from '@nestjs/common';
-import { ImagesService } from './images.service';
-import {
-  ImageMessagePattern,
-  AnalysisResultAmqpDto,
-  ImageInformationAmqpDto,
-  ImageInformationFilterAmqpDto
-} from '@ap4/amqp';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import {ImageInformationDto, ReadImageDto, UploadImageDto} from '@ap4/api';
-import {DefaultBundleId, DocumentUploadType} from "@ap4/utils";
+import { ImagesService } from './images.service';
 
 @Controller()
 export class ImagesController {
-
   private readonly logger: Logger = new Logger(ImagesController.name);
 
-  constructor(private readonly imagesService: ImagesService) {
-  }
+  constructor(private readonly imagesService: ImagesService) {}
 
   @MessagePattern(ImageMessagePattern.GET_IMAGE)
   public getImage(@Payload() uuid: string): Promise<ReadImageDto> {
@@ -36,6 +30,11 @@ export class ImagesController {
     return this.imagesService.getImageInformation(uuid);
   }
 
+  @MessagePattern(ImageMessagePattern.GET_IMAGE_NFT)
+  public getImageNft(@Payload() uuid: string): Promise<TokenReadDto> {
+    return this.imagesService.getImageNft(uuid);
+  }
+
   @MessagePattern(ImageMessagePattern.GET_ALL_IMAGE_INFORMATION)
   public getAllImageInformation(@Payload() imageInformationFilterAmqpDto: ImageInformationFilterAmqpDto): Promise<ImageInformationDto[]> {
     return this.imagesService.getAllImageInformation(imageInformationFilterAmqpDto);
@@ -43,13 +42,13 @@ export class ImagesController {
 
   @MessagePattern(ImageMessagePattern.UPLOAD_NEW_IMAGE)
   public uploadImage(@Body() uploadImageDto: UploadImageDto): Promise<ImageInformationDto> {
-      if(!uploadImageDto.documentUploadType){
-        uploadImageDto.documentUploadType = DocumentUploadType.JPEG;
-      }
-      if(!uploadImageDto.bundleId){
-        uploadImageDto.bundleId = DefaultBundleId;
-      }
-      return this.imagesService.uploadImage(uploadImageDto);
+    if (!uploadImageDto.documentUploadType) {
+      uploadImageDto.documentUploadType = DocumentUploadType.JPEG;
+    }
+    if (!uploadImageDto.bundleId) {
+      uploadImageDto.bundleId = DefaultBundleId;
+    }
+    return this.imagesService.uploadImage(uploadImageDto);
   }
 
   @MessagePattern(ImageMessagePattern.UPDATE_IMAGE_INFORMATION)
@@ -69,8 +68,7 @@ export class ImagesController {
 
   @MessagePattern(ImageMessagePattern.PUBLISH_ANALYSIS)
   public saveAnalysisResult(@Body() analysisResultAmqpDto: AnalysisResultAmqpDto): Promise<ImageInformationAmqpDto> {
-    this.logger.log("Save analysis result");
+    this.logger.log('Save analysis result');
     return this.imagesService.saveAnalysisResult(analysisResultAmqpDto);
   }
-
 }
