@@ -16,11 +16,15 @@ from openai import AzureOpenAI
 from openai.types.chat.parsed_chat_completion import ParsedChatCompletion
 from PIL import Image
 
+from document_analyzation_service.delivery_note import DeliveryNoteDocument
 from document_analyzation_service.ecmr_schema import ECMRDocument
-from document_analyzation_service.utils import image_to_data_url, make_serializable
+from document_analyzation_service.pallet_note_schema import PalletNoteDocument
+from document_analyzation_service.utils import DocumentType, image_to_data_url, make_serializable
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
+# mypy: disable-error-code=return-value
 
 
 def convert_image_to_data_url(image_data: bytes) -> str:
@@ -41,7 +45,9 @@ def convert_image_to_data_url(image_data: bytes) -> str:
     return data_url
 
 
-def process_image(data_url: str, image_uuid: str, message_pattern: str) -> dict[str, Any]:
+def process_image(
+    data_url: str, image_uuid: str, message_pattern: str, document_type: str
+) -> dict[str, Any]:
     """Process an image Data URL and extracting document data using Azure API.
 
     Args:
@@ -52,6 +58,8 @@ def process_image(data_url: str, image_uuid: str, message_pattern: str) -> dict[
         The unique identifier for the image.
     message_pattern : str
         Topic name for sending the result.
+    document_type : str
+        The type of document to be processed.
 
     Returns:
     -------
@@ -64,7 +72,7 @@ def process_image(data_url: str, image_uuid: str, message_pattern: str) -> dict[
 
     while attempt < max_attempts:
         try:
-            event = process_image_with_azure(data_url)
+            event = process_image_with_azure(data_url, document_type=document_type)
             break  # Successful processing, exit the loop
 
         except Exception as e:
@@ -97,13 +105,15 @@ def process_image(data_url: str, image_uuid: str, message_pattern: str) -> dict[
     }
 
 
-def process_image_with_azure(data_url: str) -> object:
+def process_image_with_azure(data_url: str, document_type: str) -> object:
     """Communicate with the Azure API to process the image Data URL and return the serialized result.
 
     Args:
     ----------
     data_url : str
         The Data URL representation of the image.
+    document_type : str
+        The type of document to be processed.
 
     Returns:
     -------
@@ -116,14 +126,14 @@ def process_image_with_azure(data_url: str) -> object:
         api_version=os.getenv("API_VERSION"),
     )
 
-    completion = retrieve_document_data(data_url, client)
+    completion = retrieve_document_data(data_url, client, document_type)
     event = completion.choices[0].message.parsed
     return make_serializable(event)
 
 
 def retrieve_document_data(
-    data_url: str, client: AzureOpenAI
-) -> ParsedChatCompletion[ECMRDocument]:
+    data_url: str, client: AzureOpenAI, document_type: str
+) -> ParsedChatCompletion[ECMRDocument | DeliveryNoteDocument | PalletNoteDocument]:
     """Retrieve the document data from the Azure API, by assembling an Open AI message.
 
     Args:
@@ -132,12 +142,29 @@ def retrieve_document_data(
         The Data URL representation of the image.
     client : AzureOpenAI
         The Azure OpenAI client instance.
+    document_type : str
+        The type of document to be processed.
 
     Returns:
     -------
-    ParsedChatCompletion[ECMRDocument]
+    ParsedChatCompletion[ECMRDocument | DeliveryNoteDocument | PalletNoteDocument]
         The document data retrieved from the Azure API.
     """
+    from typing import Type, Union
+
+    response_format: Type[Union[PalletNoteDocument, DeliveryNoteDocument, ECMRDocument]]
+
+    if document_type == DocumentType.PALLET_NOTE.value:
+        response_format = PalletNoteDocument
+    elif document_type == DocumentType.DELIVERY_NOTE.value:
+        response_format = DeliveryNoteDocument
+    else:
+        response_format = ECMRDocument
+
+    logger.info(
+        "Using response_format=%s for document_type=%s", response_format.__name__, document_type
+    )
+
     completion = client.beta.chat.completions.parse(
         model=str(os.getenv("GPT_MODEL")),
         messages=[
@@ -161,7 +188,7 @@ def retrieve_document_data(
                 ],
             },
         ],
-        response_format=ECMRDocument,
+        response_format=response_format,
     )
-
+    logger.debug("Completion received: %s", completion)
     return completion

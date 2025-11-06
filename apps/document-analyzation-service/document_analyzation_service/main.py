@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 
 from document_analyzation_service.image_processor import convert_image_to_data_url, process_image
 from document_analyzation_service.message_broker import RabbitMQReceiver, decode_image_from_message
+from document_analyzation_service.utils import DocumentType
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -46,6 +47,7 @@ def on_image_received(
     Processes the received image by decoding it, converting it to a data URL,
     and then processing it further. The result is then sent to a queue.
     """
+    logger.info("Received message from queue '%s'.", RECEIVE_QUEUE_NAME)
     message = json.loads(body)
     data = message.get("data")
     image_uuid = data.get("uuid")
@@ -55,10 +57,30 @@ def on_image_received(
         image_data = decode_image_from_message(base64_image)
         data_url = convert_image_to_data_url(image_data)
 
-        serializable_event = process_image(data_url, image_uuid, SAVE_ANALYZATION_RESULT_PATTERN)
+        document_type = None
+        if "document_type" in data:
+            document_type = data["document_type"]
+
+            # Sanity check, whether document_type is valid
+            if document_type in (dt.value for dt in DocumentType):
+                logger.info("Selected, valid document type: %s", document_type)
+            else:
+                logger.warning(
+                    "Invalid document type specified: %s. Defaulting to CMR.", document_type
+                )
+                logger.warning("Valid document types are: %s", [dt.value for dt in DocumentType])
+                document_type = DocumentType.CMR.value
+        else:
+            logger.warning("No 'document_type' specified in the message. Defaulting to CMR.")
+            document_type = DocumentType.CMR.value
+
+        serializable_event = process_image(
+            data_url, image_uuid, SAVE_ANALYZATION_RESULT_PATTERN, document_type
+        )
         logger.info("Image with UUID: %s processed successfully.", image_uuid)
 
         send_event_to_queue(serializable_event)
+
         logger.info(f"JSON event sent to queue '{SEND_QUEUE_NAME}'.")
     except Exception as e:
         logger.error(f"Error processing message: {e}")

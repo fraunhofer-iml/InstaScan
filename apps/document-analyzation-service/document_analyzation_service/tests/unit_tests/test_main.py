@@ -31,7 +31,13 @@ class TestOnImageReceived(unittest.TestCase):
         method = MagicMock()
         properties = MagicMock()
         body = json.dumps(
-            {"data": {"uuid": "1234", "image_base64": "some_base64_encoded_string"}}
+            {
+                "data": {
+                    "uuid": "1234",
+                    "image_base64": "some_base64_encoded_string",
+                    "document_type": "Delivery Note",
+                }
+            }
         ).encode("utf-8")
         mock_decode_image_from_message.return_value = "decoded_image_data"
         mock_convert_image_to_data_url.return_value = "data_url"
@@ -42,7 +48,7 @@ class TestOnImageReceived(unittest.TestCase):
         mock_decode_image_from_message.assert_called_once_with("some_base64_encoded_string")
         mock_convert_image_to_data_url.assert_called_once_with("decoded_image_data")
         mock_process_image.assert_called_once_with(
-            "data_url", "1234", SAVE_ANALYZATION_RESULT_PATTERN
+            "data_url", "1234", SAVE_ANALYZATION_RESULT_PATTERN, "Delivery Note"
         )
         mock_send_event_to_queue.assert_called_once_with({"processed": "data"})
 
@@ -67,14 +73,16 @@ class TestOnImageReceived(unittest.TestCase):
         mock_convert.return_value = "data_url_string"
         mock_process.return_value = event_result
 
-        body = json.dumps({"data": {"uuid": uuid, "image_base64": base64_image}}).encode("utf-8")
+        body = json.dumps(
+            {"data": {"uuid": uuid, "image_base64": base64_image, "document_type": "CMR"}}
+        ).encode("utf-8")
 
         on_image_received(MagicMock(), MagicMock(), MagicMock(), body)
 
         mock_decode.assert_called_once_with(base64_image)
         mock_convert.assert_called_once_with(b"decoded_image_bytes")
         mock_process.assert_called_once_with(
-            "data_url_string", uuid, SAVE_ANALYZATION_RESULT_PATTERN
+            "data_url_string", uuid, SAVE_ANALYZATION_RESULT_PATTERN, "CMR"
         )
         mock_send_event.assert_called_once_with(event_result)
         mock_logger.info.assert_any_call("Image with UUID: %s processed successfully.", uuid)
@@ -158,7 +166,9 @@ class TestOnImageReceived(unittest.TestCase):
         mock_convert.return_value = "data_url_string"
         mock_process.return_value = event_result
 
-        message = {"data": {"uuid": uuid, "image_base64": base64_img}}
+        message = {
+            "data": {"uuid": uuid, "image_base64": base64_img, "document_type": "Pallet Note"}
+        }
         body = json.dumps(message).encode("utf-8")
 
         # Act
@@ -168,7 +178,7 @@ class TestOnImageReceived(unittest.TestCase):
         mock_decode.assert_called_once_with(base64_img)
         mock_convert.assert_called_once_with(b"decoded_bytes")
         mock_process.assert_called_once_with(
-            "data_url_string", uuid, SAVE_ANALYZATION_RESULT_PATTERN
+            "data_url_string", uuid, SAVE_ANALYZATION_RESULT_PATTERN, "Pallet Note"
         )
         mock_send_event.assert_called_once_with(event_result)
 

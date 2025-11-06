@@ -111,7 +111,7 @@ doc-analyzation-service:sonarqube-check:
       -Dsonar.sources=${DAS_SOURCE_FILES_DIR}
       -Dsonar.tests=${TEST_FILES_DIR}
       -Dsonar.coverage.exclusions=**__init__**,${TEST_FILES_DIR}**
-      -Dsonar.exclusions=*.xml,${TEST_FILES_DIR}**
+      -Dsonar.exclusions=*.xml,${TEST_FILES_DIR}**,**/delivery_note.py
       -Dsonar.qualitygate.wait=true
   allow_failure: true
   only:

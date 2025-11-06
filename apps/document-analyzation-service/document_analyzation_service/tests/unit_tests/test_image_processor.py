@@ -34,7 +34,7 @@ class TestImageProcessor(unittest.TestCase):
         side_effect=Exception("fail"),
     )
     def test_process_image_failure_handling(self, mock_process, mock_sleep):
-        result = process_image("dummy_url", "uuid123", "pattern")
+        result = process_image("dummy_url", "uuid123", "pattern", "CMR")
 
         self.assertEqual(result["data"]["image_analysis_result"]["status"], "error")
         self.assertIn("error_details", result["data"]["image_analysis_result"])
@@ -50,18 +50,18 @@ class TestImageProcessor(unittest.TestCase):
         mock_completion.choices = [MagicMock(message=MagicMock(parsed={"field": "value"}))]
         mock_retrieve.return_value = mock_completion
 
-        result = process_image_with_azure("some_data_url")
+        result = process_image_with_azure("some_data_url", "CMR")
 
         self.assertEqual(result, {"field": "value"})
         mock_client_class.assert_called_once()
-        mock_retrieve.assert_called_once_with("some_data_url", mock_client)
+        mock_retrieve.assert_called_once_with("some_data_url", mock_client, "CMR")
 
     def test_retrieve_document_data(self):
         mock_client = MagicMock()
         mock_completion = MagicMock()
         mock_client.beta.chat.completions.parse.return_value = mock_completion
 
-        result = retrieve_document_data("dummy_url", mock_client)
+        result = retrieve_document_data("dummy_url", mock_client, "CMR")
 
         self.assertEqual(result, mock_completion)
         mock_client.beta.chat.completions.parse.assert_called_once()
@@ -75,7 +75,7 @@ class TestImageProcessor(unittest.TestCase):
             "data": "processed_data",
         }
 
-        result = process_image(data_url, image_uuid, "test_message_pattern")
+        result = process_image(data_url, image_uuid, "test_message_pattern", "CMR")
 
         self.assertEqual(result["data"]["uuid"], image_uuid)
         self.assertEqual(result["data"]["image_analysis_result"]["status"], "success")
@@ -87,7 +87,7 @@ class TestImageProcessor(unittest.TestCase):
         image_uuid = "1234"
         mock_process_image_with_azure.side_effect = Exception("401 Unauthorized")
 
-        result = process_image(data_url, image_uuid, "test_message_pattern")
+        result = process_image(data_url, image_uuid, "test_message_pattern", "CMR")
 
         self.assertEqual(result["data"]["image_analysis_result"]["status"], "error")
         self.assertIn(
@@ -100,7 +100,7 @@ class TestImageProcessor(unittest.TestCase):
     def test_process_image_with_retry(self, mock_process, mock_sleep):
         mock_process.side_effect = [Exception("Temporary error"), {"some": "result"}]
 
-        result = process_image("dummy_url", "uuid123", "pattern")
+        result = process_image("dummy_url", "uuid123", "pattern", "CMR")
 
         self.assertEqual(result["data"]["image_analysis_result"], {"some": "result"})
         self.assertEqual(mock_process.call_count, 2)

@@ -9,11 +9,20 @@
 import base64
 import io
 import os
+from enum import Enum
 from mimetypes import guess_type
 from pathlib import Path
 from typing import AnyStr
 
 from PIL.Image import Image
+
+
+class DocumentType(Enum):
+    """Enum for different document types."""
+
+    CMR = "CMR"
+    PALLET_NOTE = "Pallet Note"
+    DELIVERY_NOTE = "Delivery Note"
 
 
 def local_image_to_data_url(image_path: str) -> str:
