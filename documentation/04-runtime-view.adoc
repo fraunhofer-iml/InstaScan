@@ -23,7 +23,7 @@ This communication occurs either through direct REST interactions from the front
 This Chapter outlines all available APIs in the following Order:
 
 1. The Backend which accepts AMQP messages related to the process.
-2. The Api exposed through the BFF which the {projectName} Frontend uses to query for data and upload new documents.
+2. The Api exposed through the BFF which the InstaScan Frontend uses to query for data and upload new documents.
 
 === AMQP specific messaging interfaces and API
 
@@ -36,8 +36,14 @@ The BFF service uses various AMQP endpoints provided by the storage service and 
 |UPDATE | `images/update` | Updates an existing image. Is used by the BFF.
 |GET | `images/read` | Returns all existing images. Is used by the BFF.
 |GET_BY_ID | `images/read-by-id` | Returns a specific image. Is used by the BFF.
+|REMOVE_IMAGE | `images/remove` | Remove a specific image. Is used by the BFF.
 |PUBLISH_ANALYSIS | `analysis/publish` | Saves a complete analysis result in the database. Is used by the document analyzation service.
 |READ_ANALYSIS | `analysis/get` | Returns an analysis result of a specific image. Is used by the BFF.
+|ANALYZE_BUNDLE | `analysis/bundle/create` | Analyze all documents of a certain bundle. Is used by the BFF.
+|===
+
+| *Image Subscribe Controller* | Path | Description
+|REFRESH_ANALYSIS | `analysis/refresh` | Refresh the analysis result of a specific image. Is used by the BFF.
 |===
 
 ==== Document Analyzation Service API

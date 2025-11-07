@@ -7,11 +7,11 @@
 
 == Installation and Tutorials
 
-This section provides a detailed guide for setting up and using the Document-analyzation-service (DAS) within the {projectName} project, focusing on its communication with VLMs using RabbitMQ and processing base64-encoded images.
+This section provides a detailed guide for setting up and using the Document-analyzation-service (DAS) within the InstaScan project, focusing on its communication with VLMs using RabbitMQ and processing base64-encoded images.
 
 === Installation and Setup
 
-1. **Clone the Repository**: Use Git to clone the {projectName} repository containing the DAS code.
+1. **Clone the Repository**: Use Git to clone the InstaScan repository containing the DAS code.
 [source,shell]
 git clone <placeholder>
 
@@ -27,11 +27,11 @@ docker compose up -d
 
 === Tutorials
 
-This section provides a tutorial that shows how to use the services of {projectName}, in particular how to use the DAS for document digitization and machine readability.
+This section provides a tutorial that shows how to use the services of InstaScan, in particular how to use the DAS for document digitization and machine readability.
 
 ==== Upload a picture of a CMR document via the frontend
 
-This section explains how to access {projectName} functions via the front end.
+This section explains how to access InstaScan functions via the front end.
 
 1. *Open* your browser and navigate to:
 [source,shell]
@@ -57,4 +57,4 @@ Clicking on an entry in the table takes you to the details page of the documents
 
 2. **Process and Analyze**: The DAS will utilize VLMs to analyze the document images, ensuring accurate digitization and compliance.
 
-This section provides a comprehensive guide to installing, configuring, and utilizing the Document-analyzation-service within the {projectName} project, focusing on its communication with VLMs and processing of base64-encoded images using RabbitMQ.
+This section provides a comprehensive guide to installing, configuring, and utilizing the Document-analyzation-service within the InstaScan project, focusing on its communication with VLMs and processing of base64-encoded images using RabbitMQ.
