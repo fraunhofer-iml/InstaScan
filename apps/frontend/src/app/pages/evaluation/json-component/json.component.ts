@@ -36,18 +36,48 @@ export class JsonComponent {
   @Input() depth = 0;
   @Input() editable = true;
   @Output() modified = new EventEmitter<boolean>();
+
+  /**
+   * Detemines whether the given value is a primitive (string, number, boolean, etc.).
+   * @param value The value to test.
+   * @returns `true` if the value is primitive; otherwise `false`
+   */
   isPrimitive(value: string): boolean {
     return value === null || value === undefined || typeof value !== 'object';
   }
-  isObject(val: string): boolean {
-    return val !== null && typeof val === 'object' && !Array.isArray(val);
+
+  /**
+   * Checks if the given value represents an object.
+   * @param value The value to test.
+   * @returns `true` if the value is an object; otherwise `false`.
+   */
+  isObject(value: string): boolean {
+    return value !== null && typeof value === 'object' && !Array.isArray(value);
   }
-  isArray(val: string): boolean {
-    return Array.isArray(val);
+
+  /**
+   * Checks if the given value represents an array.
+   * @param value The value to test.
+   * @returns `true` if the value is an array; otherwise `false`.
+   */
+  isArray(value: string): boolean {
+    return Array.isArray(value);
   }
-  getObjectKeys(obj: string): string[] {
-    return Object.keys(obj);
+
+  /**
+   * Retrieves the keys of an object for iteration.
+   * @param object The object to extract keys from.
+   * @returns Array of keys.
+   */
+  getObjectKeys(object: string): string[] {
+    return Object.keys(object);
   }
+
+  /**
+   * Formats a JSON key into a more human-readable label.
+   * @param key The JSON property name.
+   * @returns The formatted label string.
+   */
   formatLabel(key: string): string {
     return key
       .replace(/[^a-zA-Z0-9.]+/g, ' ')
@@ -57,6 +87,11 @@ export class JsonComponent {
       .trim()
       .replace(/\b\w/g, c => c.toUpperCase());
   }
+
+  /**
+   * Handles user input changes in the JSON editor.
+   * @param modified Whether the JSON content has been modified.
+   */
   onInputChange(modified: boolean) {
     this.modified.emit(modified);
   }

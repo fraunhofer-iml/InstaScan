@@ -65,18 +65,36 @@ In level 1, the components of {projectName} are shown.
 
 In Level 2, the internal components of the above are shown.
 
-=== Frontend
+[options="header"]
+|===
+|Name |Status |Responsibility / Description
 
+|frontend
+|Frontend a|
+The frontend of InstaScan is an Angular-based Progressive Web App (PWA).
+It has been developed following the best practices recommended by the Angular community.
+
+*Components:*
+* The component design pattern follows a separation between smart and dumb components. 
+Smart components are primarily used at the page level and handle data and logic, while
+dumb components focus solely on presentation and receive their inputs from smart components.
+
+*Services:*
+
+* The services are responsible for managing the business logic and for communitcating with backend services.
+
+*API:*
+* API Documentation can be found
+----
+TBD
+----
+
+|backend for frontend(bff)| Backend For Frontend(BFF) a|
 TBD
 
-=== Backend for frontend (BFF)
+|storage service | Storage Service a| TBD
 
+|document analyzation service| Document Analyzation Service a|
 TBD
 
-=== Storage service
-
-TBD
-
-=== Document analyzation service
-
-TBD
+|===

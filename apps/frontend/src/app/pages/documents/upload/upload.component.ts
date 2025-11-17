@@ -40,10 +40,18 @@ export class UploadComponent {
     private readonly snackbarService: SnackbarService
   ) { }
 
+  /**
+   * Handles drag-over events to allow file drop.
+   * @param event The drag event.
+   */
   onDragOver(event: DragEvent): void {
     event.preventDefault();
   }
 
+  /**
+   * Handles file drop and extracts files from the event.
+   * @param event The drag event containing dropped files.
+   */
   onDrop(event: DragEvent): void {
     event.preventDefault();
     const file = event.dataTransfer?.files[0];
@@ -52,6 +60,10 @@ export class UploadComponent {
     }
   }
 
+  /**
+   * Handles file input selection via the upload button.
+   * @param event The file input event.
+   */
   onFileSelected(event: Event): void {
     const target = event.target as HTMLInputElement;
     if (!target.files) return;
@@ -59,6 +71,10 @@ export class UploadComponent {
     this.document.patchValue(file);
   }
 
+  /**
+   * Callback executed when a file upload completes successfully.
+   * @param image The uploaded image in base64-string.
+   */
   onUploadSuccess(image: string): void {
     this.isUploading = false;
     this.uploadSuccessful = true;
@@ -67,6 +83,9 @@ export class UploadComponent {
     this.snackbarService.sendMessage(this.uploadMessages.UPLOAD_SUCCESS);
   }
 
+  /**
+   * Submits the uploaded document for processing or analysis.
+   */
   submitDocument(): void {
     const reader = new FileReader();
     this.isUploading = true;

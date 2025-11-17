@@ -14,7 +14,13 @@ import { environment } from '../../../../environments/environment';
 @Injectable()
 export class ImageStreamService {
   private socket?: Socket;
-  private readonly update$ = new Subject<void>(); 
+  private readonly update$ = new Subject<void>();
+
+  /**
+   * Establishes a connection to the image stream.
+   * Typically used to open a WebSocket or SSE connection
+   * for receiving live image or analysis data
+   */
   connect() {
     if (this.socket) return;
 
@@ -27,10 +33,20 @@ export class ImageStreamService {
     });
   }
 
+  /**
+   * Returns an observable that emits updates from the image stream.
+   * Subscribers receive new data as soon as it is available.
+   * @returns Observable emitting image updates or stream events.
+   */
   getUpdates(): Observable<void> {
     return this.update$.asObservable();
   }
 
+  /**
+   * Closes the existing connection to the image stream.
+   * Should be called when streaming is no longer needed
+   * to release network and system resources.
+   */
   disconnect() {
     this.socket?.disconnect();
     this.socket = undefined;

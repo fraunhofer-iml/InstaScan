@@ -71,6 +71,9 @@ export class DocumentsComponent implements AfterViewInit {
     private readonly dialog: MatDialog
   ) { }
 
+  /**
+   * Lifecycle hook called after the components's view has been fully initialized.
+   */
   ngAfterViewInit(): void {
     this.imageStreamService.connect();
     this.imageStreamService.getUpdates().pipe(
@@ -80,11 +83,19 @@ export class DocumentsComponent implements AfterViewInit {
     })
   }
 
+  /**
+   * Tansforms backend status coed into human-readable strings.
+   * @param value The raw status value from the backend.
+   * @returns A formatted string representing the document's status.
+   */
   transformStatus(value: string): string {
     if (!value) return value;
     return value.replace(/_/g, ' ').toLowerCase();
   }
 
+  /**
+   * Initializes the document table data source.
+   */
   initializeDataSource(): void {
     this.imageService
       .getImages()
@@ -108,11 +119,19 @@ export class DocumentsComponent implements AfterViewInit {
       });
   }
 
+  /**
+   * Applies a user-entered filter to the data source.
+   * @param event The input event from the filter field.
+   */
   applyFilter(event: Event) {
     const value = (event.target as HTMLInputElement).value.trim().toLowerCase();
     this.filterValue$.next(value);
   }
 
+  /**
+   * Deletes an image and updates the displayed document list.
+   * @param uuid The unique ID of the image to delete.
+   */
   deleteImage(uuid: string) {
     const dialogRef = this.dialog.open(DialogDeleteDocumentComponent);
 
@@ -125,10 +144,19 @@ export class DocumentsComponent implements AfterViewInit {
     });
   }
 
+  /**
+   * Returny a corresponding icon name or path based on the document's analysis status.
+   * @param analysisStatus The analysis status string.
+   * @returns The icon name.
+   */
   getStatusIcon(analysisStatus: string) {
     return STATUS_ICONS_MAP[analysisStatus as AnalysisStatus] || '';
   }
 
+  /**
+   * Configures the paginator for the material data table.
+   * @param dataSource The data source to attach to the paginator
+   */
   private setupPaginator(
     dataSource: MatTableDataSource<ImageInformationDto>
   ): void {
@@ -139,6 +167,10 @@ export class DocumentsComponent implements AfterViewInit {
     });
   }
 
+  /**
+   * Defines a cusom filtering function for the table data source.
+   * @param dataSource The data source to configure,
+   */
   private setFilterPredicate(dataSource: MatTableDataSource<ImageInformationDto>): void {
     dataSource.filterPredicate = (image: ImageInformationDto, value: string): boolean => {
       return (
@@ -154,6 +186,11 @@ export class DocumentsComponent implements AfterViewInit {
     };
   }
 
+  /**
+   * Formats a data object into a user-friendly string,
+   * @param date the data to format.
+   * @returns A formatted data string.
+   */
   private formatDate(date: Date): string {
     return (this.datePipe.transform(date, DATETIME) ?? '').toLowerCase();
   }

@@ -29,6 +29,11 @@ export class CameraStreamService {
       this.isCameraConnected.next(false);
     });
   }
+
+  /**
+   * Subscribes to the document stream response.
+   * @returns Observable emitting the server's document response as a string.
+   */
   onDocumentResponse(): Observable<string> {
     return new Observable(observer => {
       this.socket.on(CameraCommandsEnum.uuid_topic, (uuid) => {
@@ -36,6 +41,11 @@ export class CameraStreamService {
       });
     });
   }
+
+  /**
+   * Subscribes to the camera's live image stream.
+   * @returns Observable emitting image data in base64.
+   */
   onImageStream(): Observable<string> {
     return new Observable(observer => {
       this.socket.on(CameraCommandsEnum.dsCameraLowresStream, (data) => {
@@ -43,12 +53,27 @@ export class CameraStreamService {
       });
     });
   }
+
+  /**
+   * Checks whether the camera is currently connected and active.
+   * @returns Observable emitting `true` if the camera is active, otherwise `false`.
+   */
   getCameraStatus(): Observable<boolean> {
     return this.isCameraConnected.asObservable();
   }
+
+  /**
+   * Triggers the camera to capture a single image frame.
+   * The result is typically emitted through the image stream observable.
+   */
   takeImage() {
     this.socket.emit(CameraCommandsEnum.feTakeImage);
   }
+
+  /**
+   * Closes the camera stream connection and cleans up any resources.
+   * Should be called on component destruction or when the user stop scanning.
+   */
   disconnect() {
     this.socket.disconnect();
   }

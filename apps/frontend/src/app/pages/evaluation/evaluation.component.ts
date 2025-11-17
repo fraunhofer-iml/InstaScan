@@ -72,6 +72,9 @@ export class EvaluationComponent {
     this.initializeImageInformation();
   }
 
+  /**
+   * Initializes and displays the selected image for evaluation.
+   */
   initializeImage() {
     this.imageId$.subscribe((id: string) => {
       this.imageService.getImageFileByUuid(id).subscribe((image: ReadImageDto) => {
@@ -80,6 +83,9 @@ export class EvaluationComponent {
     })
   }
 
+  /**
+   * Loads and displays the JSON data extracted from the analyzed image.
+   */
   initializeImageInformation() {
     this.imageId$.subscribe((id: string) => {
       return this.imageService
@@ -92,6 +98,10 @@ export class EvaluationComponent {
     })
   }
 
+  /**
+   * Saves any modified image information back to the server.
+   * @param uuid The unique identifier of the image being saved.
+   */
   saveImageInformation(uuid: string) {
     this.getImage.analysisStatus = this.analysisStatus.APPROVED;
     this.imageService.updateImageInformation(uuid, this.getImage).subscribe(() => {
@@ -104,6 +114,10 @@ export class EvaluationComponent {
     });
   }
 
+  /**
+   * Detecs whether the JSON file has been modified compared to its original version.
+   * @param modified `true` if modified, `false` otherwise.
+   */
   onModified(modified: boolean) {
     this.modified = modified;
   }
