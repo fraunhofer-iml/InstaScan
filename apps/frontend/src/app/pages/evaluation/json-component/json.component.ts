@@ -38,7 +38,7 @@ export class JsonComponent {
   @Output() modified = new EventEmitter<boolean>();
 
   /**
-   * Detemines whether the given value is a primitive (string, number, boolean, etc.).
+   * Determines whether the given value is a primitive (string, number, boolean, etc.).
    * @param value The value to test.
    * @returns `true` if the value is primitive; otherwise `false`
    */

@@ -72,9 +72,10 @@ export class DocumentsComponent implements AfterViewInit {
   ) { }
 
   /**
-   * Lifecycle hook called after the components's view has been fully initialized.
+   * Lifecycle hook called after the component's view has been fully initialized.
    */
   ngAfterViewInit(): void {
+    this.initializeDataSource();
     this.imageStreamService.connect();
     this.imageStreamService.getUpdates().pipe(
       startWith(null),
@@ -84,7 +85,7 @@ export class DocumentsComponent implements AfterViewInit {
   }
 
   /**
-   * Tansforms backend status coed into human-readable strings.
+   * Transforms backend status code into human-readable strings.
    * @param value The raw status value from the backend.
    * @returns A formatted string representing the document's status.
    */
@@ -145,7 +146,7 @@ export class DocumentsComponent implements AfterViewInit {
   }
 
   /**
-   * Returny a corresponding icon name or path based on the document's analysis status.
+   * Return a corresponding icon name or path based on the document's analysis status.
    * @param analysisStatus The analysis status string.
    * @returns The icon name.
    */
@@ -168,7 +169,7 @@ export class DocumentsComponent implements AfterViewInit {
   }
 
   /**
-   * Defines a cusom filtering function for the table data source.
+   * Defines a custom filtering function for the table data source.
    * @param dataSource The data source to configure,
    */
   private setFilterPredicate(dataSource: MatTableDataSource<ImageInformationDto>): void {

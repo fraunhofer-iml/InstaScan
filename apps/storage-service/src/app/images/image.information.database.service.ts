@@ -42,7 +42,7 @@ export class ImageInformationDatabaseService {
 
   /**
    * Return the list of image information and filter it with the given filter attributes.
-   * @param imageInformationFilterAmqpDto The filter attributes, that should be applied to the list of image information
+   * @param imageInformationFilterAmqpDto The filter attributes that should be applied to the list of image information
    */
   public async getAllImageInformation(imageInformationFilterAmqpDto: ImageInformationFilterAmqpDto): Promise<ImageInformation[]> {
     const filterQuery = this.imageInformationRepository.createQueryBuilder('imageInformation');

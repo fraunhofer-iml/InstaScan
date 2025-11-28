@@ -115,7 +115,7 @@ export class EvaluationComponent {
   }
 
   /**
-   * Detecs whether the JSON file has been modified compared to its original version.
+   * Detects whether the JSON file has been modified compared to its original version.
    * @param modified `true` if modified, `false` otherwise.
    */
   onModified(modified: boolean) {

@@ -53,7 +53,7 @@ export class ImageService {
   }
 
   /**
-   * Fetches the analysis results for specific image.
+   * Fetches the analysis results for a specific image.
    * @param uuid The unique identifier of the image.
    * @returns Observable containing the analysis result data.
    */
@@ -83,7 +83,7 @@ export class ImageService {
   /**
    * Initiates an analysis of an image or image bundle.
    * @param uuid The unique identifier of the image or bundle to analyze.
-   * @returns Observable emitting `true` if the analysis was successfully.
+   * @returns Observable emitting `true` if the analysis was successful.
    */
   public analyzeImageBundle(uuid: string): Observable<boolean> {
     return this.httpClient.put<boolean>(`${environment.IMAGE.URL_BUNDLES}/${uuid}`, null);

@@ -7,8 +7,8 @@
  */
 
 export enum SnackbarMessagesEnum {
-  APPROVED = 'File was successfully approved',
-  SAVE_APPROVED = 'Changes were saved and File was successfully approved',
-  ANALYSE_DOCUMENTS = 'Bundle sent to analysation',
-  ANALYSE_DOCUMENTS_FAILED = 'Document analysis failed',
+  APPROVED = 'File was successfully approved.',
+  SAVE_APPROVED = 'Changes were saved and File was successfully approved.',
+  ANALYSE_DOCUMENTS = 'Bundle sent to analysation.',
+  ANALYSE_DOCUMENTS_FAILED = 'Document analysis failed.',
 }

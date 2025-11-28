@@ -47,7 +47,7 @@ export class ImagesService {
   }
 
   /**
-   * Returns an image information entry fo a certain uuid.
+   * Returns an image information entry for a certain uuid.
    * @param uuid The uuid of the image information that should be returned.
    */
   public async getImageInformation(uuid: string): Promise<ImageInformationDto> {
@@ -75,7 +75,7 @@ export class ImagesService {
   }
 
   /**
-   * Uploads the a new image to the s3 serve and saves a new image information entry in the database.
+   * Uploads a new image to the s3 serve and saves a new image information entry in the database.
    * It also generates a new uuid for this image and the image information.
    * @param uploadImageAmqpDto The dto that contains the image that should be uploaded as base64 string and the bundle id.
    */

@@ -20,6 +20,15 @@ export class NftDatabaseFactory extends NftFactory {
     super();
   }
 
+  /**
+   * Create a new NFT by delegating the operation to the NftDatabaseService.
+   * @param imageUuid The unique UUID of the image.
+   * @param imageInformation Metadata of the image (analysis status, document type).
+   * @param imageBase64 The image encoded as a Base64 string.
+   * @param imageUrl The URL where the image is stored.
+   * @param analysisResult The analysis result as a schema object.
+   * @param analysisResultUrl The URL where the analysis result is stored.
+   */
   public async mintNFT(
     imageUuid: string,
     imageInformation: ImageInformationAmqpDto,
@@ -31,10 +40,19 @@ export class NftDatabaseFactory extends NftFactory {
     return this.nftDatabaseService.mintNFT(imageUuid, imageInformation, imageBase64, imageUrl, analysisResult, analysisResultUrl);
   }
 
+  /**
+   * Retrieve an NFT by its image UUID by delegating the operation to the NftDatabaseService.
+   * @param imageUuid The UUID of the image associated with the NFT.
+   */
   public async readNFT(imageUuid: string): Promise<TokenReadDto> {
     return this.nftDatabaseService.readNFT(imageUuid);
   }
 
+  /**
+   * Update the analysis status of an existing NFT by delegating the operation to the NftDatabaseService.
+   * @param imageUuid The UUID of the image whose NFT should be updated.
+   * @param analysisStatus The new analysis status to set.
+   */
   public async updateNFTStatus(imageUuid: string, analysisStatus: AnalysisStatus): Promise<TokenReadDto> {
     return this.nftDatabaseService.updateNFTStatus(imageUuid, analysisStatus);
   }

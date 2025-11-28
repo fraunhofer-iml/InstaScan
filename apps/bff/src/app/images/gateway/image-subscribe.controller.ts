@@ -16,6 +16,6 @@ export class ImageSubscribeController {
 
   @EventPattern(ImageMessagePattern.REFRESH_ANALYSIS)
   async handleImageUpdate() {
-    this.gateway.sendRefreshImageTable();
+    await this.gateway.sendRefreshImageTable();
   }
 }

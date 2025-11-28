@@ -16,7 +16,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { MatDialogRef } from '@angular/material/dialog';
 import { DocumentTypeId, DocumentUploadType } from '@ap4/utils';
 import { PdfConverter } from "./pdfConverter";
-import { from, switchMap } from "rxjs";
+import { from, of, switchMap } from "rxjs";
 import { SnackbarService } from '../../../shared/services/snackbar/SnackBar.Service';
 import { UploadMessages } from '../const/upload-messages.enum';
 
@@ -41,7 +41,7 @@ export class UploadComponent {
   ) { }
 
   /**
-   * Handles drag-over events to allow file drop.
+   * Handles drag-over events to allow a file drop.
    * @param event The drag event.
    */
   onDragOver(event: DragEvent): void {
@@ -49,7 +49,7 @@ export class UploadComponent {
   }
 
   /**
-   * Handles file drop and extracts files from the event.
+   * Handles a file drop and extracts files from the event.
    * @param event The drag event containing dropped files.
    */
   onDrop(event: DragEvent): void {
@@ -87,28 +87,29 @@ export class UploadComponent {
    * Submits the uploaded document for processing or analysis.
    */
   submitDocument(): void {
-    const reader = new FileReader();
     this.isUploading = true;
     this.uploadSuccessful = false;
+
+    const reader = new FileReader();
     reader.onloadend = () => {
-      const mimeType: string = (reader.result as string).split(',')[0];
-      const extension: string = mimeType.split('/')[1].split(';')[0].toUpperCase();
-      const uploadType: DocumentUploadType = DocumentUploadType[extension as keyof typeof DocumentUploadType];
-      const image_base64 = (reader.result as string).split(',')[1];
-      if (uploadType == DocumentUploadType.PDF) {
-        from(this.pdfConverter.convertToPdf(image_base64)).pipe(
-          switchMap(result => {
-            return this.imageService.uploadImage({ image_base64: result, bundleId: 'testBundleId', documentUploadType: uploadType, documentType: DocumentTypeId.CMR });
-          })
-        ).subscribe((image) => {
-          this.onUploadSuccess(image);
-        });
-      }
-      else {
-        this.imageService.uploadImage({ image_base64: image_base64, bundleId: 'testBundleId', documentUploadType: uploadType, documentType: DocumentTypeId.CMR }).subscribe((image) => {
-          this.onUploadSuccess(image);
-        });
-      }
+      const result = reader.result as string;
+      const [mimeInfo, base64Data] = result.split(',');
+      const extension = mimeInfo.split('/')[1].split(';')[0].toUpperCase();
+      const uploadType = DocumentUploadType[extension as keyof typeof DocumentUploadType];
+
+      const upload$ =
+        uploadType === DocumentUploadType.PDF ? from(this.pdfConverter.convertToPdf(base64Data)) : of(base64Data);
+
+      upload$.pipe(switchMap((processedBase64:string) =>
+            this.imageService.uploadImage({
+              image_base64: processedBase64,
+              bundleId: 'testBundleId',
+              documentUploadType: uploadType,
+              documentType: DocumentTypeId.CMR,
+            })
+          )
+        )
+        .subscribe((image:string) => this.onUploadSuccess(image));
     };
     reader.readAsDataURL(this.document.value);
   }

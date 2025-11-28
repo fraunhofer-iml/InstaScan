@@ -76,7 +76,7 @@ export class ScanComponent implements OnDestroy {
   }
 
   /**
-   * Indicates whether the 'Analyze' button should be diabled.
+   * Indicates whether the 'Analyze' button should be disabled.
    */
   get isAnalyseDisabled(): boolean {
     return Boolean(this.encodedImageFiles.length === 0) ||
@@ -85,7 +85,7 @@ export class ScanComponent implements OnDestroy {
   }
 
   /**
-   * Lifecycle hook called before he component is destroyed.
+   * Lifecycle hook called before the component is destroyed.
    * Used for cleanup and disconnecting streams.
    */
   ngOnDestroy(): void {
@@ -121,7 +121,7 @@ export class ScanComponent implements OnDestroy {
   }
 
   /**
-   * Confirms an image bundle and assigns document type slections.
+   * Confirms an image bundle and assigns document type selections.
    * @param bundleId The unique bundle ID or `null` if not yet assigned.
    * @param documentTypeSelections Array of selected document types.
    */
