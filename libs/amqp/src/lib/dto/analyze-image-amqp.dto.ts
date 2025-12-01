@@ -16,12 +16,12 @@ export class AnalyzeImageAmqpDto {
   uuid: string;
   image_base64: string;
   bundleId: string;
-  uploadType: string;
+  document_type: string;
 
-  constructor(uuid: string, image_base64: string, bundleId: string, uploadType: string) {
+  constructor(uuid: string, image_base64: string, bundleId: string, document_type: string) {
     this.uuid = uuid;
     this.image_base64 = image_base64;
     this.bundleId = bundleId;
-    this.uploadType = uploadType;
+    this.document_type = document_type;
   }
 }

@@ -192,12 +192,13 @@ export class ImagesService {
         analysisResultAmqpDto.uuid
       );
 
+      const analysisResult: any = analysisResultAmqpDto.image_analysis_result;
       if ('error_details' in analysisResultAmqpDto.image_analysis_result) {
         foundImageInformation.analysisStatus = AnalysisStatus.FAILED;
       } else {
         foundImageInformation.analysisStatus = AnalysisStatus.FINISHED;
-        foundImageInformation.sender = analysisResultAmqpDto.image_analysis_result.sender_information.senderNameCompany;
-        foundImageInformation.receiver = analysisResultAmqpDto.image_analysis_result.consignee_information.consigneeNameCompany;
+        foundImageInformation.sender = analysisResult?.sender_information?.senderNameCompany ?? analysisResult?.senderInformation?.senderNameCompany ?? null;
+        foundImageInformation.receiver = analysisResult?.consignee_information?.consigneeNameCompany ?? analysisResult?.consigneeInformation?.consigneeNameCompany ?? null;
       }
       foundImageInformation.image_analysis_result = JSON.stringify(analysisResultAmqpDto.image_analysis_result);
       this.amqpBrokerService.sendRefreshToBff();

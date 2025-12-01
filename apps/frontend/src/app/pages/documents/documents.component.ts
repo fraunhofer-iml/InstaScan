@@ -6,34 +6,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  AfterViewInit,
-  Component,
-  ViewChild,
-} from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { RouterModule } from '@angular/router';
 import { ImageInformationDto } from '@ap4/api';
-import { CommonModule, DatePipe } from '@angular/common';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { ImageService } from '../../shared/services/image/imageService';
-import { HttpClientModule } from '@angular/common/http';
+import { AnalysisStatus } from '@ap4/utils';
 import { BehaviorSubject, map, startWith, Subject, tap } from 'rxjs';
-import { DISPLAYED_COLUMNS } from './const/displayed-columns.const';
+import { CommonModule, DatePipe } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { MatFormField } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
+import { MatInput } from '@angular/material/input';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
-import { MatIcon } from '@angular/material/icon';
-import { AnalysisStatus } from '@ap4/utils';
-import { MatFormField } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { RouterModule } from '@angular/router';
 import { DialogDeleteDocumentComponent } from '../../layout/delete-document-dialog/delete-document-dialog.component';
-import { MatDialog } from '@angular/material/dialog';
+import { ImageService } from '../../shared/services/image/imageService';
+import { ImageStreamService } from '../../shared/services/socket/image-stream.service';
 import { DATETIME } from './const/date-time.const';
+import { DISPLAYED_COLUMNS } from './const/displayed-columns.const';
 import { STATUS_ICONS_MAP } from './const/status-icons-map.const';
 import { ScanComponent } from './scan/scan.component';
-import { ImageStreamService } from '../../shared/services/socket/image-stream.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -69,7 +63,9 @@ export class DocumentsComponent implements AfterViewInit {
     private readonly cdr: ChangeDetectorRef,
     private readonly datePipe: DatePipe,
     private readonly dialog: MatDialog
-  ) { }
+  ) {
+    this.initializeDataSource();
+  }
 
   /**
    * Lifecycle hook called after the component's view has been fully initialized.
@@ -77,11 +73,12 @@ export class DocumentsComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.initializeDataSource();
     this.imageStreamService.connect();
-    this.imageStreamService.getUpdates().pipe(
-      startWith(null),
-    ).subscribe(() => {
-      this.initializeDataSource();
-    })
+    this.imageStreamService
+      .getUpdates()
+      .pipe(startWith(null))
+      .subscribe(() => {
+        this.initializeDataSource();
+      });
   }
 
   /**
@@ -102,16 +99,15 @@ export class DocumentsComponent implements AfterViewInit {
       .getImages()
       .pipe(
         map((images) => {
-          const filteredImages = images
-            .filter((image) => image.analysisStatus !== AnalysisStatus.PENDING)
+          const filteredImages = images.filter((image) => image.analysisStatus !== AnalysisStatus.PENDING);
           const dataSource = new MatTableDataSource<ImageInformationDto>(filteredImages.reverse());
           this.setupPaginator(dataSource);
           this.setFilterPredicate(dataSource);
           dataSource.sort = this.sort;
           return dataSource;
         }),
-        tap(dataSource => {
-          this.filterValue$.subscribe((filter: string) => dataSource.filter = filter);
+        tap((dataSource) => {
+          this.filterValue$.subscribe((filter: string) => (dataSource.filter = filter));
         })
       )
       .subscribe((dataSource) => {
@@ -158,9 +154,7 @@ export class DocumentsComponent implements AfterViewInit {
    * Configures the paginator for the material data table.
    * @param dataSource The data source to attach to the paginator
    */
-  private setupPaginator(
-    dataSource: MatTableDataSource<ImageInformationDto>
-  ): void {
+  private setupPaginator(dataSource: MatTableDataSource<ImageInformationDto>): void {
     this.paginator.pageSize = Number(localStorage.getItem('itemsPerPage'));
     dataSource.paginator = this.paginator;
     this.paginator.page.subscribe((event: PageEvent) => {
