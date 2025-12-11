@@ -6,19 +6,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import process from 'node:process';
 import { Readable } from 'stream';
 import { AmqpBrokerQueues, AnalysisResultAmqpDtoMocks, ImageInformationFilterAmqpDto } from '@ap4/amqp';
 import { ImageInformationDto, ReadImageDto, TokenReadDtoMock, UploadImageDtoMocks } from '@ap4/api';
-import { DocumentUploadType } from '@ap4/utils';
-import { MinioModule, MinioService } from 'nestjs-minio-client';
+import { AnalysisStatus, DocumentUploadType } from '@ap4/utils';
+import { MinioService } from 'nestjs-minio-client';
 import { Repository } from 'typeorm';
-import { ClientProxy } from '@nestjs/microservices';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ImageInformation } from '../entities/image.Information';
 import { ImageInformationMocks } from '../entities/mocks/image-Information-mocks';
-import { Nft } from '../entities/nft';
 import { NftsService } from '../nfts/nfts.service';
 import { AmqpBrokerService } from './amqp.broker.service';
 import { ImageInformationDatabaseService } from './image.information.database.service';
@@ -29,44 +26,45 @@ import { ImagesService } from './images.service';
 describe('ImagesController', () => {
   let controller: ImagesController;
   let imageInformationRepository: Repository<ImageInformation>;
-  let s3ServiceMock: MinioService;
   let nftsService: NftsService;
-
-  const testUuid = 'testUuid';
-  const testEtag = 'testEtag';
-  const readable = new Readable();
-  readable.push(testUuid);
-  readable.push(null);
-
-  const mockedQueryBuilder = {
-    andWhere: jest.fn(),
-    getMany: jest.fn(),
+  let minioMock: {
+    client: {
+      getObject: jest.Mock;
+      listObjects: jest.Mock;
+      removeObjects: jest.Mock;
+      bucketExists: jest.Mock;
+      makeBucket: jest.Mock;
+      putObject: jest.Mock;
+    };
   };
+  let mockedQueryBuilder: { andWhere: jest.Mock; getMany: jest.Mock };
 
-  const mockedMinioClient = {
-    getObject: jest.fn().mockImplementation(() => readable),
-    listObjects: jest.fn(),
-    removeObjects: jest.fn(),
-    bucketExists: jest.fn().mockImplementation(() => false),
-    makeBucket: jest.fn(),
-    putObject: jest.fn().mockImplementation(() => {
-      return Promise.resolve({
-        etag: testEtag,
-      });
-    }),
-  };
+  function mockS3Service() {
+    const mockData = Buffer.from('testUuid');
+    const mockStream = Readable.from([mockData]);
+    minioMock.client.getObject.mockResolvedValue(mockStream);
+  }
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        MinioModule.register({
-          endPoint: process.env.S3_HOST || 'localhost',
-          port: process.env.S3_PORT ? parseInt(process.env.S3_PORT) : 9000,
-          useSSL: (process.env.S3_USESSL || 'false') === 'true',
-          accessKey: process.env.S3_ACCESSKEY || '',
-          secretKey: process.env.S3_SECRETKEY || '',
+    mockedQueryBuilder = {
+      andWhere: jest.fn(),
+      getMany: jest.fn(),
+    };
+    minioMock = {
+      client: {
+        getObject: jest.fn(),
+        listObjects: jest.fn(),
+        removeObjects: jest.fn(),
+        bucketExists: jest.fn().mockImplementation(() => false),
+        makeBucket: jest.fn(),
+        putObject: jest.fn().mockImplementation(() => {
+          return Promise.resolve({
+            etag: 'testEtag',
+          });
         }),
-      ],
+      },
+    };
+    const module: TestingModule = await Test.createTestingModule({
       controllers: [ImagesController],
       providers: [
         ImagesService,
@@ -107,26 +105,30 @@ describe('ImagesController', () => {
         },
         {
           provide: MinioService,
-          useValue: {
-            client: mockedMinioClient,
-          },
+          useValue: minioMock,
         },
       ],
     }).compile();
 
     controller = module.get<ImagesController>(ImagesController);
     imageInformationRepository = module.get<Repository<ImageInformation>>(getRepositoryToken(ImageInformation));
-    s3ServiceMock = module.get<MinioService>(MinioService);
     nftsService = module.get<NftsService>(NftsService) as NftsService;
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('getImage: should get an image for an uuid', async () => {
     const getImageSpy = jest.spyOn(imageInformationRepository, 'findOne');
-    getImageSpy.mockImplementationOnce(() => {
+    getImageSpy.mockImplementation(() => {
       return Promise.resolve(ImageInformationMocks[0]);
     });
 
-    const returnValue: ReadImageDto = await controller.getImage(testUuid);
+    mockS3Service();
+    const returnValue: ReadImageDto = await controller.getImage('testUuid');
     const base64_mock_value = 'dGVzdFV1aWQ=';
     const expected: ReadImageDto = new ReadImageDto('testUuid', base64_mock_value, DocumentUploadType.JPEG);
 
@@ -135,18 +137,19 @@ describe('ImagesController', () => {
 
   it('getImage: should not get an image due to invalid uuid', async () => {
     const getImageSpy = jest.spyOn(imageInformationRepository, 'findOne');
-    getImageSpy.mockImplementationOnce(() => {
+    getImageSpy.mockImplementation(() => {
       return null;
     });
+    mockS3Service();
 
-    const returnValue: ReadImageDto = await controller.getImage(testUuid);
+    const returnValue: ReadImageDto = await controller.getImage('testUuid');
 
     expect(returnValue).toBeNull();
   });
 
   it('getImageInformation: should get image information', async () => {
     const getImageSpy = jest.spyOn(imageInformationRepository, 'findOne');
-    getImageSpy.mockImplementationOnce(() => {
+    getImageSpy.mockImplementation(() => {
       return Promise.resolve(ImageInformationMocks[0]);
     });
 
@@ -158,7 +161,7 @@ describe('ImagesController', () => {
 
   it('getImageInformation: should not get an image information if it is missing', async () => {
     const getImageSpy = jest.spyOn(imageInformationRepository, 'findOne');
-    getImageSpy.mockImplementationOnce(() => {
+    getImageSpy.mockImplementation(() => {
       return Promise.resolve(null);
     });
 
@@ -168,7 +171,7 @@ describe('ImagesController', () => {
 
   it('getImageNft: should get image nft', async () => {
     const getImageSpy = jest.spyOn(nftsService, 'readNft');
-    getImageSpy.mockImplementationOnce(() => {
+    getImageSpy.mockImplementation(() => {
       return Promise.resolve(TokenReadDtoMock);
     });
 
@@ -180,7 +183,7 @@ describe('ImagesController', () => {
 
   it('getAllImageInformation: should get all image information', async () => {
     const getImageSpy = jest.spyOn(mockedQueryBuilder, 'getMany');
-    getImageSpy.mockImplementationOnce(() => {
+    getImageSpy.mockImplementation(() => {
       return ImageInformationMocks;
     });
     const expectedReturnValue: ImageInformationDto[] = [
@@ -200,7 +203,7 @@ describe('ImagesController', () => {
 
   it('uploadImage: should upload an image', async () => {
     const saveImageSpy = jest.spyOn(imageInformationRepository, 'save');
-    saveImageSpy.mockImplementationOnce(() => {
+    saveImageSpy.mockImplementation(() => {
       return Promise.resolve(ImageInformationMocks[0]);
     });
 
@@ -215,12 +218,12 @@ describe('ImagesController', () => {
     jest.useFakeTimers().setSystemTime(fixedDate);
 
     const getImageSpy = jest.spyOn(imageInformationRepository, 'findOne');
-    getImageSpy.mockImplementationOnce(() => {
+    getImageSpy.mockImplementation(() => {
       return Promise.resolve(ImageInformationMocks[0]);
     });
 
     const saveImageSpy = jest.spyOn(imageInformationRepository, 'save');
-    saveImageSpy.mockImplementationOnce(() => {
+    saveImageSpy.mockImplementation(() => {
       return Promise.resolve(ImageInformationMocks[0]);
     });
 
@@ -235,7 +238,7 @@ describe('ImagesController', () => {
 
   it('removeImageInformation: should remove a dataset of image information', async () => {
     const getImageSpy = jest.spyOn(imageInformationRepository, 'findOne');
-    getImageSpy.mockImplementationOnce(() => {
+    getImageSpy.mockImplementation(() => {
       return Promise.resolve(ImageInformationMocks[0]);
     });
 
@@ -245,7 +248,7 @@ describe('ImagesController', () => {
 
   it('removeImageInformation: should not remove a dataset if it is missing', async () => {
     const getImageSpy = jest.spyOn(imageInformationRepository, 'findOne');
-    getImageSpy.mockImplementationOnce(() => {
+    getImageSpy.mockImplementation(() => {
       return Promise.resolve(null);
     });
 
@@ -255,62 +258,66 @@ describe('ImagesController', () => {
 
   it('analyzeImageBundle: should send all images of an image bundle to the DAS', async () => {
     const getImageSpy = jest.spyOn(mockedQueryBuilder, 'getMany');
-    getImageSpy.mockImplementationOnce(() => {
+    getImageSpy.mockImplementation(() => {
       return [ImageInformationMocks[0]];
     });
+    mockS3Service();
 
-    controller.analyzeImageBundle(ImageInformationMocks[0].uuid).then((returnValue) => {
-      expect(returnValue).toEqual(true);
-    });
+    const returnValue = await controller.analyzeImageBundle(ImageInformationMocks[0].uuid);
+    expect(returnValue).toEqual(true);
   });
 
-  it('saveAnalysisResult: should save image information', () => {
+  it('saveAnalysisResult: should save image information', async () => {
     const getImageSpy = jest.spyOn(imageInformationRepository, 'findOne');
-    getImageSpy.mockImplementationOnce(() => {
+    getImageSpy.mockImplementation(() => {
       return Promise.resolve(ImageInformationMocks[0]);
     });
+    mockS3Service();
 
     const saveImageSpy = jest.spyOn(imageInformationRepository, 'save');
-    saveImageSpy.mockImplementationOnce(() => {
+    saveImageSpy.mockImplementation(() => {
       return Promise.resolve(ImageInformationMocks[0]);
     });
 
     const crateNftSpy = jest.spyOn(nftsService, 'createNft');
-    crateNftSpy.mockImplementationOnce(() => {
+    crateNftSpy.mockImplementation(() => {
       return Promise.resolve(null);
     });
 
     const expectedReturnValue = ImageInformationMocks[0].toImageInformationAmqpDto();
     expectedReturnValue.sender = 'testSender';
     expectedReturnValue.receiver = 'testReceiver';
+    expectedReturnValue.analysisStatus = AnalysisStatus.FINISHED;
 
-    expect(controller.saveAnalysisResult(AnalysisResultAmqpDtoMocks[0])).resolves.toEqual(expectedReturnValue);
+    const returnValue = await controller.saveAnalysisResult(AnalysisResultAmqpDtoMocks[0]);
+    expect(returnValue).toEqual(expectedReturnValue);
   });
 
-  it('saveAnalysisResult: should save a analysation failure', () => {
+  it('saveAnalysisResult: should save a analysation failure', async () => {
     const getImageSpy = jest.spyOn(imageInformationRepository, 'findOne');
-    getImageSpy.mockImplementationOnce(() => {
+    getImageSpy.mockImplementation(() => {
       return Promise.resolve(ImageInformationMocks[1]);
     });
+    mockS3Service();
 
     const saveImageSpy = jest.spyOn(imageInformationRepository, 'save');
-    saveImageSpy.mockImplementationOnce(() => {
+    saveImageSpy.mockImplementation(() => {
       return Promise.resolve(ImageInformationMocks[1]);
     });
 
     const crateNftSpy = jest.spyOn(nftsService, 'createNft');
-    crateNftSpy.mockImplementationOnce(() => {
+    crateNftSpy.mockImplementation(() => {
       return Promise.resolve(null);
     });
 
     const expectedReturnValue = ImageInformationMocks[1].toImageInformationAmqpDto();
-
-    expect(controller.saveAnalysisResult(AnalysisResultAmqpDtoMocks[1])).resolves.toEqual(expectedReturnValue);
+    const returnValue = await controller.saveAnalysisResult(AnalysisResultAmqpDtoMocks[1]);
+    expect(returnValue).toEqual(expectedReturnValue);
   });
 
   it('saveAnalysisResult: should not save an analysis result due to missing image', () => {
     const getImageSpy = jest.spyOn(imageInformationRepository, 'findOne');
-    getImageSpy.mockImplementationOnce(() => {
+    getImageSpy.mockImplementation(() => {
       return Promise.resolve(null);
     });
 
