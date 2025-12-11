@@ -14,6 +14,12 @@ import { Controller } from "@nestjs/common";
 export class ImageSubscribeController {
   constructor(private readonly gateway: ImageGateway) {}
 
+  /**
+   * Handles incoming REFRESH_ANALYSIS events from the message broker.
+   * 
+   * Triggered when updated image-analysis results are published.
+   * Executes internal refresh logic without blocking the event loop.
+   */
   @EventPattern(ImageMessagePattern.REFRESH_ANALYSIS)
   async handleImageUpdate() {
     await this.gateway.sendRefreshImageTable();

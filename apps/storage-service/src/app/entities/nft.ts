@@ -58,6 +58,11 @@ export class Nft {
     this.additionalData = additionalData;
   }
 
+  /**
+   * Maps the internal NFT entity to the public TokenReadDto,
+   * used for API exposure or message distribution.
+   * @returns DTO representation of the NFT metadata.
+   */
   public toTokenReadDto(): TokenReadDto {
     return new TokenReadDto(
       this.remoteId,
@@ -74,6 +79,11 @@ export class Nft {
     );
   }
 
+  /**
+   * Creates an Nft entity instance from a TokenReadDto.
+   * @param tokenReadDto DTO containing NFT metadata.
+   * @returns A reconstructed NFT entity.
+   */
   public static fromTokenReadDto(tokenReadDto: TokenReadDto): Nft {
     const newNft = new Nft(
       tokenReadDto.remoteId,

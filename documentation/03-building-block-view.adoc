@@ -89,10 +89,49 @@ dumb components focus solely on presentation and receive their inputs from smart
 TBD
 ----
 
-|backend for frontend(bff)| Backend For Frontend(BFF) a|
-TBD
+|backend for frontend(bff)
+| Backend For Frontend (BFF) a|
+The Backend for Frontend (BFF) serves as the dedicated interface layer between the Angular-based frontend and the internal microservices.  
+It ensures a clear separation of concerns and shields the client from the complexity of the distributed backend landscape.
 
-|storage service | Storage Service a| TBD
+*Responsibilities:*
+
+* Receives all HTTP requests from the frontend and routes them to the respective microservices.
+* Performs request aggregation to reduce the number of calls the frontend must execute.
+* Transforms and normalizes data structures to provide a frontend-optimized API surface.
+* Implements authentication and authorization checks where required.
+* Ensures protocol translation between the frontend (HTTP/REST) and backend services (HTTP, AMQP).
+
+*Internal Components:*
+
+* **Controller Layer** – Exposes REST endpoints consumed by the frontend.
+* **Service Layer** – Bridges communication with storage-service and analysis-service.
+* **Message-Broker Adapter** – Publishes and consumes events such as image updates.
+
+---
+
+|storage service
+| Storage Service a|
+The storage service is a central backend component responsible for persisting, managing, and distributing all document-related data.  
+It forms the core of the system’s data lifecycle and coordinates between the database, the S3 file storage, and the analyzation service.
+
+*Responsibilities:*
+
+* Stores uploaded document images in S3 object storage.
+* Creates and updates database records containing metadata, UUIDs, analysis status, and document classification.
+* Exposes endpoints and message patterns for retrieving and modifying image data.
+* Provides interfaces for document bundles, document metadata, and NFT/token information.
+* Handles events from the analyzation service and updates stored data accordingly.
+* Publishes events to notify the frontend (via BFF) about data updates (e.g., refreshed analysis results).
+
+*Internal Components:*
+
+* **Image Controller** – Handles inbound REST and AMQP requests for managing document data.
+* **Image Service** – Contains the business logic for storing, updating, and retrieving image information.
+* **Database Adapter** – Persists metadata in PostgreSQL.
+* **S3 Storage Adapter** – Uploads, downloads, and deletes image files.
+* **Message-Broker Integration** – Publishes refresh events and processes analysis results.
+
 
 |document analyzation service| Document Analyzation Service a|
 TBD

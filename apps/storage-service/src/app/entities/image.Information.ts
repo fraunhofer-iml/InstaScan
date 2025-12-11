@@ -54,6 +54,11 @@ export class ImageInformation {
     this.image_analysis_result = image_analysis_result;
   }
 
+  /**
+   * Converts the ImageInformation entity into a transport-ready DTO
+   * for HTTP APIs or internal services.
+   * @returns A DTO containing the normalized image metadata.
+   */
   public toImageInformationDto(): ImageInformationDto {
     return new ImageInformationDto(
       this.uuid,
@@ -68,6 +73,12 @@ export class ImageInformation {
       JSON.parse(this.image_analysis_result)
     );
   }
+  
+  /**
+   * Converts the ImageInformation entity into an AMQP-optimized DTO
+   * used for message-broker communication.
+   * @returns DTO formatted for event/message transport.
+   */
   public toImageInformationAmqpDto(): ImageInformationAmqpDto {
     return new ImageInformationAmqpDto(
       this.uuid,

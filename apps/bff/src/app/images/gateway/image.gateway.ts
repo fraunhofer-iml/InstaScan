@@ -20,6 +20,12 @@ export class ImageGateway {
     @WebSocketServer()
     server: Server;
 
+    /**
+     * Emits a WebSocket event notifying all connected clients
+     * that the image table must be refreshed.
+     * 
+     * Typically used after image metadata or analysis results change.
+     */
     async sendRefreshImageTable() {
         this.server.emit('refresh_image_table', {});
     }

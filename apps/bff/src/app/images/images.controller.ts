@@ -19,6 +19,11 @@ import { ImagesService } from './images.service';
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
 
+  /**
+   * Retrieves the image file associated with the given UUID.
+   * @param uuid Unique identifier of the image.
+   * @returns Stream containing image data.
+   */
   @Get(':uuid/file')
   @ApiOperation({ description: 'Return a certain image' })
   @ApiParam({
@@ -41,6 +46,11 @@ export class ImagesController {
     );
   }
 
+  /**
+   * Retrieves metadata and analysis information for the specified image.
+   * @param uuid Unique identifier of the image.
+   * @returns Metadata and analysis results.
+   */
   @Get(':uuid')
   @ApiOperation({ description: 'Return a certain image' })
   @ApiParam({
@@ -62,6 +72,11 @@ export class ImagesController {
     );
   }
 
+  /**
+   * Retrieves NFT metadata associated with the given image.
+   * @param uuid Unique image identifier.
+   * @returns NFT/Token information
+   */
   @Get('nft/:uuid')
   @ApiOperation({ description: 'Return the token information for an image' })
   @ApiParam({
@@ -83,6 +98,15 @@ export class ImagesController {
     );
   }
 
+  /**
+   * Retrieves a filtered list of image metadata entries.
+   * @param sender Filter by sender address.
+   * @param receiver Filter by receiver address.
+   * @param analysisStatus Filter by analysis status.
+   * @param documentType Filter by classified document type.
+   * @param bundleId Filter by bundle identifier.
+   * @returns Array of filtered image metadata entries.
+   */
   @Get()
   @ApiOperation({ description: 'Get all stored image information' })
   @ApiQuery({
@@ -127,6 +151,11 @@ export class ImagesController {
     return this.imagesService.getAllImageInformation(sender, receiver, analysisStatus, documentType, bundleId);
   }
 
+  /**
+   * Uploads a new image and stores both file and metadata.
+   * @param uploadImageDto DTO containing image data and metadata
+   * @returns Stored image metadata.
+   */
   @Post()
   @ApiOperation({ description: 'Create a new image' })
   @ApiBody({
@@ -146,6 +175,12 @@ export class ImagesController {
     );
   }
 
+  /**
+   * Updates metadata for the specified image.
+   * @param uuid Image identifier.
+   * @param imageInformationDto Updated metadata object
+   * @returns Updated image metadata
+   */
   @Put(':uuid')
   @ApiOperation({ description: 'Update existing image information' })
   @ApiParam({
@@ -170,6 +205,11 @@ export class ImagesController {
     );
   }
 
+  /**
+   * Deletes the specified image file and its metadata entry.
+   * @param uuid Unique image identifier.
+   * @returns True if deletion was successful.
+   */
   @Delete(':uuid')
   @ApiOperation({ description: 'Remove a certain image' })
   @ApiParam({
@@ -191,6 +231,11 @@ export class ImagesController {
     );
   }
 
+  /**
+   * Triggers analysis for an entire image bundle starting from the given image.
+   * @param uuid Identifier of an image inside the bundle.
+   * @returns True if the analysis was initiated successfully.
+   */
   @Put('bundles/:uuid')
   @ApiOperation({ description: 'Analyze all documents of a certain bundle' })
   @ApiParam({
