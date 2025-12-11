@@ -7,9 +7,9 @@
  */
 
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, EventEmitter, OnDestroy, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { CameraStreamService } from './service/camera-stream.service';
+import { CameraStreamService } from './camera-service/camera-stream/camera-stream.service';
 import { catchError, forkJoin, Observable, of, switchMap } from 'rxjs';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -26,6 +26,8 @@ import { SnackbarMessagesEnum } from '../../../shared/enums/snackbar-messages.en
 import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BundleCharsEnum } from './enum/bundle-chars.enum';
 import { MatOption, MatSelect } from '@angular/material/select';
+import { LocalCameraService } from './camera-service/local-camera/local-camera.service';
+import { CameraService } from './camera-service/camera.service';
 
 @Component({
   selector: 'app-scan-document',
@@ -43,13 +45,13 @@ import { MatOption, MatSelect } from '@angular/material/select';
     MatOption,
     FormsModule
   ],
-  providers: [CameraStreamService, SnackbarService],
+  providers: [CameraService, LocalCameraService, CameraStreamService, SnackbarService],
   templateUrl: './scan.component.html',
   styleUrl: './scan.component.css',
 })
-export class ScanComponent implements OnDestroy {
-  liveImage: Observable<string>;
-  isCameraConnected: Observable<boolean>;
+export class ScanComponent implements OnDestroy, OnInit {
+  liveImage!: Observable<string>;
+  isCameraConnected!: Observable<boolean>;
   bundleId: FormControl<string | null> = new FormControl('', Validators.required);
   encodedImageFiles: string[] = [];
   images: ImageInformationDto[] | undefined = [];
@@ -60,16 +62,18 @@ export class ScanComponent implements OnDestroy {
     new EventEmitter<void>();
 
   constructor(
-    private readonly cameraStreamService: CameraStreamService,
+    private readonly cameraService: CameraService,
     private readonly imageService: ImageService,
     private readonly dialog: MatDialog,
     private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly snackBar: SnackbarService
   ) {
     this.generateBundleId();
-    this.liveImage = this.cameraStreamService.onImageStream();
-    this.isCameraConnected = this.cameraStreamService.getCameraStatus();
-    this.cameraStreamService.onDocumentResponse().subscribe(uuid => {
+  }
+  ngOnInit(): void {
+    this.liveImage = this.cameraService.onImageStream();
+    this.isCameraConnected = this.cameraService.getCameraStatus();
+    this.cameraService.onDocumentResponse().subscribe(uuid => {
       this.getImageInformation(uuid);
       this.getImageFile(uuid);
     });
@@ -89,15 +93,14 @@ export class ScanComponent implements OnDestroy {
    * Used for cleanup and disconnecting streams.
    */
   ngOnDestroy(): void {
-    this.cameraStreamService.disconnect();
+    this.cameraService.disconnect();
   }
 
   /**
    * Captures an image using the connected camera or stream.
    */
   captureImage(): void {
-    this.cameraStreamService.takeImage();
-    this.initializeDataSource.emit();
+    this.cameraService.takeImage();
     this.documentTypeSelections.push('');
   }
 
@@ -131,7 +134,6 @@ export class ScanComponent implements OnDestroy {
         const updatedImageInformation: ImageInformationDto = { ...image, bundleId, documentType: documentTypeSelections[index] };
         return this.imageService.updateImageInformation(image.uuid, updatedImageInformation);
       });
-
       forkJoin(images).pipe(
         switchMap(() =>
           this.imageService.analyzeImageBundle(bundleId).pipe(
@@ -159,7 +161,7 @@ export class ScanComponent implements OnDestroy {
    */
   getImageInformation(uuid: string) {
     this.imageService.getImageByUuid(uuid).subscribe((image: ImageInformationDto) => {
-      if (this.images) {
+      if (this.images && uuid) {
         this.images.push(image);
       }
       this.changeDetectorRef.detectChanges();
@@ -171,11 +173,13 @@ export class ScanComponent implements OnDestroy {
    * @param uuid The unique image ID.
    */
   getImageFile(uuid: string) {
-    this.imageService.getImageFileByUuid(uuid).subscribe((image: ReadImageDto) => {
-      const base64String = `${DOCUMENT_UPLOAD_TYPE_TO_UPLOAD_VALUES[image.documentUploadType].mimeType}${image.image_base64}`;
-      this.encodedImageFiles.push(base64String);
-      this.changeDetectorRef.detectChanges();
-    })
+    if (uuid) {
+      this.imageService.getImageFileByUuid(uuid).subscribe((image: ReadImageDto) => {
+        const base64String = `${DOCUMENT_UPLOAD_TYPE_TO_UPLOAD_VALUES[image.documentUploadType].mimeType}${image.image_base64}`;
+        this.encodedImageFiles.push(base64String);
+        this.changeDetectorRef.detectChanges();
+      })
+    }
   }
 
   /**
@@ -183,10 +187,17 @@ export class ScanComponent implements OnDestroy {
    * @param index The index of the image to remove.
    */
   removeImage(index: number) {
-    this.generateBundleId();
-    this.encodedImageFiles.splice(index, 1);
-    this.images?.splice(index, 1);
-    this.documentTypeSelections.splice(index, 1)
+    const image = this.images?.[index];
+    if (image) {
+      this.imageService.deleteImage(image.uuid).subscribe((result) => {
+        if(result){
+          this.snackBar.sendMessage(SnackbarMessagesEnum.DELETE_IMAGE);
+          this.encodedImageFiles.splice(index, 1);
+          this.images?.splice(index, 1);
+          this.documentTypeSelections.splice(index, 1)
+        }
+      });
+    }
   }
 
   /**

@@ -42,7 +42,7 @@
             @if(getImage){
                 <mat-card-header>
                     <div class="custom-header">
-                        @if(getImage && getImage.analysisStatus !== analysisStatus.FAILED){
+                        @if(getImage && (getImage.analysisStatus == analysisStatus.FINISHED ||getImage.analysisStatus == analysisStatus.APPROVED)){
                         <mat-card-title class="json-title">Document type: {{ getImage.documentType }}</mat-card-title>
                         <button
                             mat-flat-button

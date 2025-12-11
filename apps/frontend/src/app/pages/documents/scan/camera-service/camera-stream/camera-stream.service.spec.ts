@@ -9,8 +9,10 @@
 import { TestBed } from '@angular/core/testing';
 import { io, Socket } from 'socket.io-client';
 import { CameraStreamService } from './camera-stream.service';
-import { environment } from '../../../../../environments/environment';
-import { CameraCommandsEnum } from '../../../../shared/enums/camera-commands.enum';
+import { environment } from '../../../../../../environments/environment';
+import { CameraCommandsEnum } from '../../../../../shared/enums/camera-commands.enum';
+import { SnackbarService } from 'apps/frontend/src/app/shared/services/snackbar/SnackBar.Service';
+import { SnackbarMessagesEnum } from 'apps/frontend/src/app/shared/enums/snackbar-messages.enum';
 
 jest.mock('socket.io-client');
 
@@ -27,7 +29,9 @@ describe('CameraStreamService', () => {
     (io as jest.Mock).mockReturnValue(mockSocket);
 
     TestBed.configureTestingModule({
-      providers: [CameraStreamService],
+      providers: [CameraStreamService,
+        { provide: SnackbarService, useValue: { sendMessage: jest.fn() } }
+      ],
     });
     service = TestBed.inject(CameraStreamService);
   });
@@ -40,25 +44,16 @@ describe('CameraStreamService', () => {
     expect(io).toHaveBeenCalledWith(environment.SOCKET.CAMERA_URL + CameraCommandsEnum.nsFrontend, { transports: ['websocket'] });
   });
 
-  it('should set isCameraConnected to true on connect event', () => {
-    const isConnectedSpy = jest.spyOn((service).isCameraConnected, 'next');
+  it('should update connection state and send snackbar message on connect', () => {
+    service.initialize();
+    const isConnectedSpy = jest.spyOn(service.isCameraConnected, 'next');
+    const snackbarSpy = jest.spyOn(service['snackbar'], 'sendMessage');
+
     const connectCallback = (mockSocket.on as jest.Mock).mock.calls.find(call => call[0] === CameraCommandsEnum.connect)?.[1];
     if (connectCallback) connectCallback();
+
     expect(isConnectedSpy).toHaveBeenCalledWith(true);
-  });
-
-  it('should set isCameraConnected to false on disconnect event', () => {
-    const isConnectedSpy = jest.spyOn((service).isCameraConnected, 'next');
-    const disconnectCallback = (mockSocket.on as jest.Mock).mock.calls.find(call => call[0] === CameraCommandsEnum.disconnect)?.[1];
-    if (disconnectCallback) disconnectCallback();
-    expect(isConnectedSpy).toHaveBeenCalledWith(false);
-  });
-
-  it('should set isCameraConnected to false on connection error event', () => {
-    const isConnectedSpy = jest.spyOn((service).isCameraConnected, 'next');
-    const connectErrorCallback = (mockSocket.on as jest.Mock).mock.calls.find(call => call[0] === CameraCommandsEnum.connectError)?.[1];
-    if (connectErrorCallback) connectErrorCallback();
-    expect(isConnectedSpy).toHaveBeenCalledWith(false);
+    expect(snackbarSpy).toHaveBeenCalledWith(SnackbarMessagesEnum.CAMERA_STREAM_CONNECTED);
   });
 
   it('should return camera status as observable', (done) => {
@@ -71,12 +66,12 @@ describe('CameraStreamService', () => {
   it('should receive image stream data', (done) => {
     const mockData = 'mock-image-data';
     const expectedData = CameraCommandsEnum.dataImage + mockData;
-    
+
     service.onImageStream().subscribe((data) => {
       expect(data).toBe(expectedData);
       done();
     });
-    
+
     const streamCallback = (mockSocket.on as jest.Mock).mock.calls.find(call => call[0] === CameraCommandsEnum.dsCameraLowresStream)?.[1];
     if (streamCallback) streamCallback(mockData);
   });

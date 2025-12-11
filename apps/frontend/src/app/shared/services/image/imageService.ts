@@ -48,8 +48,8 @@ export class ImageService {
    * @param image The image data to be uploaded.
    * @returns Observable containing the UUID of the uploaded image.
    */
-  public uploadImage(image: UploadImageDto): Observable<string> {
-    return this.httpClient.post<string>(environment.IMAGE.URL, image);
+  public uploadImage(image: UploadImageDto): Observable<ImageInformationDto> {
+    return this.httpClient.post<ImageInformationDto>(environment.IMAGE.URL, image);
   }
 
   /**
@@ -74,10 +74,10 @@ export class ImageService {
   /**
    * Deletes an image by its UUID.
    * @param uuid The unique identifier of the image to delete.
-   * @returns Observable containing the remaining list of images.
+   * @returns Observable containing the result as boolean.
    */
-  public deleteImage(uuid: string): Observable<ImageInformationDto[]> {
-    return this.httpClient.delete<ImageInformationDto[]>(`${environment.IMAGE.URL}/${uuid}`);
+  public deleteImage(uuid: string): Observable<boolean> {
+    return this.httpClient.delete<boolean>(`${environment.IMAGE.URL}/${uuid}`);
   }
 
   /**

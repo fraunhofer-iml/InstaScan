@@ -9,7 +9,7 @@
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { ImageService } from './imageService';
-import {ErrorSchemaDto, ImageInformationDto, UploadImageDto} from '@ap4/api';
+import {ErrorSchemaDto, ImageInformationDto, ImageInformationDtoMocks, UploadImageDto} from '@ap4/api';
 import { environment } from '../../../../environments/environment';
 import { AnalysisStatus, DocumentTypeId, DocumentUploadType } from '@ap4/utils';
 
@@ -96,7 +96,7 @@ describe('ImageService', (): void => {
   });
 
   it('should upload an image and return a response string', () => {
-    const responseMessage = 'Image uploaded';
+    const responseMessage = ImageInformationDtoMocks[0];
     const newImage: UploadImageDto = {
       image_base64: 'eyzwijh',
       bundleId: 'bundleId',

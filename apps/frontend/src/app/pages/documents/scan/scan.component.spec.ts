@@ -9,7 +9,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ScanComponent } from './scan.component';
 import { By } from '@angular/platform-browser';
-import { CameraStreamService } from './service/camera-stream.service';
+import { CameraStreamService } from './camera-service/camera-stream/camera-stream.service';
 import { of } from 'rxjs';
 import { ImageService } from '../../../shared/services/image/imageService';
 import { HttpClientModule } from '@angular/common/http';
@@ -17,7 +17,7 @@ import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ImageDialogComponent } from './image-dialog/image-dialog.component';
 import { UploadComponent } from '../upload/upload.component';
-import { ImageInformationDto } from '@ap4/api';
+import { ImageInformationDto, ImageInformationDtoMocks } from '@ap4/api';
 import { SnackbarService } from '../../../shared/services/snackbar/SnackBar.Service';
 
 jest.mock('pdfjs-dist', () => ({
@@ -44,6 +44,7 @@ describe('ScanComponent', () => {
     getImageFileByUuid: jest.fn(),
     analyzeImageBundle: jest.fn(),
     updateImageInformation: jest.fn(),
+    deleteImage: jest.fn()
   } as never;
 
   const matDialogMock: jest.Mocked<MatDialog> = {
@@ -114,8 +115,12 @@ describe('ScanComponent', () => {
 
   it('should remove image by index', () => {
     component.encodedImageFiles = ['image1', 'image2'];
+    component.images = [ImageInformationDtoMocks[0]];
+    imageServiceMock.deleteImage.mockReturnValue(of(true));
     component.removeImage(0);
-    expect(component.encodedImageFiles).toEqual(['image2']);
+    expect(component.images.length).toEqual(0);
+    expect(component.encodedImageFiles.length).toEqual(1);
+    expect(component.documentTypeSelections.length).toEqual(0);
   });
 
   it('should open image preview', () => {

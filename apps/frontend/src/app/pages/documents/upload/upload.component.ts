@@ -19,6 +19,7 @@ import { PdfConverter } from "./pdfConverter";
 import { from, of, switchMap } from "rxjs";
 import { SnackbarService } from '../../../shared/services/snackbar/SnackBar.Service';
 import { UploadMessages } from '../const/upload-messages.enum';
+import { ImageInformationDto } from '@ap4/api';
 
 @Component({
   selector: 'app-upload-document',
@@ -75,7 +76,7 @@ export class UploadComponent {
    * Callback executed when a file upload completes successfully.
    * @param image The uploaded image in base64-string.
    */
-  onUploadSuccess(image: string): void {
+  onUploadSuccess(image: ImageInformationDto): void {
     this.isUploading = false;
     this.uploadSuccessful = true;
     this.document.setValue(null);
@@ -109,7 +110,7 @@ export class UploadComponent {
             })
           )
         )
-        .subscribe((image:string) => this.onUploadSuccess(image));
+        .subscribe((image) => this.onUploadSuccess(image));
     };
     reader.readAsDataURL(this.document.value);
   }
