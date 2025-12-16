@@ -77,6 +77,8 @@
     width: 100%;
     height: 100%;
     box-sizing: border-box;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .bundle-title {
@@ -139,9 +141,10 @@
 .encodedImageFiles {
     display: flex;
     gap: 10px;
-    max-width: 100%;
     flex-wrap: nowrap;
     overflow-x: auto;
+    max-width: 100%;
+    width: 100%;
 }
 
 .encodedImageFile {
