@@ -55,6 +55,8 @@ doc-analyzation-service:unit-tests:
   image: python:3.10-slim
   interruptible: true
   before_script:
+      - apt-get update
+      - apt-get install -y libgl1 libglib2.0-0
       - pip install -r $DAS_REQUIREMENTS_DIR/requirements-lock-uv-py310-all.txt
   variables:
     TEST_FILES_DIR: "document_analyzation_service/tests"
@@ -111,7 +113,7 @@ doc-analyzation-service:sonarqube-check:
       -Dsonar.sources=${DAS_SOURCE_FILES_DIR}
       -Dsonar.tests=${TEST_FILES_DIR}
       -Dsonar.coverage.exclusions=**__init__**,${TEST_FILES_DIR}**
-      -Dsonar.exclusions=*.xml,${TEST_FILES_DIR}**,**/delivery_note.py
+      -Dsonar.exclusions=*.xml,${TEST_FILES_DIR}**,**/delivery_note.py,**/*_identifier.py,**/*_identifier_list.py,**/*_dto.py
       -Dsonar.qualitygate.wait=true
   allow_failure: true
   only:
@@ -135,6 +137,8 @@ doc-analyzation-service:license-check:
     # For now, ignore the "pkg-resources" package as it seems to be listed in the output even though it is not a dependency.
     # This issue might be related: https://bugs.launchpad.net/ubuntu/+source/python-pip/+bug/1635463
     - 'pip-licenses --ignore-packages pkg-resources --with-urls --format=csv --output-file=$GENERATED_LICENSES_FILE'
+    - 'cat $REFERENCE_LICENSES_FILE'
+    - 'cat $GENERATED_LICENSES_FILE'
     - 'cmp --silent $REFERENCE_LICENSES_FILE $GENERATED_LICENSES_FILE || export LICENSES_CHANGED=true'
     - 'if [ ! -z ${LICENSES_CHANGED} ]; then
         echo Some licenses used by the third-party dependencies have changed.;

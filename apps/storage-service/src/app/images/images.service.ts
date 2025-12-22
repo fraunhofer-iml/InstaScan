@@ -199,6 +199,7 @@ export class ImagesService {
         foundImageInformation.analysisStatus = AnalysisStatus.FINISHED;
         foundImageInformation.sender = analysisResult?.sender_information?.senderNameCompany ?? analysisResult?.senderInformation?.senderNameCompany ?? null;
         foundImageInformation.receiver = analysisResult?.consignee_information?.consigneeNameCompany ?? analysisResult?.consigneeInformation?.consigneeNameCompany ?? null;
+        foundImageInformation.documentType = analysisResultAmqpDto.document_type ? analysisResultAmqpDto.document_type : foundImageInformation.documentType;
       }
       foundImageInformation.image_analysis_result = JSON.stringify(analysisResultAmqpDto.image_analysis_result);
       this.amqpBrokerService.sendRefreshToBff();

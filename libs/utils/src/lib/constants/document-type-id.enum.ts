@@ -10,4 +10,5 @@ export enum DocumentTypeId {
   CMR = 'CMR',
   PALLET_NOTE = 'Pallet Note',
   DELIVERY_NOTE = 'Delivery Note',
+  AUTOMATIC = 'auto',
 }

@@ -15,9 +15,11 @@ export class AnalysisResultAmqpDto {
 
   uuid: string;
   image_analysis_result: Schema;
+  document_type: string;
 
-  constructor(uuid: string, image_analysis_result: Schema) {
+  constructor(uuid: string, image_analysis_result: Schema, document_type: string) {
     this.uuid = uuid;
     this.image_analysis_result = image_analysis_result;
+    this.document_type = document_type;
   }
 }

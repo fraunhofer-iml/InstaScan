@@ -101,7 +101,11 @@ def process_image(
 
     return {
         "pattern": message_pattern,
-        "data": {"uuid": image_uuid, "image_analysis_result": event},
+        "data": {
+            "uuid": image_uuid,
+            "image_analysis_result": event,
+            "document_type": document_type,
+        },
     }
 
 

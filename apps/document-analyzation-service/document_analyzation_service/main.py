@@ -17,6 +17,10 @@ from dotenv import load_dotenv
 from document_analyzation_service.image_processor import convert_image_to_data_url, process_image
 from document_analyzation_service.message_broker import RabbitMQReceiver, decode_image_from_message
 from document_analyzation_service.utils import DocumentType
+from document_analyzation_service.document_classification.classification import get_document_class
+from document_analyzation_service.document_classification.document_class_identifier.document_type_identifier_list import (
+    document_type_identifier_list,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -60,6 +64,19 @@ def on_image_received(
         document_type = None
         if "document_type" in data:
             document_type = data["document_type"]
+
+            if document_type == "auto":
+                found_doc_type_identifier = get_document_class(base64_image)
+                if found_doc_type_identifier == document_type_identifier_list[0].name:
+                    document_type = DocumentType.PALLET_NOTE.value
+                elif found_doc_type_identifier == document_type_identifier_list[1].name:
+                    document_type = DocumentType.CMR.value
+                elif found_doc_type_identifier == document_type_identifier_list[2].name:
+                    document_type = DocumentType.CMR.value
+                elif found_doc_type_identifier == document_type_identifier_list[3].name:
+                    document_type = DocumentType.DELIVERY_NOTE.value
+                else:
+                    document_type = DocumentType.CMR.value
 
             # Sanity check, whether document_type is valid
             if document_type in (dt.value for dt in DocumentType):
